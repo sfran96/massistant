@@ -1,0 +1,19 @@
+{
+  "name": "massistant",
+  "version": "0.0.1",
+  "description": "Asistente para facilitar el uso de Moodle a las personas discapacitadas.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "assistant",
+    "moodle",
+    "accesible"
+  ],
+  "author": "Francis Santos Liranzo",
+  "license": "ISC",
+  "dependencies": {
+    "socket.io": "^2.0.4"
+  }
+}
