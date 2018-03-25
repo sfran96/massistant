@@ -32,8 +32,7 @@ io.on('connection', function (socket) {
         // Obtener la room del usuario
         var rooms = Object.keys(socket.rooms);
         if (rooms.length > 1) {
-            socket.to(rooms[1]).emit('broadcast-msg', data);
-            console.log(`Rooms: ${rooms}`);
+            socket.to(rooms[0]).emit('broadcast-msg', data);
         }
     });
 });
