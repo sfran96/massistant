@@ -13,7 +13,7 @@
         "host": "localhost",
         "port": "3306",
         "user": "tfg",
-        "password": "passwd",
+        "password": "TfG2018$",
         "sql_moodle_db": "moodle",
         "sql_mass_db": "massistant"
     }
