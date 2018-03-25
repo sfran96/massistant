@@ -6,7 +6,6 @@ const io = require('socket.io')(server, {
 });
 const conf = require('./conf.json');
 const moodleConn = require('./moodle-conn/moodle-conn');
-const utils = require('./utils/utils');
 
 // TODO: remove later
 app.get('/test', function (req, res) {
@@ -18,16 +17,21 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', function (socket) {
+    
     // Comprobar que está con una sesión iniciada
-    moodleConn.IsUserLoggedIn(utils.getCookie(socket.request.headers.cookie, 'MoodleSession'), (userId) => {
-        socket.join(userId);
-        socket.emit('joined', { message: "Te has unido correctamente a la sala del usuario con Id: " + userId });
+    socket.on('amIOnline', (data) => {
+        if (data.cookie !== "" || data.cookie !== undefined) {
+            moodleConn.IsUserLoggedIn(data.cookie, (userId) => {
+                socket.join(userId);
+                socket.emit('joined', { message: "Te has unido correctamente a la sala del usuario con Id: " + userId });
+            });
+        }
     });
 
     socket.on('broadcast-it', (data) => {
         // Obtener la room del usuario
         var rooms = Object.keys(socket.rooms);
-        if(rooms.length > 1){
+        if (rooms.length > 1) {
             socket.to(rooms[1]).emit('broadcast-msg', data);
             console.log("MESSAGE SENT");
         }
