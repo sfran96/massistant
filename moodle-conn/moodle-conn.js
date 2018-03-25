@@ -14,9 +14,9 @@ var connection = mysql.createConnection({
  * @param {function(string)} callback 
  */
 function IsUserLoggedIn(moodCookValue, callback) {
-    connection.query("SELECT * FROM `mdl_sessions` WHERE `sid` LIKE '" + moodCookValue + "' AND `timemodified`+(15*60*60) >= NOW() ", (error, results, fields) => {
+    connection.query("SELECT * FROM `mdl_sessions` WHERE `sid` LIKE '" + moodCookValue + "'", (error, results, fields) => {
         // Si hay resultados
-        if (results.length > 0) {
+        if (results != undefined && results.length > 0 && results[0].userid !== 0) {
             callback(results[0].userid);
         }
     });
