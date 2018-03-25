@@ -1,28 +1,40 @@
 // Modulo principal, encargado de cargar todos los métodos necesarios para la aplicación
-var app = require('http').createServer(handler)
-var io = require('socket.io')(app);
-var fs = require('fs');
+const app = require('express')();
+const server = require('http').Server(app);
+const io = require('socket.io')(server, {
+    pingTimeout: 5000
+});
+const conf = require('./conf.json');
+const moodleConn = require('./moodle-conn/moodle-conn');
+const utils = require('./utils/utils');
 
-var ids = [[]];
-var id = 0;
-
-app.listen(3000, () => {
-    console.log("Listening...");
+// TODO: remove later
+app.get('/test', function (req, res) {
+    res.sendFile(__dirname + '/public/index.html');
 });
 
-function handler(req, res) {
-    fs.readFile(__dirname + '/index.html',
-        function (err, data) {
-            res.writeHead(500);
-            return res.end('Error loading index.html');
-        });
-}
+app.get('/', (req, res) => {
+    res.end("Nothing to see here.");
+});
 
 io.on('connection', function (socket) {
-    id++;
-    socket.emit('news', { hello: 'world' });
-    socket.on('my other event', function (data) {
-        console.log(data);
-        socket.emit('alert', { msg: 'Mensaje de alerta para id=' + id });
+    // Comprobar que está con una sesión iniciada
+    moodleConn.IsUserLoggedIn(utils.getCookie(socket.request.headers.cookie, 'MoodleSession'), (userId) => {
+        socket.join(userId);
+        socket.emit('joined', { message: "Te has unido correctamente a la sala del usuario con Id: " + userId });
     });
+
+    socket.on('broadcast-it', (data) => {
+        // Obtener la room del usuario
+        var rooms = Object.keys(socket.rooms);
+        if(rooms.length > 1){
+            socket.to(rooms[1]).emit('broadcast-msg', data);
+            console.log("MESSAGE SENT");
+        }
+    });
+});
+
+// Listen on configuration port
+server.listen(conf.self.port, () => {
+    console.log(`Listening on port ${conf.self.port}...`);
 });
