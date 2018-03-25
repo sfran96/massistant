@@ -33,7 +33,7 @@ io.on('connection', function (socket) {
         var rooms = Object.keys(socket.rooms);
         if (rooms.length > 1) {
             socket.to(rooms[1]).emit('broadcast-msg', data);
-            console.log("MESSAGE SENT to room " + rooms[1]);
+            console.log(`Rooms: ${rooms}`);
         }
     });
 });
