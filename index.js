@@ -23,9 +23,7 @@ io.on('connection', function (socket) {
         if (data.cookie !== "" || data.cookie !== undefined) {
             moodleConn.IsUserLoggedIn(data.cookie, (userId) => {
                 socket.join(userId);
-                var rooms = Object.keys(socket.rooms);
                 socket.emit('joined', "¡Bienvenido a Moodle!");
-                socket.to(rooms[0]).emit('socket-joined', "Una ventana/sesión más ha sido abierta.");
             });
         }
     });
@@ -33,7 +31,7 @@ io.on('connection', function (socket) {
     // Cuando el usuario se "desconecta del socket", cierra la pestaña del navegador, por ejemplo.
     socket.on('disconnecting', (reason) => {
         var rooms = Object.keys(socket.rooms);
-        socket.to(rooms[0]).emit("socket-left", "Una de tus pestañas ha sido cerrada");
+        socket.to(rooms[0]).emit("socket-left", "Una de tus pestañas ha sido cerrada/recargada.");
     });
 
 });
