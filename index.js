@@ -23,6 +23,7 @@ io.use((socket, next) => {
         moodleConn.IsUserLoggedIn(cookieMoodle, (userId) => {
             socket.join(userId);
             // Mensaje de bienvenida
+            console.log(socket.request.headers.referer);
             if (socket.request.headers.referer.includes('login'))
                 socket.emit('joined-welcome', "¡Bienvenido a Moodle!");
             else
