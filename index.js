@@ -22,7 +22,9 @@ io.use((socket, next) => {
     if (cookieMoodle != "" || cookieMoodle != undefined) {
         moodleConn.IsUserLoggedIn(cookieMoodle, (userId) => {
             socket.join(userId);
-            socket.emit('joined', "¡Bienvenido a Moodle!");
+            // Mensaje de bienvenida
+            if (socket.request.referer.contains('login'))
+                socket.emit('joined', "¡Bienvenido a Moodle!");
             next();
         });
     }
