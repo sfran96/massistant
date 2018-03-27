@@ -24,7 +24,7 @@ io.on('connection', function (socket) {
             moodleConn.IsUserLoggedIn(data.cookie, (userId) => {
                 socket.join(userId);
                 var rooms = Object.keys(socket.rooms);
-                socket.emit('joined', { message: "¡Bienvenido a Moodle!"});
+                socket.emit('joined', "¡Bienvenido a Moodle!");
                 socket.to(rooms[0]).emit('socket-joined', "Una ventana/sesión más ha sido abierta.");
             });
         }
