@@ -16,18 +16,19 @@ app.get('/', (req, res) => {
     res.end("Nothing to see here.");
 });
 
+io.use((socket, next) => {
+    // Comprobamos que tiene la cookie iniciada
+    var cookieMoodle = getCookie("MoodleSession", socket.request.headers.cookie);
+    if (cookieMoodle != "" || cookieMoodle != undefined) {
+        moodleConn.IsUserLoggedIn(cookieMoodle, (userId) => {
+            socket.join(userId);
+            socket.emit('joined', "¡Bienvenido a Moodle!");
+            next();
+        });
+    }
+});
+
 io.on('connection', function (socket) {
-
-    // Comprobar que está con una sesión iniciada
-    socket.on('amIOnline', (data) => {
-        if (data.cookie !== "" || data.cookie !== undefined) {
-            moodleConn.IsUserLoggedIn(data.cookie, (userId) => {
-                socket.join(userId);
-                socket.emit('joined', "¡Bienvenido a Moodle!");
-            });
-        }
-    });
-
     // Cuando el usuario se "desconecta del socket", cierra la pestaña del navegador, por ejemplo.
     socket.on('disconnecting', (reason) => {
         var rooms = Object.keys(socket.rooms);
@@ -40,3 +41,19 @@ io.on('connection', function (socket) {
 server.listen(conf.self.port, () => {
     console.log(`Listening on port ${conf.self.port}...`);
 });
+
+function getCookie(cname, cookies) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(cookies);
+    var ca = decodedCookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
