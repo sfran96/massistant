@@ -23,18 +23,19 @@ io.on('connection', function (socket) {
         if (data.cookie !== "" || data.cookie !== undefined) {
             moodleConn.IsUserLoggedIn(data.cookie, (userId) => {
                 socket.join(userId);
-                socket.emit('joined', { message: "Te has unido correctamente a la sala del usuario con Id: " + userId });
+                var rooms = Object.keys(socket.rooms);
+                socket.emit('joined', { message: "¡Bienvenido a Moodle!"});
+                socket.to(rooms[0]).emit('socket-joined', "Una ventana/sesión más ha sido abierta.");
             });
         }
     });
 
-    socket.on('broadcast-it', (data) => {
-        // Obtener la room del usuario
+    // Cuando el usuario se "desconecta del socket", cierra la pestaña del navegador, por ejemplo.
+    socket.on('disconnecting', (reason) => {
         var rooms = Object.keys(socket.rooms);
-        if (rooms.length > 1) {
-            socket.to(rooms[0]).emit('broadcast-msg', data);
-        }
+        socket.to(rooms[0]).emit("socket-left", "Una de tus pestañas ha sido cerrada");
     });
+
 });
 
 // Listen on configuration port
