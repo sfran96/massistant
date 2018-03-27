@@ -24,7 +24,9 @@ io.use((socket, next) => {
             socket.join(userId);
             // Mensaje de bienvenida
             if (socket.request.referer.contains('login'))
-                socket.emit('joined', "¡Bienvenido a Moodle!");
+                socket.emit('joined-welcome', "¡Bienvenido a Moodle!");
+                else
+                socket.emit('joined', {});
             next();
         });
     }
