@@ -6,7 +6,14 @@ const io = require('socket.io')(server, {
 });
 const conf = require('./conf.json');
 const moodleConn = require('./moodle-conn/moodle-conn');
+const session = require("express-session")({
+    secret: conf.self.cookie_session_key1,
+    resave: true,
+    saveUninitialized: true
+});
+const sharedsession = require("express-socket.io-session");
 
+app.use(session);
 // TODO: remove later
 app.get('/test', function (req, res) {
     res.sendFile(__dirname + '/public/index.html');
@@ -16,20 +23,28 @@ app.get('/', (req, res) => {
     res.end("Nothing to see here.");
 });
 
+io.use(sharedsession(session));
 io.use((socket, next) => {
     // Comprobamos que tiene la cookie iniciada
     var cookieMoodle = getCookie("MoodleSession", socket.request.headers.cookie);
-    if (cookieMoodle != "" || cookieMoodle != undefined) {
+    // Si la cookie está definida, y no se ha registrado su sesión en el sistema de sockets, buscar en la base de datos SQL
+    if ((cookieMoodle != "" || cookieMoodle != undefined) && socket.handshake.session.cookieMoodle != cookieMoodle) {
         moodleConn.IsUserLoggedIn(cookieMoodle, (userId) => {
+            socket.handshake.session.userId = userId;
+            socket.handshake.session.cookieMoodle = cookieMoodle;
             socket.join(userId);
             // Mensaje de bienvenida
-            console.log(socket.request.headers.referer);
             if (socket.request.headers.referer.includes('login'))
                 socket.emit('joined-welcome', "¡Bienvenido a Moodle!");
             else
                 socket.emit('joined', {});
             next();
         });
+        // Si SÍ está definida, coger los datos de la sesión
+    } else if ((cookieMoodle != "" || cookieMoodle != undefined) && socket.handshake.session.cookieMoodle === cookieMoodle) {
+        socket.join(socket.handshake.session.userId);
+        socket.emit('joined', {});
+        next();
     }
 });
 
