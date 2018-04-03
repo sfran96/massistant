@@ -13,6 +13,14 @@ const session = require("express-session")({
 });
 const sharedsession = require("express-socket.io-session");
 
+const globalMenu = [
+    { name: "Abrir asignatura", url, type: "course" },
+    { name: "Abrir mensajes", url: `http://massistant.ddns.net/moodle/message/index.php`, type: "message" },
+    { name: "Mostrar calificaciones", url: `http://massistant.ddns.net/moodle/grade/report/overview/index.php`, type: "clasification" },
+    { name: "Desplegar menú", url, type: "menu-toggle" },
+    { name: "Información sobre mí", url, type: "about" }
+]
+
 app.use(session);
 // TODO: remove later
 app.get('/test', function (req, res) {
@@ -33,11 +41,6 @@ io.use((socket, next) => {
             socket.handshake.session.userId = userId;
             socket.handshake.session.cookieMoodle = cookieMoodle;
             socket.join(userId);
-            // Mensaje de bienvenida
-            if (socket.request.headers.referer.includes('login'))
-                socket.emit('joined-welcome', "¡Bienvenido a Moodle!");
-            else
-                socket.emit('joined', {});
             next();
         });
         // Si SÍ está definida, coger los datos de la sesión
@@ -53,6 +56,10 @@ io.on('connection', function (socket) {
     socket.on('disconnecting', (reason) => {
         var rooms = Object.keys(socket.rooms);
         socket.to(rooms[0]).emit("socket-left", "Una de tus pestañas ha sido cerrada/recargada.");
+    });
+
+    socket.on('get-menu-info', () => {
+        socket.emit('menu-info', globalMenu);
     });
 
 });
