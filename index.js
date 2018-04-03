@@ -14,11 +14,11 @@ const session = require("express-session")({
 const sharedsession = require("express-socket.io-session");
 
 const globalMenu = [
-    { name: "Abrir asignatura", url, type: "course" },
+    { name: "Abrir asignatura", url: undefined, type: "course" },
     { name: "Abrir mensajes", url: `http://massistant.ddns.net/moodle/message/index.php`, type: "message" },
     { name: "Mostrar calificaciones", url: `http://massistant.ddns.net/moodle/grade/report/overview/index.php`, type: "clasification" },
-    { name: "Desplegar menú", url, type: "menu-toggle" },
-    { name: "Información sobre mí", url, type: "about" }
+    { name: "Desplegar menú", url: undefined, type: "menu-toggle" },
+    { name: "Información sobre mí", url: undefined, type: "about" }
 ]
 
 app.use(session);
