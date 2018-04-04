@@ -13,14 +13,6 @@ const session = require("express-session")({
 });
 const sharedsession = require("express-socket.io-session");
 
-const globalMenu = [
-    { name: "Abrir asignatura", url: undefined, type: "course" },
-    { name: "Abrir mensajes", url: `http://massistant.ddns.net/moodle/message/index.php`, type: "message" },
-    { name: "Mostrar calificaciones", url: `http://massistant.ddns.net/moodle/grade/report/overview/index.php`, type: "clasification" },
-    { name: "Desplegar menú", url: undefined, type: "menu-toggle" },
-    { name: "Información sobre mí", url: undefined, type: "about" }
-]
-
 app.use(session);
 // TODO: remove later
 app.get('/test', function (req, res) {
@@ -57,11 +49,6 @@ io.on('connection', function (socket) {
         var rooms = Object.keys(socket.rooms);
         socket.to(rooms[0]).emit("socket-left", "Una de tus pestañas ha sido cerrada/recargada.");
     });
-
-    socket.on('get-menu-info', () => {
-        socket.emit('menu-info', globalMenu);
-    });
-
 });
 
 // Listen on configuration port
