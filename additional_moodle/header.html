@@ -3,30 +3,19 @@
 <script>    
     var socket = io('http://massistant.ddns.net:3000');
 </script>
-<script>
-
-    // Opciones del menú global
-    const globalMenu = [
-        { name: "Página principal", url: "http://massistant.ddns.net/moodle/my/", type: "home" },
-        { name: "Asignaturas", url: undefined, type: "course" },
-        { name: "Mensajes", url: `http://massistant.ddns.net/moodle/message/index.php`, type: "message" },
-        { name: "Calificaciones", url: `http://massistant.ddns.net/moodle/grade/report/overview/index.php`, type: "clasification" },
-        { name: "Desplegar menú", url: undefined, type: "menu_toggle" },
-        { name: "Presentación", url: undefined, type: "config" },
-        { name: "Sobre MA", url: undefined, type: "about" }
-    ]
+<script>    
     // Opciones del submenú de la asignatura
-    const courseMenu = [
-        { name: "Abrir" },
-        { name: "Buscar" },
-        { name: "Navegar" },
-        { name: "Calificaciones" },
-        { name: "Profesores" },
-        { name: "Menú global" }
-    ]
-
+    var courseMenu;
+    // Opciones del submenú de los mensajes
+    var messageMenu;
+    // Opciones del menú global
+    var globalMenu;
+    // Asignaturas del usuario
+    const userSubjects;
     // Menú seleccionado (globalMenu por defecto)
-    var menuOnUse = globalMenu;
+    var menuOnUse;
+    // Menús visitados
+    var menuHistory = [];
     // Última vez clicado
     var lastClick;
     // ¿Está en input?
@@ -48,15 +37,27 @@
         // Cambiar a color de conectado
         $(".massistant").css("background", "linear-gradient(14deg, rgba(15, 184, 173, 0.6) 0%, rgba(31, 200, 219, 0.6) 50%, rgba(44, 181, 232, 0.6) 100%)");
         $("#massistant_popup").css("visibility", "visible");
-        // Mostrar el menú
-        showMenu(globalMenu);
+        // Solicitar menú
+        socket.emit('menusRequested');
     });
 
     // Se ejecuta cuando el cliente se reconecta con el sistema de forma correcta
     socket.on('reconnect', (attemtNumber) => {
         $(".massistant").css("background", "linear-gradient(14deg, rgba(15, 184, 173, 0.6) 0%, rgba(31, 200, 219, 0.6) 50%, rgba(44, 181, 232, 0.6) 100%)");
         showMessage("Se ha reestablecido la conexión correctamente.");
-    })
+    });
+
+    // Se ejecuta cuando el cliente recibe la información acerca de los menús disponibles
+    socket.on('menusRecieved', (menus) => {
+        // Guardamos todos los datos
+        globalMenu = menus.globalMenu;
+        courseMenu = menus.courseMenu;
+        messageMenu = menus.messageMenu;
+        // Asignar que el menú a usar es el global
+        menuOnUse = globalMenu;
+        // Mostrar el menú
+        showMenu(globalMenu);
+    });
 
     // Función para mostrar en forma de menú todas las opciones
     function showMenu(data) {
@@ -137,6 +138,139 @@
         $("#massistant_menu_content").empty();
     }
 
+    function keyUpEventFunction(event) {
+        if (!isOnInput && socket.connected && !socket.disconnected) {
+            switch (event.keyCode) {
+                // m
+                case 77:
+                    doubleClickMA();
+                    break;
+                // Left
+                case 37:
+                    if ($("#massistant").css("opacity") === "1" && menuHistory.length !== 0) {
+                        // Recogemos la información del menú anterior
+                        let previousMenuInfo = menuHistory.pop();
+                        // Recogemos el menú
+                        menuOnUse = previousMenuInfo.menu;
+                        // Recogemos el puntero
+                        pointerMenu = previousMenuInfo.position;
+                        // Mostramos el menú y destacamos la opción en la que ha entrado previamente
+                        showMenu(menuOnUse);
+                        highlightMenuItem(pointerMenu);
+
+                        // Ocultar mensaje si está mostrandose alguno
+                        hideMessage();
+                    }
+                    break;
+                // Right
+                case 39:
+                    if ($("#massistant").css("opacity") === "1") {
+                        event.preventDefault();
+                        getInTheItemOption();
+                    }
+                    break;
+            }
+        }
+    }
+
+    function keyDownEventFunction(event) {
+        console.log(event.keyCode);
+        if (!isOnInput && socket.connected && !socket.disconnected) {
+            switch (event.keyCode) {
+                // Up
+                case 38:
+                    if ($("#massistant").css("opacity") === "1") {
+                        event.preventDefault();
+                        goUpInTheMenu();
+                    }
+                    break;
+                // Down
+                case 40:
+                    if ($("#massistant").css("opacity") === "1") {
+                        event.preventDefault();
+                        goDownInTheMenu();
+                    }
+                    break;
+            }
+        }
+
+    }
+
+    function goUpInTheMenu() {
+        // Asignamos valor
+        if (pointerMenu != 0 && pointerMenu != -1)
+            pointerMenu = (pointerMenu - 1) % menuItems.length;
+        else
+            pointerMenu = menuItems.length - 1;
+        highlightMenuItem(pointerMenu);
+        unhighlightMenuItem(pointerMenu, false);
+    }
+
+    function goDownInTheMenu() {
+        // Asignamos valor
+        pointerMenu = (pointerMenu + 1) % menuItems.length;
+        highlightMenuItem(pointerMenu);
+        unhighlightMenuItem(pointerMenu, true);
+
+    }
+
+    function highlightMenuItem(index) {
+        $(menuItems[index]).css("color", "#21b8d1").css("font-size", "20px");
+    }
+
+    function unhighlightMenuItem(index, isPressingDown) {
+        if (isPressingDown) {
+            if (index != -1 && index != 0) {
+                $(menuItems[index - 1]).css("color", "").css("font-size", "");
+            } else {
+                $(menuItems[menuItems.length - 1]).css("color", "").css("font-size", "");
+            }
+        } else {
+            if (index !== menuItems.length - 1)
+                $(menuItems[index + 1]).css("color", "").css("font-size", "");
+            else
+                $(menuItems[0]).css("color", "").css("font-size", "");
+        }
+    }
+
+    function getInTheItemOption() {
+        if (pointerMenu != -1) {
+            // Si es el menú global
+            if (menuOnUse === globalMenu) {
+                if (menuOnUse[pointerMenu].url) {
+                    window.location.replace(menuOnUse[pointerMenu].url);
+                    localStorage.setItem("lastMenuItemSelected", pointerMenu);
+                }
+                else if (!menuOnUse[pointerMenu].url) {
+                    switch (menuOnUse[pointerMenu].type) {
+                        case "course":
+                            // Preguntamos qué asignatura quiere visitar
+                            showMessage("¿Qué asignatura quieres visitar?", 6000000);
+                            // Guardamos en qué menú nos encontrabamos en primer momento y en qué posición
+                            menuHistory.push({ position: pointerMenu, menu: menuOnUse });
+                            // Asignamos qué menú se muestra en estos momentos
+                            menuOnUse = dummySubjects;
+                            // Mostramos el menú
+                            showMenu(menuOnUse);
+                            // Puntero a cero
+                            pointerMenu = 0;
+                            highlightMenuItem(pointerMenu);
+                            break;
+                        case "about":
+                            showMessage("Soy <i>MAssistant (Moodle Assistant)<\/i>, pretendo ayudarte a utilizar Moodle de una forma más sencilla e intuitiva como alumno.<br\/>Desarrollado por <strong>Francis Santos<\/strong> como proyecto de fin de carrera en el segundo periodo del curso 2017/2018.", 15000)
+                            break;
+                        default:
+                            showMessage("Esta opción no está disponible en estos momentos.");
+                            break;
+                    }
+                }
+            }
+            // Si es el menú de encontrar curso
+            else if (menuOnUse === dummySubjects) {
+                hideMessage();
+            }
+        }
+    }
     // Opciones cargadas cuando el DOM se encuentra totalmente cargado
     $('document').ready(() => {
 
@@ -151,99 +285,11 @@
         });
 
         // Ejecutado únicamente cuando se levanta el dedo de la tecla
-        $('body').keyup((event) => {
-            if (!isOnInput && socket.connected && !socket.disconnected) {
-                switch (event.keyCode) {
-                    // m
-                    case 77:
-                        doubleClickMA();
-                        break;
-                    // Left
-                    case 37:
-                        break;
-                    // Right
-                    case 39:
-                        if ($("#massistant").css("opacity") === "1") {
-                            event.preventDefault();
-                            getInTheItemOption();
-                        }
-                        break;
-                }
-            }
-        });
+        $('body').keyup(keyUpEventFunction);
 
         // Ejecutado mientras siga el dedo presionando la tecla
-        $('body').keydown((event) => {
-            console.log(event.keyCode);
-            if (!isOnInput && socket.connected && !socket.disconnected) {
-                switch (event.keyCode) {
-                    // Up
-                    case 38:
-                        if ($("#massistant").css("opacity") === "1") {
-                            event.preventDefault();
-                            goUpInTheMenu();
-                        }
-                        break;
-                    // Down
-                    case 40:
-                        if ($("#massistant").css("opacity") === "1") {
-                            event.preventDefault();
-                            goDownInTheMenu();
-                        }
-                        break;
-                }
-            }
-        });
+        $('body').keydown(keyDownEventFunction);
     });
-
-    function goUpInTheMenu() {
-        // Asignamos valor
-        if (pointerMenu != 0 && pointerMenu != -1)
-            pointerMenu = (pointerMenu - 1) % menuItems.length;
-        else
-            pointerMenu = menuItems.length - 1;
-        // Si tiene valores que no son iniciales
-        if (pointerMenu !== menuItems.length - 1)
-            $(menuItems[pointerMenu + 1]).css("color", "").css("font-size", "");
-        else
-            $(menuItems[0]).css("color", "").css("font-size", "");
-        $(menuItems[pointerMenu]).css("color", "#21b8d1").css("font-size", "20px");
-    }
-
-    function goDownInTheMenu() {
-        // Asignamos valor
-        pointerMenu = (pointerMenu + 1) % menuItems.length;
-        $(menuItems[pointerMenu]).css("color", "#21b8d1").css("font-size", "20px");
-
-        // Si tiene valores que no son iniciales
-        if (pointerMenu != -1 && pointerMenu != 0) {
-            $(menuItems[pointerMenu - 1]).css("color", "").css("font-size", "");
-        } else {
-            $(menuItems[menuItems.length - 1]).css("color", "").css("font-size", "");
-        }
-    }
-
-    function getInTheItemOption() {
-        if (pointerMenu != -1) {
-            if (globalMenu[pointerMenu].url) {
-                window.location.replace(globalMenu[pointerMenu].url);
-                localStorage.setItem("lastMenuItemSelected", pointerMenu);
-            }
-            else if (!globalMenu[pointerMenu].url) {
-                switch (globalMenu[pointerMenu].type) {
-                    case "course":
-                        showMessage("¿Qué asignatura quieres visitar?", 6000000);
-                        break;
-                    case "about":
-                        showMessage("Soy <i>MAssistant (Moodle Assistant)<\/i>, pretendo ayudarte a utilizar Moodle de una forma más sencilla e intuitiva como alumno.<br\/>Desarrollado por <strong>Francis Santos<\/strong> como proyecto de fin de carrera en el segundo periodo del curso 2017/2018.", 15000)
-                        break;
-                    default:
-                        showMessage("Esta opción no está disponible en estos momentos.");
-                        break;
-                }
-            }
-        }
-    }
 </script>
 <style>
     p#massistant_menu_msg {
@@ -362,6 +408,11 @@
 
     .massistant_menu_option_home {
         background: url(https://image.flaticon.com/icons/svg/263/263115.svg) no-repeat;
+        background-size: 20px;
+    }
+
+    .massistant_menu_option_bullet {
+        background: url(https://image.flaticon.com/icons/svg/90/90492.svg) no-repeat;
         background-size: 20px;
     }
 

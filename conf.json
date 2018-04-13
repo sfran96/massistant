@@ -1,11 +1,8 @@
 {
     "self": {
+        "host": "http://massistant.ddns.net/moodle",
         "port": "3000",
         "log_file_path": "./logs/",
-        "mode": "dev",
-        "_mode": "It's used to describe the mode the program is going to be excuting in (prod|dev).",
-        "language": "ES",
-        "_language": "Language used by the speech-to-text and text-to-speech API, written in ISO 639-1 mode.",
         "cookie_session_key1": "mo0Dl3KeY",
         "cookie_session_key2": "k3Ym0odLe"
     },

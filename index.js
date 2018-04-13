@@ -1,6 +1,7 @@
-/** Archivo de configuración */
+/** Archivo de configuración y menús **/
 const conf = require('./conf.json');
-/** Módulos externos utilizados */
+const menus = require('./menus.js');
+/** Módulos externos utilizados **/
 const app = require('express')();
 const server = require('http').Server(app);
 const io = require('socket.io')(server, {
@@ -12,7 +13,8 @@ const session = require("express-session")({
     saveUninitialized: true
 });
 const sharedsession = require("express-socket.io-session");
-/** Módulos propios utilizados */
+const fs = require('fs');
+/** Módulos propios utilizados **/
 const sessionControl = require("./session-control/session-cont");
 
 app.use(session);
@@ -25,6 +27,16 @@ io.on('connection', function (socket) {
         var rooms = Object.keys(socket.rooms);
         socket.to(rooms[0]).emit("socket-left", "Una de tus pestañas ha sido cerrada/recargada.");
     });
+
+    // Cuando el usuario solicita los distintos menús disponibles
+    socket.on('menusRequested', () => {
+        socket.emit('menusRecieved', menus.menus)
+    });
+});
+
+// Vigilar el fichero que contiene la información acerca de los menús, si cambia hay que cambiar la información que el servidor reenvía a los usuarios
+fs.watch('./menus.js', (event, filename) => {
+    menus = require('./menus.js');
 });
 
 // Listen on configuration port
