@@ -1,6 +1,7 @@
 /** Archivo de configuración y menús **/
+var reload = require('require-reload')(require);
 const conf = require('./conf.json');
-const menus = require('./menus.js');
+const menus = reload('./menus.js');
 /** Módulos externos utilizados **/
 const app = require('express')();
 const server = require('http').Server(app);
@@ -41,7 +42,7 @@ io.on('connection', function (socket) {
 
 // Vigilar el fichero que contiene la información acerca de los menús, si cambia hay que cambiar la información que el servidor reenvía a los usuarios
 fs.watch('./menus.js', (event, filename) => {
-    menus = require('./menus.js');
+    menus = reload('./menus.js');
 });
 
 // Listen on configuration port
