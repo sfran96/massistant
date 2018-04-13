@@ -86,7 +86,7 @@
             $("#massistant_popup").css({ "display": "block" });
             if (localStorage.getItem("lastMenuItemSelected")) {
                 pointerMenu = parseInt(localStorage.getItem("lastMenuItemSelected"));
-                $(menuItems[pointerMenu]).css("color", "#21b8d1").css("font-size", "20px");
+                highlightMenuItem(pointerMenu);
                 localStorage.removeItem("lastMenuItemSelected");
             }
         }
@@ -99,7 +99,7 @@
             $('#massistant').css({ "opacity": "1", "visibility": "visible" });
             $('#massistant > div').css({ "visibility": "" });
             $('#massistant_popup').css({ "display": "block" });
-            showMenu(globalMenu);
+            showMenu(menuOnUse);
         }
         else {
             $('#massistant').css({ "opacity": "", "visibility": "" });
@@ -225,7 +225,7 @@
     }
 
     function highlightMenuItem(index) {
-        $(menuItems[index]).css("color", "#21b8d1").css("font-size", "20px");
+        $(menuItems[index]).css("color", "#21b8d1").css("font-size", "30px");
     }
 
     function unhighlightMenuItem(index, isPressingDown) {
@@ -259,7 +259,7 @@
                             // Guardamos en qué menú nos encontrabamos en primer momento y en qué posición
                             menuHistory.push({ position: pointerMenu, menu: menuOnUse });
                             // Asignamos qué menú se muestra en estos momentos
-                            menuOnUse = dummySubjects;
+                            menuOnUse = userSubjects;
                             // Mostramos el menú
                             showMenu(menuOnUse);
                             // Puntero a cero
@@ -276,8 +276,32 @@
                 }
             }
             // Si es el menú de encontrar curso
-            else if (menuOnUse === dummySubjects) {
+            else if (menuOnUse === userSubjects) {
                 hideMessage();
+            }
+            else if (menuOnUse === courseMenu) {
+                if (menuOnUse[pointerMenu].url) {
+                    window.location.replace(menuOnUse[pointerMenu].url);
+                    localStorage.setItem("lastMenuItemSelected", pointerMenu);
+                }
+                else if (!menuOnUse[pointerMenu].url) {
+                    switch (menuOnUse[pointerMenu].option) {
+                        case "global":
+                            // Guardamos en qué menú nos encontrabamos en primer momento y en qué posición
+                            menuHistory.push({ position: pointerMenu, menu: menuOnUse });
+                            // Asignamos qué menú se muestra en estos momentos
+                            menuOnUse = globalMenu;
+                            // Mostramos el menú
+                            showMenu(menuOnUse);
+                            // Puntero a cero
+                            pointerMenu = 0;
+                            highlightMenuItem(pointerMenu);
+                            break;
+                        default:
+                            showMessage("Esta opción no está disponible en estos momentos.");
+                            break;
+                    }
+                }
             }
         }
     }
@@ -347,8 +371,8 @@
     }
 
     div.massistant_box {
-        max-height: 350px;
-        max-width: 300px;
+        max-height: 450px;
+        max-width: 400px;
         background: #f5f5f5;
         box-shadow: 0px 0px 10px #AAA;
         border-radius: 6px;
@@ -374,59 +398,62 @@
 
     .massistant_menu_option {
         text-align: left;
-        margin-bottom: 10px;
-        font-size: 18px;
+        margin-bottom: 20px;
+        font-size: 28px;
         word-break: inherit;
-        line-height: 20px;
-        padding-left: 35px;
+        line-height: 30px;
+        padding-left: 45px;
     }
 
     .massistant_popupbox_content {
-        margin: 15px;
+        font-size: 20px;
+        word-break: inherit;
+        line-height: 25px;
+        margin: 25px;
         cursor: context-menu;
     }
 
     .massistant_menu_option_course {
         background: url(https://image.flaticon.com/icons/svg/103/103340.svg) no-repeat;
-        background-size: 20px;
+        background-size: 30px;
     }
 
     .massistant_menu_option_message {
         background: url(https://image.flaticon.com/icons/svg/126/126516.svg) no-repeat;
-        background-size: 20px;
+        background-size: 30px;
     }
 
     .massistant_menu_option_clasification {
         background: url(https://image.flaticon.com/icons/svg/782/782702.svg) no-repeat;
-        background-size: 20px;
+        background-size: 30px;
     }
 
     .massistant_menu_option_about {
         background: url(https://image.flaticon.com/icons/svg/685/685815.svg) no-repeat;
-        background-size: 20px;
+        background-size: 30px;
     }
 
     .massistant_menu_option_menu_toggle {
         background: url(https://image.flaticon.com/icons/svg/109/109682.svg) no-repeat;
-        background-size: 20px;
+        background-size: 30px;
     }
 
     .massistant_menu_option_config {
         background: url(https://image.flaticon.com/icons/svg/70/70367.svg) no-repeat;
-        background-size: 20px;
+        background-size: 30px;
     }
 
     .massistant_menu_option_home {
         background: url(https://image.flaticon.com/icons/svg/263/263115.svg) no-repeat;
-        background-size: 20px;
+        background-size: 30px;
     }
 
     .massistant_menu_option_bullet {
         background: url(https://image.flaticon.com/icons/svg/90/90492.svg) no-repeat;
-        background-size: 20px;
+        background-size: 30px;
     }
 
-    @media screen and (max-height: 559px) and (min-width: 600px) {
+    @media screen and (max-height: 759px) and (min-width: 600px) {
         div.massistant_box {
             display: inline-block;
         }
