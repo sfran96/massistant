@@ -2,7 +2,6 @@
 const conf = require('./conf.json');// Opciones del submenú de la asignatura
 
 var courseMenu = [
-    { name: "Abrir", type: "bullet" },
     { name: "Buscar (beta)", type: "bullet" },
     { name: "Navegar", type: "bullet" },
     { name: "Calificaciones", type: "bullet" },
