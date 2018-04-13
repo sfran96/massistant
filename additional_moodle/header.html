@@ -48,7 +48,7 @@
     });
 
     // Se ejecuta cuando el usuario recibe la información que había solicitado acerca de quién ha desarrollado el asistente
-    socket.on('aboutReceived', (text) => {
+    socket.on('aboutRecieved', (text) => {
         showMessage(text, 20000);
     })
 
@@ -58,10 +58,15 @@
         globalMenu = menus.globalMenu;
         courseMenu = menus.courseMenu;
         messageMenu = menus.messageMenu;
-        // Asignar que el menú a usar es el global
-        menuOnUse = globalMenu;
+        if (document.title.search("Course") !== -1 || document.title.search("Curso") !== -1) {
+            // Asignar que el menú a usar es el da las asignaturas
+            menuOnUse = courseMenu;
+        } else {
+            // Asignar que el menú a usar es el global
+            menuOnUse = globalMenu;
+        }
         // Mostrar el menú
-        showMenu(globalMenu);
+        showMenu(menuOnUse);
     });
 
     // Función para mostrar en forma de menú todas las opciones

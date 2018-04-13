@@ -2,12 +2,12 @@
 const conf = require('./conf.json');// Opciones del submenú de la asignatura
 
 var courseMenu = [
-    { name: "Abrir" },
-    { name: "Buscar (beta)" },
-    { name: "Navegar" },
-    { name: "Calificaciones" },
-    { name: "Profesores" },
-    { name: "Menú global" }
+    { name: "Abrir", type: "bullet" },
+    { name: "Buscar (beta)", type: "bullet" },
+    { name: "Navegar", type: "bullet" },
+    { name: "Calificaciones", type: "bullet" },
+    { name: "Profesores", type: "bullet" },
+    { name: "Menú global", type: "bullet" }
 ]
 // Opciones del submenú de los mensajes
 var messageMenu = [
