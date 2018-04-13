@@ -2,20 +2,20 @@
 const conf = require('./conf.json');// Opciones del submenú de la asignatura
 
 var courseMenu = [
-    { name: "Abrir", option: "open", type: "bullet" },
-    { name: "Buscar (beta)", option: "search", type: "bullet" },
-    { name: "Navegar", option: "navigate", type: "bullet" },
-    { name: "Calificaciones", option: "califications", type: "bullet" },
-    { name: "Profesores", option: "teachers", type: "bullet" },
-    { name: "Menú global", option: "global", type: "bullet" }
+    { name: "Abrir", option: "open"},
+    { name: "Buscar (beta)", option: "search"},
+    { name: "Navegar", option: "navigate"},
+    { name: "Calificaciones", option: "califications"},
+    { name: "Profesores", option: "teachers"},
+    { name: "Menú global", option: "global"}
 ]
 // Opciones del submenú de los mensajes
 var messageMenu = [
-    { name: "Abrir" },
-    { name: "Responder" },
-    { name: "Redactar" },
-    { name: "Eliminar" },
-    { name: "Menú global", option: "global", type: "bullet" }
+    { name: "Abrir", option: "open" },
+    { name: "Responder" , option: "reply"},
+    { name: "Redactar", option: "write" },
+    { name: "Eliminar", option: "delete" },
+    { name: "Menú global", option: "global"}
 ]
 // Opciones del menú global
 var globalMenu = [

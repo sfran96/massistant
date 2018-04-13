@@ -61,6 +61,9 @@
         if (document.title.search("Course") !== -1 || document.title.search("Curso") !== -1) {
             // Asignar que el menú a usar es el da las asignaturas
             menuOnUse = courseMenu;
+        } else if (document.title.search("Messages") !== -1 || document.title.search("Mensajes") !== -1) {
+            // Asignar que el menú a usar es el da las asignaturas
+            menuOnUse = messageMenu;
         } else {
             // Asignar que el menú a usar es el global
             menuOnUse = globalMenu;
@@ -225,21 +228,21 @@
     }
 
     function highlightMenuItem(index) {
-        $(menuItems[index]).css("color", "#21b8d1").css("font-size", "30px");
+        $(menuItems[index]).css("color", "#21b8d1").css({ "font-size": "30px", "font-weight": "bold" });
     }
 
     function unhighlightMenuItem(index, isPressingDown) {
         if (isPressingDown) {
             if (index != -1 && index != 0) {
-                $(menuItems[index - 1]).css("color", "").css("font-size", "");
+                $(menuItems[index - 1]).css("color", "").css("font-size", "").css("font-weight", "");
             } else {
-                $(menuItems[menuItems.length - 1]).css("color", "").css("font-size", "");
+                $(menuItems[menuItems.length - 1]).css("color", "").css("font-size", "").css("font-weight", "");
             }
         } else {
             if (index !== menuItems.length - 1)
-                $(menuItems[index + 1]).css("color", "").css("font-size", "");
+                $(menuItems[index + 1]).css("color", "").css("font-size", "").css("font-weight", "");
             else
-                $(menuItems[0]).css("color", "").css("font-size", "");
+                $(menuItems[0]).css("color", "").css("font-size", "").css("font-weight", "");
         }
     }
 
@@ -259,7 +262,7 @@
                             // Guardamos en qué menú nos encontrabamos en primer momento y en qué posición
                             menuHistory.push({ position: pointerMenu, menu: menuOnUse });
                             // Asignamos qué menú se muestra en estos momentos
-                            menuOnUse = userSubjects;
+                            menuOnUse = userSubjects || globalMenu;
                             // Mostramos el menú
                             showMenu(menuOnUse);
                             // Puntero a cero
@@ -279,7 +282,31 @@
             else if (menuOnUse === userSubjects) {
                 hideMessage();
             }
+            // Si es el menú de dentro de un curso
             else if (menuOnUse === courseMenu) {
+                if (menuOnUse[pointerMenu].url) {
+                    window.location.replace(menuOnUse[pointerMenu].url);
+                    localStorage.setItem("lastMenuItemSelected", pointerMenu);
+                }
+                else if (!menuOnUse[pointerMenu].url) {
+                    switch (menuOnUse[pointerMenu].option) {
+                        case "global":
+                            // Guardamos en qué menú nos encontrabamos en primer momento y en qué posición
+                            menuHistory.push({ position: pointerMenu, menu: menuOnUse });
+                            // Asignamos qué menú se muestra en estos momentos
+                            menuOnUse = globalMenu;
+                            // Mostramos el menú
+                            showMenu(menuOnUse);
+                            // Puntero a cero
+                            pointerMenu = 0;
+                            highlightMenuItem(pointerMenu);
+                            break;
+                        default:
+                            showMessage("Esta opción no está disponible en estos momentos.");
+                            break;
+                    }
+                }
+            } else if (menuOnUse === messageMenu) {
                 if (menuOnUse[pointerMenu].url) {
                     window.location.replace(menuOnUse[pointerMenu].url);
                     localStorage.setItem("lastMenuItemSelected", pointerMenu);
@@ -448,7 +475,7 @@
         background-size: 30px;
     }
 
-    .massistant_menu_option_bullet {
+    .massistant_menu_option_undefined {
         background: url(https://image.flaticon.com/icons/svg/90/90492.svg) no-repeat;
         background-size: 30px;
     }
