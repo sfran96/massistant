@@ -32,6 +32,11 @@ io.on('connection', function (socket) {
     socket.on('menusRequested', () => {
         socket.emit('menusRecieved', menus.menus)
     });
+
+    socket.on('aboutRequested', () => {
+        let text = "Soy <i>MAssistant (Moodle Assistant)<\/i>, pretendo ayudarte a utilizar Moodle de una forma más sencilla e intuitiva como alumno.<br\/>Desarrollado por <strong>Francis Santos<\/strong> como proyecto de fin de carrera en el segundo periodo del curso 2017/2018.";
+        socket.emit('aboutRecieved', text);
+    });
 });
 
 // Vigilar el fichero que contiene la información acerca de los menús, si cambia hay que cambiar la información que el servidor reenvía a los usuarios

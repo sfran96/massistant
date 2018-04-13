@@ -11,7 +11,7 @@
     // Opciones del menú global
     var globalMenu;
     // Asignaturas del usuario
-    const userSubjects;
+    var userSubjects;
     // Menú seleccionado (globalMenu por defecto)
     var menuOnUse;
     // Menús visitados
@@ -46,6 +46,11 @@
         $(".massistant").css("background", "linear-gradient(14deg, rgba(15, 184, 173, 0.6) 0%, rgba(31, 200, 219, 0.6) 50%, rgba(44, 181, 232, 0.6) 100%)");
         showMessage("Se ha reestablecido la conexión correctamente.");
     });
+
+    // Se ejecuta cuando el usuario recibe la información que había solicitado acerca de quién ha desarrollado el asistente
+    socket.on('aboutReceived', (text) => {
+        showMessage(text, 20000);
+    })
 
     // Se ejecuta cuando el cliente recibe la información acerca de los menús disponibles
     socket.on('menusRecieved', (menus) => {
@@ -257,7 +262,7 @@
                             highlightMenuItem(pointerMenu);
                             break;
                         case "about":
-                            showMessage("Soy <i>MAssistant (Moodle Assistant)<\/i>, pretendo ayudarte a utilizar Moodle de una forma más sencilla e intuitiva como alumno.<br\/>Desarrollado por <strong>Francis Santos<\/strong> como proyecto de fin de carrera en el segundo periodo del curso 2017/2018.", 15000)
+                            socket.emit('aboutRequested');
                             break;
                         default:
                             showMessage("Esta opción no está disponible en estos momentos.");
