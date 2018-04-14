@@ -17,6 +17,7 @@ const sharedsession = require("express-socket.io-session");
 const fs = require('fs');
 /** Módulos propios utilizados **/
 const sessionControl = require("./session-control/session-cont");
+const moodleConnection = require("./moodle-conn/moodle-conn");
 
 app.use(session);
 io.use(sharedsession(session));
@@ -34,10 +35,26 @@ io.on('connection', function (socket) {
         socket.emit('menusRecieved', menus.menus)
     });
 
+    // Cuando el usuario solicita información acerca de Massistant
     socket.on('aboutRequested', () => {
         let text = "Soy <i>MAssistant (Moodle Assistant)<\/i>, pretendo ayudarte a utilizar Moodle de una forma más sencilla e intuitiva como alumno.<br\/>Desarrollado por <strong>Francis Santos<\/strong> como proyecto de fin de carrera en el segundo periodo del curso 2017/2018.";
         socket.emit('aboutRecieved', text);
     });
+
+    // Cuando el usuario solicita entrar en una de las asignaturas que tiene matriculado
+    socket.on('coursesRequested', () => {
+        // Solicitamos dicha información a la base de datos
+        moodleConnection.retrieveUserCourses(socket.handshake.session.userId, (subjectsSql) => {
+            let userSubjects = [];
+            for (i = 0; i < subjectsSql.length; i++) {
+                let subject = {};
+                subject.name = subjectsSql[i].fullname;
+                subject.url = `${conf.self.host}/course/view.php?id=${subjectsSql[i].id}`
+                userSubjects.push(subject);
+            }
+            socket.emit('coursesRecieved', userSubjects);
+        })
+    })
 });
 
 // Vigilar el fichero que contiene la información acerca de los menús, si cambia hay que cambiar la información que el servidor reenvía a los usuarios

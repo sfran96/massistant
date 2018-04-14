@@ -1,5 +1,6 @@
 <script src="http://massistant.ddns.net:3000/socket.io/socket.io.js"></script>
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="http://code.responsivevoice.org/responsivevoice.js"></script>
 <script>    
     var socket = io('http://massistant.ddns.net:3000');
 </script>
@@ -50,7 +51,7 @@
     // Se ejecuta cuando el usuario recibe la información que había solicitado acerca de quién ha desarrollado el asistente
     socket.on('aboutRecieved', (text) => {
         showMessage(text, 20000);
-    })
+    });
 
     // Se ejecuta cuando el cliente recibe la información acerca de los menús disponibles
     socket.on('menusRecieved', (menus) => {
@@ -72,6 +73,24 @@
         showMenu(menuOnUse);
     });
 
+    // Se ejecuta cuando el usuario recibe las asignaturas de las que está matricualdo
+    socket.on('coursesRecieved', (subjects) => {
+        userSubjects = subjects;
+        if (userSubjects != undefined && userSubjects.length > 0) {
+            // Guardamos en qué menú nos encontrabamos en primer momento y en qué posición
+            menuHistory.push({ position: pointerMenu, menu: menuOnUse });
+            // Asignamos qué menú se muestra en estos momentos
+            menuOnUse = userSubjects;
+            // Mostramos el menú
+            showMenu(menuOnUse);
+            // Puntero a cero
+            pointerMenu = 0;
+            highlightMenuItem(pointerMenu);
+        } else {
+            showMessage("Parece ser que no estás matriculado de ninguna asignatura.");
+        }
+    });
+
     // Función para mostrar en forma de menú todas las opciones
     function showMenu(data) {
         var htmlRepresentation = "";
@@ -88,8 +107,10 @@
             $('#massistant').css({ "opacity": "1", "visibility": "visible" });
             $("#massistant_popup").css({ "display": "block" });
             if (localStorage.getItem("lastMenuItemSelected")) {
-                pointerMenu = parseInt(localStorage.getItem("lastMenuItemSelected"));
-                highlightMenuItem(pointerMenu);
+                if (menuOnUse === globalMenu) {
+                    pointerMenu = parseInt(localStorage.getItem("lastMenuItemSelected"));
+                    highlightMenuItem(pointerMenu);
+                }
                 localStorage.removeItem("lastMenuItemSelected");
             }
         }
@@ -105,6 +126,8 @@
             showMenu(menuOnUse);
         }
         else {
+            if (responsiveVoice.isPlaying())
+                responsiveVoice.cancel();
             $('#massistant').css({ "opacity": "", "visibility": "" });
             $('#massistant_popup').css({ "display": "none" });
             localStorage.removeItem("visibleMass");
@@ -115,7 +138,6 @@
     function onclickma() {
         // ¿Es doble click?
         let newClick = Date.now();
-        console.log(`new click = ${newClick} and last click = ${lastClick}`)
         if (socket.connected && !socket.disconnected && lastClick != undefined && newClick - lastClick < 200) {
             doubleClickMA();
         }
@@ -132,6 +154,7 @@
 
     // Muestra un mensaje con el HTML que se le asigne en "message" y que desaparece en un intervalo específicado "timeout"
     function showMessage(message, timeout) {
+        textToSpeech(message);
         $("#massistant_message").css("visibility", "visible");
         $("#massistant_message_content").empty().append(`<p id="massistant_menu_msg">${message}<\/p>`);
         setTimeout(() => {
@@ -141,14 +164,17 @@
 
     // Oculta el mensaje, se ejecuta cuando se pulsa la "x"
     function hideMessage() {
+        if (responsiveVoice.isPlaying())
+            responsiveVoice.cancel();
         $("#massistant_message").css("visibility", "");
         $("#massistant_message_content").empty();
     }
 
-    // Oculta el menú, se ejecuta cuando se pulsa la "x"
-    function hideMenu() {
-        $("#massistant_menu").css("visibility", "");
-        $("#massistant_menu_content").empty();
+    // Realiza la función de reproducir el audio
+    function textToSpeech(text) {
+        if (responsiveVoice.isPlaying())
+            responsiveVoice.cancel();
+        responsiveVoice.speak(text, "Spanish Female");
     }
 
     function keyUpEventFunction(event) {
@@ -175,11 +201,27 @@
                         hideMessage();
                     }
                     break;
+                // Up
+                case 38:
+                    if ($("#massistant").css("opacity") === "1") {
+                        event.preventDefault();
+                        goUpInTheMenu();
+                    }
+                    break;
                 // Right
                 case 39:
                     if ($("#massistant").css("opacity") === "1") {
                         event.preventDefault();
+                        // Ocultar mensaje si está mostrandose alguno
+                        hideMessage();
                         getInTheItemOption();
+                    }
+                    break;
+                // Down
+                case 40:
+                    if ($("#massistant").css("opacity") === "1") {
+                        event.preventDefault();
+                        goDownInTheMenu();
                     }
                     break;
             }
@@ -190,19 +232,13 @@
         console.log(event.keyCode);
         if (!isOnInput && socket.connected && !socket.disconnected) {
             switch (event.keyCode) {
-                // Up
+                case 37:
                 case 38:
-                    if ($("#massistant").css("opacity") === "1") {
-                        event.preventDefault();
-                        goUpInTheMenu();
-                    }
-                    break;
-                // Down
+                case 39:
                 case 40:
-                    if ($("#massistant").css("opacity") === "1") {
+                case 77:
+                    if ($("#massistant").css("opacity") === "1")
                         event.preventDefault();
-                        goDownInTheMenu();
-                    }
                     break;
             }
         }
@@ -228,6 +264,7 @@
     }
 
     function highlightMenuItem(index) {
+        textToSpeech(menuOnUse[index].name);
         $(menuItems[index]).css("color", "#21b8d1").css({ "font-size": "30px", "font-weight": "bold" });
     }
 
@@ -259,15 +296,8 @@
                         case "course":
                             // Preguntamos qué asignatura quiere visitar
                             showMessage("¿Qué asignatura quieres visitar?", 6000000);
-                            // Guardamos en qué menú nos encontrabamos en primer momento y en qué posición
-                            menuHistory.push({ position: pointerMenu, menu: menuOnUse });
-                            // Asignamos qué menú se muestra en estos momentos
-                            menuOnUse = userSubjects || globalMenu;
-                            // Mostramos el menú
-                            showMenu(menuOnUse);
-                            // Puntero a cero
-                            pointerMenu = 0;
-                            highlightMenuItem(pointerMenu);
+                            // Preguntamos por las asignaturas que tenemos guardadas
+                            socket.emit('coursesRequested');
                             break;
                         case "about":
                             socket.emit('aboutRequested');
@@ -347,8 +377,6 @@
 
         // Ejecutado únicamente cuando se levanta el dedo de la tecla
         $('body').keyup(keyUpEventFunction);
-
-        // Ejecutado mientras siga el dedo presionando la tecla
         $('body').keydown(keyDownEventFunction);
     });
 </script>

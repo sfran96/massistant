@@ -15,8 +15,10 @@ var connection = mysql.createConnection({
  */
 function isUserLoggedIn(moodCookValue, callback) {
     connection.query("SELECT * FROM `mdl_sessions` WHERE `sid` LIKE '" + moodCookValue + "'", (error, results, fields) => {
+        if (error)
+            console.log("Ha ocurrido un problema al verificar al usuario con sid " + moodCookValue);
         // Si hay resultados
-        if (results != undefined && results.length > 0 && results[0].userid !== 0) {
+        else if (results != undefined && results.length > 0 && results[0].userid !== 0) {
             callback(results[0].userid);
         }
     });
@@ -25,12 +27,23 @@ function isUserLoggedIn(moodCookValue, callback) {
 /**
  * Función para obtener las asignaturas que tiene un usuario matriculado
  * @param {number} userId 
- * @param {function} callback 
+ * @param {function(subjectsSql)} callback 
  */
-function retrieveUserCourses(userId, callback){
-
+function retrieveUserCourses(userId, callback) {
+    let fechaActual = Date.now();
+    connection.query("SELECT courses.id, courses.fullname FROM `mdl_course` AS `courses` INNER JOIN `mdl_enrol` AS `user_asig`ON user_asig.courseid = courses.id INNER JOIN `mdl_user_enrolments` AS `user_enr` ON user_enr.enrolid = user_asig.id WHERE user_enr.userid LIKE '" + userId + "' AND user_enr.timestart <= " + fechaActual + " AND (user_enr.timeend > " + fechaActual + " OR user_enr.timeend = 0)", (error, results, fields) => {
+        if (error)
+            console.log("Ha ocurrido un problema al recoger las asignaturas de un usuario");
+        else {
+            if (result != undefined && results.length > 0) {
+                callback(results);
+            } else {
+                callback([]);
+            }
+        }
+    });
 }
 
 module.exports = {
-    isUserLoggedIn
+    isUserLoggedIn, retrieveUserCourses
 }
