@@ -77,6 +77,8 @@
     socket.on('coursesRecieved', (subjects) => {
         userSubjects = subjects;
         if (userSubjects != undefined && userSubjects.length > 0) {
+            // Preguntamos qué asignatura quiere visitar
+            showMessage("¿Qué asignatura quieres visitar?", 6000000);
             // Guardamos en qué menú nos encontrabamos en primer momento y en qué posición
             menuHistory.push({ position: pointerMenu, menu: menuOnUse });
             // Asignamos qué menú se muestra en estos momentos
@@ -294,8 +296,6 @@
                 else if (!menuOnUse[pointerMenu].url) {
                     switch (menuOnUse[pointerMenu].type) {
                         case "course":
-                            // Preguntamos qué asignatura quiere visitar
-                            showMessage("¿Qué asignatura quieres visitar?", 6000000);
                             // Preguntamos por las asignaturas que tenemos guardadas
                             socket.emit('coursesRequested');
                             break;

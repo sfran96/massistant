@@ -35,7 +35,7 @@ function retrieveUserCourses(userId, callback) {
         if (error)
             console.log("Ha ocurrido un problema al recoger las asignaturas de un usuario");
         else {
-            if (result != undefined && results.length > 0) {
+            if (results != undefined && results.length > 0) {
                 callback(results);
             } else {
                 callback([]);
