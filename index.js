@@ -3,8 +3,13 @@ var reload = require('require-reload')(require);
 const conf = require('./conf.json');
 const menus = reload('./menus.js');
 /** Módulos externos utilizados **/
+const fs = require('fs');
+const https = require('https');
 const app = require('express')();
-const server = require('http').Server(app);
+const server = https.createServer({
+    key: fs.readFileSync('./ssl_config_files/key.pem'),
+    cert: fs.readFileSync('./ssl_config_files/cert.crt')
+}, app);
 const io = require('socket.io')(server, {
     pingTimeout: 5000
 });
@@ -14,7 +19,6 @@ const session = require("express-session")({
     saveUninitialized: true
 });
 const sharedsession = require("express-socket.io-session");
-const fs = require('fs');
 /** Módulos propios utilizados **/
 const sessionControl = require("./session-control/session-cont");
 const moodleConnection = require("./moodle-conn/moodle-conn");
