@@ -310,7 +310,9 @@
             }
             // Si es el menú de encontrar curso
             else if (menuOnUse === userSubjects) {
-                hideMessage();
+                if (menuOnUse[pointerMenu].url) {
+                    window.location.replace(menuOnUse[pointerMenu].url);
+                }
             }
             // Si es el menú de dentro de un curso
             else if (menuOnUse === courseMenu) {

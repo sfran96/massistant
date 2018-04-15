@@ -1,12 +1,13 @@
 var mysql = require('mysql');
 var conf = require('../conf.json');
 
-var connection = mysql.createConnection({
+var connection = mysql.createPool({
+    connectionLimit: 50,
     host: conf.sql.host,
     user: conf.sql.user,
     password: conf.sql.password,
     database: conf.sql.sql_moodle_db
-})
+});
 
 /**
  * Función encargada de comprobar si el usuario que solicita la petición HTTP se encuentra con una sesión iniciada según Moodle
@@ -31,17 +32,22 @@ function isUserLoggedIn(moodCookValue, callback) {
  */
 function retrieveUserCourses(userId, callback) {
     let fechaActual = Date.now();
-    connection.query("SELECT courses.id, courses.fullname FROM `mdl_course` AS `courses` INNER JOIN `mdl_enrol` AS `user_asig`ON user_asig.courseid = courses.id INNER JOIN `mdl_user_enrolments` AS `user_enr` ON user_enr.enrolid = user_asig.id WHERE user_enr.userid LIKE '" + userId + "' AND user_enr.timestart <= " + fechaActual + " AND (user_enr.timeend > " + fechaActual + " OR user_enr.timeend = 0)", (error, results, fields) => {
-        if (error)
-            console.log("Ha ocurrido un problema al recoger las asignaturas de un usuario");
-        else {
-            if (results != undefined && results.length > 0) {
-                callback(results);
-            } else {
-                callback([]);
+    connection.query("SELECT courses.id, courses.fullname FROM `mdl_course` AS `courses`" +
+        " INNER JOIN `mdl_enrol` AS `user_asig` ON user_asig.courseid = courses.id" +
+        " INNER JOIN `mdl_user_enrolments` AS `user_enr` ON user_enr.enrolid = user_asig.id" +
+        " WHERE user_enr.userid LIKE '" + userId +
+        "' AND user_enr.timestart <= " + fechaActual +
+        " AND (user_enr.timeend > " + fechaActual + " OR user_enr.timeend = 0)", (error, results, fields) => {
+            if (error)
+                console.log("Ha ocurrido un problema al recoger las asignaturas de un usuario");
+            else {
+                if (results != undefined && results.length > 0) {
+                    callback(results);
+                } else {
+                    callback([]);
+                }
             }
-        }
-    });
+        });
 }
 
 module.exports = {
