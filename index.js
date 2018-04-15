@@ -8,7 +8,8 @@ const https = require('https');
 const app = require('express')();
 const server = https.createServer({
     key: fs.readFileSync('./ssl_config_files/key.pem'),
-    cert: fs.readFileSync('./ssl_config_files/cert.crt')
+    cert: fs.readFileSync('./ssl_config_files/cert.crt'),
+    passphrase: conf.self.passphrase
 }, app);
 const io = require('socket.io')(server, {
     pingTimeout: 5000

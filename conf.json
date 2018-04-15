@@ -4,7 +4,8 @@
         "port": "3000",
         "log_file_path": "./logs/",
         "cookie_session_key1": "mo0Dl3KeY",
-        "cookie_session_key2": "k3Ym0odLe"
+        "cookie_session_key2": "k3Ym0odLe",
+        "passphrase": "TfG2018$"
     },
     "sql": {
         "host": "localhost",
