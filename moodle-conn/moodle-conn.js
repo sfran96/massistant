@@ -60,9 +60,9 @@ function getCourse(moduleName, courseId, callback) {
     connection.query("SELECT mcm.course FROM `mdl_course_modules` AS mcm" +
         " INNER JOIN `mdl_modules` AS mm" +
         " ON mcm.module = mm.id" +
-        " WHERE mcm.id = ? AND mm.name LIKE '?'", [courseId, module], (error, results, fields) => {
+        " WHERE mcm.id = ? AND mm.name LIKE '?'", [courseId, moduleName], (error, results, fields) => {
             if (error)
-                console.log("Ha ocurrido un problema al intentar realizar la petición.");
+                console.log("[ERROR]: Ha ocurrido un problema al intentar realizar la petición.\n" + error.message);
             else {
                 if (results != undefined && results.length > 0) {
                     callback(results[0].course);

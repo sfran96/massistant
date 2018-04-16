@@ -74,6 +74,7 @@
 
         // Se ejecuta para comprobar en qué página se encuentra el cliente
         socket.on('checkIfInCourseRecieved', (subjectId) => {
+            console.log("subjectId = " + subjectId);
             if (subjectId !== 'undefined' || document.title.search("Course") !== -1 || document.title.search("Curso") !== -1) {
                 // Asignar que el menú a usar es el da las asignaturas
                 menuOnUse = courseMenu;
