@@ -75,7 +75,7 @@ io.on('connection', function (socket) {
         let mmodule = path.split('/')[0];
         let params = new URLSearchParams(myURL.searchParams);
         if (url.includes('mod') && params.has('id') && mmodule !== 'undefined' && mmodule !== '')
-            moodleConnection.getCourse(mmodule, params, (subjectId) => {
+            moodleConnection.getCourse(mmodule, params.get('id'), (subjectId) => {
                 socket.emit('checkIfInCourseRecieved', subjectId);
             })
         else
