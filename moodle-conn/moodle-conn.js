@@ -61,8 +61,11 @@ function getCourse(moduleName, courseId, callback) {
         " INNER JOIN `mdl_modules` AS mm" +
         " ON mcm.module = mm.id" +
         " WHERE mcm.id = ? AND mm.name = ?", [courseId, moduleName], (error, results, fields) => {
-            if (error)
+            if (error) {
                 console.log("[ERROR]: Ha ocurrido un problema al intentar realizar la petición.\n" + error.message);
+                if (error.sql)
+                    console.log("SQL: " + error.sql);
+            }
             else {
                 if (results != undefined && results.length > 0) {
                     callback(results[0].course);
