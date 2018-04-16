@@ -20,6 +20,7 @@ const session = require("express-session")({
     saveUninitialized: true
 });
 const sharedsession = require("express-socket.io-session");
+const { URL, URLSearchParams } = require('url');
 /** Módulos propios utilizados **/
 const sessionControl = require("./session-control/session-cont");
 const moodleConnection = require("./moodle-conn/moodle-conn");
@@ -65,6 +66,20 @@ io.on('connection', function (socket) {
     socket.on('pathForGradesRequested', subjectId => {
         let toReturn = `${conf.self.host}/grade/report/index.php?id=${subjectId}`;
         socket.emit('pathForGradesRecieved', toReturn);
+    });
+
+    // Ejecutado para saber si un usuario se encuentra en una subpágina de una asignatura
+    socket.on('checkIfInCourseRequested', url => {
+        let myURL = new URL(url);
+        let path = url.replace(conf.self.host + "/", '');
+        let mmodule = path.split('/')[0];
+        let params = new URLSearchParams(myURL.searchParams);
+        if (params.has('id') && mmodule !== 'undefined' && mmodule !== '')
+            moodleConnection.getCourse(mmodule, params, (subjectId) => {
+                socket.emit('checkIfInCourseRecieved', subjectId);
+            })
+        else
+            socket.emit('checkIfInCourseRecieved');
     });
 });
 

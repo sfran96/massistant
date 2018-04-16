@@ -68,7 +68,13 @@
             globalMenu = menus.globalMenu;
             courseMenu = menus.courseMenu;
             messageMenu = menus.messageMenu;
-            if (document.title.search("Course") !== -1 || document.title.search("Curso") !== -1) {
+
+            socket.emit('checkIfInCourseRequested', window.location.href);
+        });
+
+        // Se ejecuta para comprobar en qué página se encuentra el cliente
+        socket.on('checkIfInCourseRecieved', (subjectId) => {
+            if (subjectId !== 'undefined' || document.title.search("Course") !== -1 || document.title.search("Curso") !== -1) {
                 // Asignar que el menú a usar es el da las asignaturas
                 menuOnUse = courseMenu;
             } else if (document.title.search("Messages") !== -1 || document.title.search("Mensajes") !== -1) {

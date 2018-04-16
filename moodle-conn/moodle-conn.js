@@ -50,6 +50,28 @@ function retrieveUserCourses(userId, callback) {
         });
 }
 
+/**
+ * 
+ * @param {string} moduleName 
+ * @param {number} courseId 
+ * @param {function(subjectId)} callback 
+ */
+function getCourse(moduleName, courseId, callback) {
+    connection.query("SELECT mcm.course FROM `mdl_course_modules` AS mcm" +
+        " INNER JOIN `mdl_modules` AS mm" +
+        " ON mcm.module = mm.id" +
+        " WHERE mcm.id = ? AND mm.name LIKE '?'", [courseId, module], (error, results, fields) => {
+            if (error)
+                console.log("Ha ocurrido un problema al intentar realizar la petición.");
+            else {
+                if (results != undefined && results.length > 0) {
+                    callback(results[0].course);
+                } else {
+                    callback();
+                }
+            }
+        });
+}
 module.exports = {
-    isUserLoggedIn, retrieveUserCourses
+    isUserLoggedIn, retrieveUserCourses, getCourse
 }
