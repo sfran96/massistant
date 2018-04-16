@@ -59,7 +59,13 @@ io.on('connection', function (socket) {
             }
             socket.emit('coursesRecieved', userSubjects);
         })
-    })
+    });
+
+    // Cuando el usuario solicita visitar la página de calificaciones de una asignatura
+    socket.on('pathForGradesRequested', subjectId => {
+        let toReturn = `${conf.self.host}/grade/report/index.php?id=${subjectId}`;
+        socket.emit('pathForGradesRecieved', toReturn);
+    });
 });
 
 // Vigilar el fichero que contiene la información acerca de los menús, si cambia hay que cambiar la información que el servidor reenvía a los usuarios
