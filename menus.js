@@ -2,7 +2,6 @@
 const conf = require('./conf.json');// Opciones del submenú de la asignatura
 
 var courseMenu = [
-    { name: "Abrir", option: "open"},
     { name: "Buscar (beta)", option: "search"},
     { name: "Navegar", option: "navigate"},
     { name: "Calificaciones", option: "califications"},
@@ -24,7 +23,7 @@ var globalMenu = [
     { name: "Mensajes", url: `${conf.self.host}/message/index.php`, type: "message" },
     { name: "Calificaciones", url: `${conf.self.host}/grade/report/overview/index.php`, type: "clasification" },
     { name: "Desplegar menú", url: undefined, type: "menu_toggle" },
-    { name: "Presentación", url: undefined, type: "config" },
+    { name: "Configuración", url: undefined, type: "config" },
     { name: "Sobre MA", url: undefined, type: "about" }
 ]
 

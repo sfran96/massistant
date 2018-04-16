@@ -25,6 +25,11 @@
     var pointerMenu = -1;
     // Menu items
     var menuItems;
+    // Subject items
+    var subjectItems;
+    // Boolean inSubject navigation mode
+    var navigatingSubject;
+
     // Se ejecuta cuando el cliente pierde la conexión con el sistema
     socket.on('disconnect', (reason) => {
         setTimeout(() => {
@@ -322,6 +327,9 @@
                 }
                 else if (!menuOnUse[pointerMenu].url) {
                     switch (menuOnUse[pointerMenu].option) {
+                        case "navigate":
+                            navigatingSubject = true;
+                            break;
                         case "global":
                             // Guardamos en qué menú nos encontrabamos en primer momento y en qué posición
                             menuHistory.push({ position: pointerMenu, menu: menuOnUse });
@@ -380,8 +388,12 @@
         // Ejecutado únicamente cuando se levanta el dedo de la tecla
         $('body').keyup(keyUpEventFunction);
         $('body').keydown(keyDownEventFunction);
+
+        // Guardamos todos los elementos importantes para la navegación
+        subjectItems = $(".activityinstance");
     });
 </script>
+
 <style>
     p#massistant_menu_msg {
         margin: 20px 10px 0px 10px;
@@ -418,7 +430,7 @@
         opacity: 1;
     }
 
-    div#massistant_popup {
+    div.massistant_popup {
         position: fixed;
         margin: auto 12px 82px 0px;
         right: 0;
