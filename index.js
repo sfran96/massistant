@@ -71,10 +71,10 @@ io.on('connection', function (socket) {
     // Ejecutado para saber si un usuario se encuentra en una subpágina de una asignatura
     socket.on('checkIfInCourseRequested', url => {
         let myURL = new URL(url);
-        let path = url.replace(conf.self.host + "/", '');
+        let path = url.replace(conf.self.host + "/mod/", '');
         let mmodule = path.split('/')[0];
         let params = new URLSearchParams(myURL.searchParams);
-        if (params.has('id') && mmodule !== 'undefined' && mmodule !== '')
+        if (url.contains('mod') && params.has('id') && mmodule !== 'undefined' && mmodule !== '')
             moodleConnection.getCourse(mmodule, params, (subjectId) => {
                 socket.emit('checkIfInCourseRecieved', subjectId);
             })
