@@ -29,6 +29,8 @@
     var subjectItems;
     // Boolean inSubject navigation mode
     var navigatingSubject;
+    // Subject ID assigned
+    var courseId;
 
     /**
      * SOCKETS MODULE
@@ -74,10 +76,11 @@
 
         // Se ejecuta para comprobar en qué página se encuentra el cliente
         socket.on('checkIfInCourseRecieved', (subjectId) => {
-            console.log("subjectId = " + subjectId);
-            if (subjectId !== 'undefined' || document.title.search("Course") !== -1 || document.title.search("Curso") !== -1) {
+            console.log(subjectId);
+            if (subjectId || document.title.search("Course") !== -1 || document.title.search("Curso") !== -1 || (document.title.search("Grades") !== -1 && Utils.getQueryParam('id')) || (document.title.search("Calificaciones") !== -1 && Utils.getQueryParam('id'))) {
                 // Asignar que el menú a usar es el da las asignaturas
                 menuOnUse = courseMenu;
+                courseId = subjectId;
             } else if (document.title.search("Messages") !== -1 || document.title.search("Mensajes") !== -1) {
                 // Asignar que el menú a usar es el da las asignaturas
                 menuOnUse = messageMenu;
@@ -228,14 +231,28 @@
         // Course menu options
         function courseGetInOptions() {
             switch (menuOnUse[pointerMenu].option) {
+                case "home":
+                    if (!courseId) {
+                        showMessage("Ya estás en la página de entrada de esta asignatura.");
+                    }else{
+                        // TODO
+                    }
+                    break;
                 case "califications":
-                    socket.emit('pathForGradesRequested', Utils.getQueryParam('id'));
+                    if (!courseId)
+                        socket.emit('pathForGradesRequested', Utils.getQueryParam('id'));
+                    else
+                        socket.emit('pathForGradesRequested', courseId);
                     break;
                 case "navigate":
-                    showMessage("Para volver presiona la flecha hacia la izquierda.", 600000);
-                    $("body").off('keyup');
-                    $('body').on('keyup', Navigater.keyUpEventFunction);
-                    Navigater.nextItem();
+                    if (!courseId) {
+                        showMessage("Para volver presiona la flecha hacia la izquierda.", 600000);
+                        $("body").off('keyup');
+                        $('body').on('keyup', Navigater.keyUpEventFunction);
+                        Navigater.nextItem();
+                    } else {
+                        showMessage('No es posible realizar esta acción desde este espacio.');
+                    }
                     break;
                 case "global":
                     _getInGlobalMenu();
