@@ -246,7 +246,7 @@
                     break;
                 case "navigate":
                     if (!courseId) {
-                        showMessage("Para volver presiona la flecha hacia la izquierda.", 600000);
+                        showMessage("Para volver presiona la flecha con dirección izquierda.", 600000);
                         $("body").off('keyup');
                         $('body').on('keyup', Navigater.keyUpEventFunction);
                         Navigater.nextItem();
@@ -311,7 +311,7 @@
             showMenu(menuOnUse);
             // Puntero a cero
             pointerMenu = -1;
-            highlightMenuItem(pointerMenu);
+            Utils.textToSpeech("Para volver al menú anterior presiona la flecha con dirección izquierda");
         }
 
         function keyUpEventFunction(event) {

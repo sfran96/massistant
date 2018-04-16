@@ -23,7 +23,6 @@ var globalMenu = [
     { name: "Asignaturas", url: undefined, type: "course" },
     { name: "Mensajes", url: `${conf.self.host}/message/index.php`, type: "message" },
     { name: "Calificaciones", url: `${conf.self.host}/grade/report/overview/index.php`, type: "clasification" },
-    { name: "Desplegar menú", url: undefined, type: "menu_toggle" },
     { name: "Configuración", url: undefined, type: "config" },
     { name: "Sobre MA", url: undefined, type: "about" }
 ]
