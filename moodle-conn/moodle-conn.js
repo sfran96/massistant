@@ -85,10 +85,10 @@ function getQuizStatus(userId, quizId, callback) {
         " INNER JOIN `mdl_modules` AS mm" +
         " ON mm.id= mcm.module" +
         " WHERE mcm.id = ?" +
-        "AND mm.name LIKE 'quiz'", [quizId], (error, resutlsCourse, fields) => {
+        "AND mm.name LIKE 'quiz'", [quizId], (error, resultsCourse, fields) => {
             if (error) manageError(error);
             else {
-                if (resutlsCourse != undefined && resutlsCourse.length > 0) {
+                if (resultsCourse != undefined && resultsCourse.length > 0) {
                     // Comprobamos que el usuario está matriculado en dicha asignatura
                     connection.query("SELECT COUNT(*) AS enrolled FROM `mdl_user_enrolments` AS mue" +
                         " INNER JOIN `mdl_enrol AS me`" +
