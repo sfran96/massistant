@@ -85,7 +85,7 @@ function getQuizStatus(userId, quizId, callback) {
         " INNER JOIN `mdl_modules` AS mm" +
         " ON mm.id= mcm.module" +
         " WHERE mcm.id = ?" +
-        "AND mm.name LIKE 'quiz'", [quizId], (error, resultsCourse, fields) => {
+        " AND mm.name LIKE 'quiz'", [quizId], (error, resultsCourse, fields) => {
             if (error) manageError(error);
             else {
                 if (resultsCourse != undefined && resultsCourse.length > 0) {
