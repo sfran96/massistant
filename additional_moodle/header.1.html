@@ -79,17 +79,21 @@
         });
 
         // Se ejecuta para comprobar en qué página se encuentra el cliente
-        socket.on('checkUserPositionRecieved', (subjectId) => {
-            console.log(subjectId);
-            if (subjectId || window.location.pathname.includes('course') || (window.location.pathname.includes('grade/report') && Utils.getQueryParam('id'))) {
+        socket.on('checkUserPositionRecieved', (object) => {
+            console.log(object);
+            if ((typeof object !== 'undefined' && object[1]) || window.location.pathname.includes('course/view.php') || (window.location.pathname.includes('grade/report') && Utils.getQueryParam('id'))) {
                 // Asignar que el menú a usar es el da las asignaturas
                 menuOnUse = courseMenu;
-                courseId = subjectId;
+                if (object && object[0] === 'subjectMenu' && object.length > 1)
+                    courseId = object[1];
+                else
+                    courseId = Utils.getQueryParam('id');
             } else if (window.location.pathname.includes('message')) {
                 // Asignar que el menú a usar es el da las asignaturas
                 menuOnUse = messageMenu;
             } else if (window.location.pathname.includes('quiz')) {
                 // Asignar que el menú a usar es el de resolución de quiz
+                menuOnUse = quizMenu;
             } else {
                 // Asignar que el menú a usar es el global
                 menuOnUse = globalMenu;
@@ -157,7 +161,9 @@
                 } else if (menuOnUse == messageMenu) {
                     Utils.textToSpeech("Estás en el menú de manejo de mensajes");
                 } else if (menuOnUse == globalMenu) {
-                    Utils.textToSpeech("Estás en el menú global")
+                    Utils.textToSpeech("Estás en el menú global");
+                } else if (menuOnUse == quizMenu) {
+                    Utils.textToSpeech("Estás en el menú de resolución de cuestionarios");
                 }
             }
         }
