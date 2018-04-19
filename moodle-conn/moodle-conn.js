@@ -124,6 +124,44 @@ function getQuizStatus(userId, modId, callback) {
         });
 }
 
+/**
+ * Llama a la función 'callback' pasando como parámetro el array de notas, nota => {description, finalGrade, maxGrade}
+ * @param {number} userId 
+ * @param {number} courseId 
+ * @param {function(Object)} callback 
+ */
+function getGrades(userId, courseId, callback) {
+    connection.query("SELECT mgi.itemname, mgg.finalgrade, mgi.grademax, mgi.itemtype FROM `mdl_grade_items` AS mgi" +
+        " INNER JOIN `mdl_grade_grades` AS mgg" +
+        " ON mgi.id = mgg.itemid" +
+        " WHERE userid = ?" +
+        " AND mgi.courseid = ? " +
+        " AND (mgg.hidden != 1 OR mgg.hidden > NOW())" +
+        " AND (mgi.hidden != 1 OR mgi.hidden > NOW())" +
+        " ORDER BY mgi.itemtype ASC", [userId, courseId], (error, results, fields) => {
+            if (error) manageError(error);
+            else {
+                if (results.length > 0) {
+                    // Objeto a devolver
+                    let arrayOfObjects = [];
+                    results.array.forEach(grade => {
+                        let auxGradeObject = {};
+                        // Sacamos la descripción de la nota, es decir, de qué es la nota
+                        if (grade.itemname !== undefined) auxGradeObject.description = grade.itemname;
+                        else if (grade.itemname === undefined && grade.itemtype === 'course') auxGradeObject.description = 'Nota de la asignatura';
+                        // Nota obtenida
+                        auxGradeObject.finalGrade = grade.finalgrade;
+                        // Nota máxima
+                        auxGradeObject.maxGrade = grade.grademax;
+                        arrayOfObjects.push(auxGradeObject);
+                    });
+                    callback(arrayOfObjects)
+                } else
+                    callback([]);
+            }
+        });
+}
+
 function manageError(error) {
     console.log("[ERROR]: Ha ocurrido un problema al intentar realizar la petición.\n" + error.message);
     if (error.sql)

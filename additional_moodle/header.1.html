@@ -117,9 +117,8 @@
         });
 
         // Se ejecuta cuando el usuario recibe la URL de calificaciones de la asignatura a la que quiere acceder
-        socket.on('pathForGradesReceived', (url) => {
-            window.location.replace(url);
-            localStorage.setItem("wasRedirected", true);
+        socket.on('gradesReceived', (gradeObjectsArray) => {
+            console.log(gradeObjectsArray);
         });
 
         // Se ejecuta cuando el cliente entra en un cuestionario y el servidor le responde el estado
@@ -262,11 +261,13 @@
         function courseGetInOptions() {
             switch (menuOnUse[pointerMenu].option) {
                 case "home":
-                    if (localStorage.getItem('host') !== undefined && courseId !== undefined)
+                    if (localStorage.getItem('host') !== undefined && courseId !== undefined) {
                         window.location.replace(`${localStorage.getItem('host')}/course/view.php?id=${courseId}`);
+                        localStorage.setItem("wasRedirected", true);
+                    }
                     break;
                 case "califications":
-                    socket.emit('pathForGradesRequested', courseId);
+                    socket.emit('gradesRequested', courseId);
                     break;
                 case "navigate":
                     if (window.location.pathname.includes('course/view.php')) {

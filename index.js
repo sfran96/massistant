@@ -85,9 +85,17 @@ io.on('connection', function (socket) {
             socket.emit('checkUserPositionReceived');
     });
 
+    // Ejecutado para recabar información de que menú le viene mejor al usuario en cada momento dentro del quiz
     socket.on('statusOfQuizRequested', (modId) => {
         moodleConnection.getQuizStatus(socket.handshake.session.userId, modId, (status) => {
             socket.emit('statusOfQuizReceived', status);
+        });
+    });
+
+    // Ejecutado cuando el usuario quiere saber su nota
+    socket.on('gradesRequested', (courseId) => {
+        moodleConnection.getGrades(socket.handshake.session.userId, courseId, (gradeObjectsArray) => {
+            socket.emit('gradesReceived', gradeObjectsArray);
         });
     });
 });
