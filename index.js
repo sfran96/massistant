@@ -86,7 +86,7 @@ io.on('connection', function (socket) {
     });
 
     socket.on('statusOfQuizRequested', (quizId) => {
-        moodleConnection.getQuizStatus(session.handshake.session.userId, quizId, (status) => {
+        moodleConnection.getQuizStatus(socket.handshake.session.userId, quizId, (status) => {
             socket.emit('statusOfQuizReceived', status);
         });
     });
