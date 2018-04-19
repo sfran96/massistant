@@ -38,18 +38,18 @@ var globalMenu = [
 
 // Menús para el manejo de la página principal del quiz
 var quizStartMenu = [
-    { name: "Iniciar cuestionario", type: "start" },
-    { name: "Inicio de la asignatura", type: "home" }
+    { name: "Iniciar cuestionario", option: "start" },
+    { name: "Inicio de la asignatura", option: "home", type: "home" }
 ];
 var quizResumeMenu = [
-    { name: "Reanudar cuestionario", type: "resume" },
-    { name: "Inicio de la asignatura", type: "home" }
+    { name: "Reanudar cuestionario", option: "resume" },
+    { name: "Inicio de la asignatura", option: "home", type: "home" }
 ]
 var quizFinishMenu = [
-    { name: "Enviar solución del cuestionario", type: "send" },
-    { name: "Cambiar alguna resultado", type: "change" },
-    { name: "Reiniciar cuestionario", type: "restart" },
-    { name: "Salir sin realizar ningún cambio", type: "exit" }
+    { name: "Enviar solución del cuestionario", option: "send" },
+    { name: "Cambiar alguna resultado", option: "change" },
+    { name: "Reiniciar cuestionario", option: "restart" },
+    { name: "Salir sin realizar ningún cambio", option: "exit", type: "home" }
 ]
 
 // Menú devuelto en petición
