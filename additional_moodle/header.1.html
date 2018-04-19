@@ -47,6 +47,10 @@
             socket.emit('menusRequested');
         });
 
+        socket.on('hostInfo', (host) => {
+            localStorage.setItem('host', host);
+        });
+
         // Se ejecuta cuando el cliente se reconecta con el sistema de forma correcta
         socket.on('reconnect', (attemtNumber) => {
             $(".massistant").css("background", "linear-gradient(14deg, rgba(15, 184, 173, 0.6) 0%, rgba(31, 200, 219, 0.6) 50%, rgba(44, 181, 232, 0.6) 100%)");
@@ -258,11 +262,8 @@
         function courseGetInOptions() {
             switch (menuOnUse[pointerMenu].option) {
                 case "home":
-                    if (!courseId) {
-                        showMessage("Ya estás en la página de entrada de esta asignatura.");
-                    } else {
-                        // TODO
-                    }
+                    if (localStorage.getItem('host') !== undefined && courseId !== undefined)
+                        window.location.replace(`${localStorage.getItem('host')}/course/view.php?id=${courseId}`);
                     break;
                 case "califications":
                     socket.emit('pathForGradesRequested', courseId);
