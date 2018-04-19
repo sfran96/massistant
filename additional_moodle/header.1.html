@@ -123,15 +123,14 @@
             switch (status) {
                 case 'NotFound':
                 case 'NotEnrolled':
+                default:
                     menuOnUse = menus.globalMenu;
                     break;
                 case 'NotAttempted':
-                menuOnUse = menus.quizStartMenu;
+                    menuOnUse = menus.quizStartMenu;
                     break;
                 case 'Attempted':
-                menuOnUse = menus.quizResumeMenu;
-                    break;
-                default:
+                    menuOnUse = menus.quizResumeMenu;
                     break;
             }
         })

@@ -1,5 +1,3 @@
-import { join } from 'path';
-
 var mysql = require('mysql');
 var conf = require('../conf.json');
 
