@@ -95,7 +95,7 @@ function getQuizStatus(userId, quizId, callback) {
                         " ON mue.enrolid = me.id" +
                         " WHERE mue.userid = ?" +
                         " AND mue.status = 0" +
-                        " me.courseid = ?", [userId, resultsCourse[0].course], (error, resultsEnroled, fields) => {
+                        " AND me.courseid = ?", [userId, resultsCourse[0].course], (error, resultsEnroled, fields) => {
                             if (error) manageError(error);
                             else {
                                 if (resultsEnroled != undefined && resultsEnroled.length > 0 && resultsEnroled.enrolled == 1) {

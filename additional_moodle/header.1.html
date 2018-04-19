@@ -120,6 +120,7 @@
 
         // Se ejecuta cuando el cliente entra en un cuestionario y el servidor le responde el estado
         socket.on('statusOfQuizReceived', status => {
+            console.log("STATUS: " + status);
             switch (status) {
                 case 'NotFound':
                 case 'NotEnrolled':
