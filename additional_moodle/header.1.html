@@ -134,8 +134,6 @@
                     menuOnUse = menus.quizResumeMenu;
                     break;
             }
-            // Mostrar el menú
-            Massistant.showMenu(menuOnUse);
         });
     })();
 
@@ -145,36 +143,42 @@
     var Massistant = (() => {
         // Función para mostrar en forma de menú todas las opciones
         function showMenu(data) {
-            var htmlRepresentation = "";
-            data.forEach((value, index) => {
-                htmlRepresentation += `<div class="massistant_menu_option massistant_menu_option_${value.type}">${value.name}<\/div>`;
-            });
-            $("#massistant_menu_content").html(htmlRepresentation);
-            $("#massistant_menu").css({ "visibility": "visible" });
+            if (data !== undefined) {
+                var htmlRepresentation = "";
+                data.forEach((value, index) => {
+                    htmlRepresentation += `<div class="massistant_menu_option massistant_menu_option_${value.type}">${value.name}<\/div>`;
+                });
+                $("#massistant_menu_content").html(htmlRepresentation);
+                $("#massistant_menu").css({ "visibility": "visible" });
 
-            // Asignamos el valor a la "lista"
-            menuItems = $("#massistant_menu div.massistant_menu_option");
+                // Asignamos el valor a la "lista"
+                menuItems = $("#massistant_menu div.massistant_menu_option");
 
-            if (localStorage.getItem("visibleMass")) {
-                $('#massistant').css({ "opacity": "1", "visibility": "visible" });
-                $("#massistant_popup").css({ "display": "block" });
+                if (localStorage.getItem("visibleMass")) {
+                    $('#massistant').css({ "opacity": "1", "visibility": "visible" });
+                    $("#massistant_popup").css({ "display": "block" });
 
-                // Si fue redirigido por alguna URL del MAssistant
-                var wasRedirected = (localStorage.getItem('wasRedirected') == 'true');
-                if (wasRedirected) {
-                    Utils.textToSpeech("Has sido redirigido a la página con título:" + document.title);
-                    localStorage.removeItem('wasRedirected');
+                    // Si fue redirigido por alguna URL del MAssistant
+                    var wasRedirected = (localStorage.getItem('wasRedirected') == 'true');
+                    if (wasRedirected) {
+                        Utils.textToSpeech("Has sido redirigido a la página con título:" + document.title);
+                        localStorage.removeItem('wasRedirected');
+                    }
+
+                    if (menuOnUse == menus.courseMenu) {
+                        Utils.textToSpeech("Estás en el menú de manejo de asignaturas");
+                    } else if (menuOnUse == menus.messageMenu) {
+                        Utils.textToSpeech("Estás en el menú de manejo de mensajes");
+                    } else if (menuOnUse == menus.globalMenu) {
+                        Utils.textToSpeech("Estás en el menú global");
+                    } else if (menuOnUse == menus.quizMenu) {
+                        Utils.textToSpeech("Estás en el menú de resolución de cuestionarios");
+                    }
                 }
-
-                if (menuOnUse == menus.courseMenu) {
-                    Utils.textToSpeech("Estás en el menú de manejo de asignaturas");
-                } else if (menuOnUse == menus.messageMenu) {
-                    Utils.textToSpeech("Estás en el menú de manejo de mensajes");
-                } else if (menuOnUse == menus.globalMenu) {
-                    Utils.textToSpeech("Estás en el menú global");
-                } else if (menuOnUse == menus.quizMenu) {
-                    Utils.textToSpeech("Estás en el menú de resolución de cuestionarios");
-                }
+            } else {
+                setTimeout(() => {
+                    Massistant.showMenu(menuOnUse);
+                }, 1000);
             }
         }
 
@@ -325,7 +329,7 @@
                         courseGetInOptions();
                     }
                     // Si es el menú de resolver un quiz
-                    else if (menuOnUse === menus.quizMenu) {
+                    else if (menuOnUse === menus.quizMenu || menuOnUse === menus.quizStartMenu || menuOnUse === menus.quizResumeMenu || menuOnUse === menus.quizFinishMenu) {
                         quizGetInOptions();
                     }
                     // Si es el menú de los mensajes

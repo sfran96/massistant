@@ -22,7 +22,6 @@ var quizMenu = [
     { name: "Responder pregunta", option: "answer" },
     { name: "Siguiente pregunta", option: "next" },
     { name: "Pregunta anterior", option: "previous" },
-    { name: "Enviar cuestionario", option: "send" },
     { name: "Salir", option: "exit" }
 ]
 
