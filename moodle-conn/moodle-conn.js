@@ -98,7 +98,7 @@ function getQuizStatus(userId, quizId, callback) {
                         " AND me.courseid = ?", [userId, resultsCourse[0].course], (error, resultsEnroled, fields) => {
                             if (error) manageError(error);
                             else {
-                                if (resultsEnroled != undefined && resultsEnroled.length > 0 && resultsEnroled.enrolled == 1) {
+                                if (resultsEnroled != undefined && resultsEnroled.length > 0 && resultsEnroled.enrolled == '1') {
                                     // Comprobamos si existe algún intento por parte del usuario
                                     connection.query("SELECT COUNT(*) AS attempted FROM `mdl_quiz_attemps`" +
                                         " WHERE userid = ?" +
