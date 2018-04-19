@@ -41,16 +41,22 @@ var quizStartMenu = [
     { name: "Iniciar cuestionario", type: "start" },
     { name: "Inicio de la asignatura", type: "home" }
 ];
-var quizResumeMenu = [    
+var quizResumeMenu = [
     { name: "Reanudar cuestionario", type: "resume" },
     { name: "Inicio de la asignatura", type: "home" }
+]
+var quizFinishMenu = [
+    { name: "Enviar solución del cuestionario", type: "send" },
+    { name: "Cambiar alguna resultado", type: "change" },
+    { name: "Reiniciar cuestionario", type: "restart" },
+    { name: "Salir sin realizar ningún cambio", type: "exit" }
 ]
 
 // Menú devuelto en petición
 var menus = {
-    courseMenu, messageMenu, quizMenu, globalMenu
+    courseMenu, messageMenu, quizMenu, globalMenu, quizStartMenu, quizResumeMenu, quizFinishMenu
 }
 
 module.exports = {
-    menus, quizStartMenu
+    menus
 }

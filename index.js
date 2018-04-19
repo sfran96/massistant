@@ -38,13 +38,13 @@ io.on('connection', function (socket) {
 
     // Cuando el usuario solicita los distintos menús disponibles
     socket.on('menusRequested', () => {
-        socket.emit('menusRecieved', menus.menus)
+        socket.emit('menusReceived', menus.menus)
     });
 
     // Cuando el usuario solicita información acerca de Massistant
     socket.on('aboutRequested', () => {
         let text = "Soy <i>MAssistant (Moodle Assistant)<\/i>, pretendo ayudarte a utilizar Moodle de una forma más sencilla e intuitiva como alumno.<br\/>Desarrollado por <strong>Francis Santos<\/strong> como proyecto de fin de carrera en el segundo periodo del curso 2017/2018.";
-        socket.emit('aboutRecieved', text);
+        socket.emit('aboutReceived', text);
     });
 
     // Cuando el usuario solicita entrar en una de las asignaturas que tiene matriculado
@@ -58,14 +58,14 @@ io.on('connection', function (socket) {
                 subject.url = `${conf.self.host}/course/view.php?id=${subjectsSql[i].id}`
                 userSubjects.push(subject);
             }
-            socket.emit('coursesRecieved', userSubjects);
+            socket.emit('coursesReceived', userSubjects);
         })
     });
 
     // Cuando el usuario solicita visitar la página de calificaciones de una asignatura
     socket.on('pathForGradesRequested', subjectId => {
         let toReturn = `${conf.self.host}/grade/report/index.php?id=${subjectId}`;
-        socket.emit('pathForGradesRecieved', toReturn);
+        socket.emit('pathForGradesReceived', toReturn);
     });
 
     // Ejecutado para saber si un usuario se encuentra en una subpágina de una asignatura
@@ -79,10 +79,16 @@ io.on('connection', function (socket) {
             moodleConnection.getCourse(mmodule, params.get('id'), (subjectId) => {
                 delivered.push('subjectMenu');
                 delivered.push(subjectId);
-                socket.emit('checkUserPositionRecieved', delivered);
+                socket.emit('checkUserPositionReceived', delivered);
             })
         else
-            socket.emit('checkUserPositionRecieved');
+            socket.emit('checkUserPositionReceived');
+    });
+
+    socket.on('statusOfQuizRequested', (quizId) => {
+        moodleConnection.getQuizStatus(session.handshake.session.userId, quizId, (status) => {
+            socket.emit('statusOfQuizReceived', status);
+        });
     });
 });
 

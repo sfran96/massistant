@@ -4,18 +4,8 @@
 <script>    
     // Socket variable
     var socket = io('https://massistant.ddns.net:3000');
-    // Opciones del submenú de la asignatura
-    var courseMenu;
-    // Opciones del submenú de los mensajes
-    var messageMenu;
-    // Opciones del menú global
-    var globalMenu;
-    // Opciones del menú de resolución de quiz
-    var quizMenu;
-    // Opciones del menú de la página de presentación del quiz
-    var quizHomeMenu;
-    // Asignaturas del usuario
-    var userSubjects;
+    // Diccionario de menús
+    var menus;
     // Menú seleccionado (globalMenu por defecto)
     var menuOnUse;
     // Menús visitados
@@ -65,55 +55,53 @@
         });
 
         // Se ejecuta cuando el usuario recibe la información que había solicitado acerca de quién ha desarrollado el asistente
-        socket.on('aboutRecieved', (text) => {
+        socket.on('aboutReceived', (text) => {
             Massistant.showMessage(text, 20000);
         });
 
         // Se ejecuta cuando el cliente recibe la información acerca de los menús disponibles
-        socket.on('menusRecieved', (menus) => {
+        socket.on('menusReceived', (menus) => {
             // Guardamos todos los datos
-            globalMenu = menus.globalMenu;
-            courseMenu = menus.courseMenu;
-            messageMenu = menus.messageMenu;
-            quizMenu = menus.quizMenu;
-
+            this.menus = menus;
             socket.emit('checkUserPositionRequested', window.location.href);
         });
 
         // Se ejecuta para comprobar en qué página se encuentra el cliente
-        socket.on('checkUserPositionRecieved', (object) => {
-            console.log(object);
-            if ((typeof object !== 'undefined' && !window.location.pathname.includes('quiz') && object[1]) || window.location.pathname.includes('course/view.php') || (window.location.pathname.includes('grade/report') && Utils.getQueryParam('id'))) {
+        socket.on('checkUserPositionReceived', (object) => {
+            if (window.location.pathname.includes('message')) {
                 // Asignar que el menú a usar es el da las asignaturas
-                menuOnUse = courseMenu;
+                menuOnUse = menus.messageMenu;
+            } else if (window.location.pathname.includes('quiz/attempt.php')) {
+                // Asignar que el menú a usar es el de resolución de quiz
+                menuOnUse = menus.quizMenu;
+            } else if (window.location.pathname.includes('quiz/view.php')) {
+                if (Utils.getQueryParam('id'))
+                    socket.emit("statusOfQuizRequested", Utils.getQueryParam('id'));
+            } else if ((typeof object !== 'undefined' && object[1]) || window.location.pathname.includes('course/view.php') || (window.location.pathname.includes('grade/report') && Utils.getQueryParam('id'))) {
+                // Asignar que el menú a usar es el da las asignaturas
+                menuOnUse = menus.courseMenu;
                 if (object && object[0] === 'subjectMenu' && object.length > 1)
                     courseId = object[1];
                 else
                     courseId = Utils.getQueryParam('id');
-            } else if (window.location.pathname.includes('message')) {
-                // Asignar que el menú a usar es el da las asignaturas
-                menuOnUse = messageMenu;
-            } else if (window.location.pathname.includes('quiz/attempt.php')) {
-                // Asignar que el menú a usar es el de resolución de quiz
-                menuOnUse = quizMenu;
             } else {
                 // Asignar que el menú a usar es el global
-                menuOnUse = globalMenu;
+                menuOnUse = menus.globalMenu;
             }
             // Mostrar el menú
             Massistant.showMenu(menuOnUse);
         });
 
         // Se ejecuta cuando el usuario recibe las asignaturas de las que está matricualdo
-        socket.on('coursesRecieved', (subjects) => {
-            userSubjects = subjects;
-            if (userSubjects != undefined && userSubjects.length > 0) {
+        socket.on('coursesReceived', (subjects) => {
+            menus.userSubjects = subjects;
+            if (menus.userSubjects != undefined && menus.userSubjects.length > 0) {
                 // Preguntamos qué asignatura quiere visitar
                 Massistant.showMessage("¿Qué asignatura quieres visitar?", 6000000);
                 // Guardamos en qué menú nos encontrabamos en primer momento y en qué posición
                 menuHistory.push({ position: pointerMenu, menu: menuOnUse });
                 // Asignamos qué menú se muestra en estos momentos
-                menuOnUse = userSubjects;
+                menuOnUse = menus.userSubjects;
                 // Mostramos el menú
                 Massistant.showMenu(menuOnUse);
                 // Puntero a cero
@@ -125,9 +113,27 @@
         });
 
         // Se ejecuta cuando el usuario recibe la URL de calificaciones de la asignatura a la que quiere acceder
-        socket.on('pathForGradesRecieved', (url) => {
+        socket.on('pathForGradesReceived', (url) => {
             window.location.replace(url);
             localStorage.setItem("wasRedirected", true);
+        });
+
+        // Se ejecuta cuando el cliente entra en un cuestionario y el servidor le responde el estado
+        socket.on('statusOfQuizReceived', status => {
+            switch (status) {
+                case 'NotFound':
+                case 'NotEnrolled':
+                    menuOnUse = menus.globalMenu;
+                    break;
+                case 'NotAttempted':
+                menuOnUse = menus.quizStartMenu;
+                    break;
+                case 'Attempted':
+                menuOnUse = menus.quizResumeMenu;
+                    break;
+                default:
+                    break;
+            }
         })
     })();
 
@@ -158,13 +164,13 @@
                     localStorage.removeItem('wasRedirected');
                 }
 
-                if (menuOnUse == courseMenu) {
+                if (menuOnUse == menus.courseMenu) {
                     Utils.textToSpeech("Estás en el menú de manejo de asignaturas");
-                } else if (menuOnUse == messageMenu) {
+                } else if (menuOnUse == menus.messageMenu) {
                     Utils.textToSpeech("Estás en el menú de manejo de mensajes");
-                } else if (menuOnUse == globalMenu) {
+                } else if (menuOnUse == menus.globalMenu) {
                     Utils.textToSpeech("Estás en el menú global");
-                } else if (menuOnUse == quizMenu) {
+                } else if (menuOnUse == menus.quizMenu) {
                     Utils.textToSpeech("Estás en el menú de resolución de cuestionarios");
                 }
             }
@@ -305,23 +311,23 @@
                 // Acciones que difieren por tipo de menú
                 else {
                     // Si es el menú global
-                    if (menuOnUse === globalMenu) {
+                    if (menuOnUse === menus.globalMenu) {
                         globalGetInOptions();
                     }
                     // Si es el menú de encontrar curso
-                    else if (menuOnUse === userSubjects) {
+                    else if (menuOnUse === menus.userSubjects) {
                         (() => { })(); // Nothing
                     }
                     // Si es el menú de dentro de un curso
-                    else if (menuOnUse === courseMenu) {
+                    else if (menuOnUse === menus.courseMenu) {
                         courseGetInOptions();
                     }
                     // Si es el menú de resolver un quiz
-                    else if (menuOnUse === quizMenu) {
+                    else if (menuOnUse === menus.quizMenu) {
                         quizGetInOptions();
                     }
                     // Si es el menú de los mensajes
-                    else if (menuOnUse === messageMenu) {
+                    else if (menuOnUse === menus.messageMenu) {
                         messagesGetInOptions();
                     }
                 }
@@ -332,7 +338,7 @@
             // Guardamos en qué menú nos encontrabamos en primer momento y en qué posición
             menuHistory.push({ position: pointerMenu, menu: menuOnUse });
             // Asignamos qué menú se muestra en estos momentos
-            menuOnUse = globalMenu;
+            menuOnUse = menus.globalMenu;
             // Mostramos el menú
             showMenu(menuOnUse);
             // Puntero a cero
@@ -443,7 +449,7 @@
         };
 
         return {
-            showMenu, showMessage, hideMessage, highlightMenuItem, keyUpEventFunction, keyDownEventFunction, onclickma
+            showMenu, showMessage, hideMessage, highlightMenuItem, keyUpEventFunction, keyDownEventFunction, onclickma, doubleClickMA
         }
     })();
 
@@ -593,7 +599,7 @@
         }
 
         function finishAttempt() {
-            let attemptNumber = getQueryParam("attemptNumber");
+            let attemptNumber = getQueryParam("attempt");
             if (typeof attemptNumber !== 'undefined') {
                 let referTo = $(".endtestlink")[0].href;
                 window.location.replace(referTo);
