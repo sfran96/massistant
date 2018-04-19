@@ -169,5 +169,5 @@ function manageError(error) {
 }
 
 module.exports = {
-    isUserLoggedIn, retrieveUserCourses, getCourse, getQuizStatus
+    isUserLoggedIn, retrieveUserCourses, getCourse, getQuizStatus, getGrades
 }
