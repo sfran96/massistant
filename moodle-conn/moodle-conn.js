@@ -91,7 +91,7 @@ function getQuizStatus(userId, quizId, callback) {
                 if (resultsCourse != undefined && resultsCourse.length > 0) {
                     // Comprobamos que el usuario está matriculado en dicha asignatura
                     connection.query("SELECT COUNT(*) AS enrolled FROM `mdl_user_enrolments` AS mue" +
-                        " INNER JOIN `mdl_enrol` AS me`" +
+                        " INNER JOIN `mdl_enrol` AS me" +
                         " ON mue.enrolid = me.id" +
                         " WHERE mue.userid = ?" +
                         " AND mue.status = 0" +
