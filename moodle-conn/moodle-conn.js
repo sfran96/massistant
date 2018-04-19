@@ -141,10 +141,11 @@ function getGrades(userId, courseId, callback) {
         " ORDER BY mgi.itemtype ASC", [userId, courseId], (error, results, fields) => {
             if (error) manageError(error);
             else {
-                if (results.length > 0) {
+                if (results !== undefined && results.length > 0) {
                     // Objeto a devolver
                     let arrayOfObjects = [];
-                    results.array.forEach(grade => {
+                    for (i = 0; i < results.length; i++) {
+                        let grade = results[i];
                         let auxGradeObject = {};
                         // Sacamos la descripción de la nota, es decir, de qué es la nota
                         if (grade.itemname !== undefined) auxGradeObject.description = grade.itemname;
@@ -154,7 +155,7 @@ function getGrades(userId, courseId, callback) {
                         // Nota máxima
                         auxGradeObject.maxGrade = grade.grademax;
                         arrayOfObjects.push(auxGradeObject);
-                    });
+                    }
                     callback(arrayOfObjects)
                 } else
                     callback([]);
