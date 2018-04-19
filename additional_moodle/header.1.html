@@ -118,7 +118,12 @@
 
         // Se ejecuta cuando el usuario recibe la URL de calificaciones de la asignatura a la que quiere acceder
         socket.on('gradesReceived', (gradeObjectsArray) => {
-            console.log(gradeObjectsArray);
+            gradeObjectsArray.forEach((grade) => {
+                if (grade.finalGrade !== null)
+                    console.log(`Has obtenido una calificación de ${grade.finalGrade} sobre ${grade.maxGrade} en ${grade.description}`);
+                else
+                    console.log(`No tienes calificación asignada para ${grade.description}`);
+            })
         });
 
         // Se ejecuta cuando el cliente entra en un cuestionario y el servidor le responde el estado

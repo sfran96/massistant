@@ -138,7 +138,7 @@ function getGrades(userId, courseId, callback) {
         " AND mgi.courseid = ? " +
         " AND (mgg.hidden != 1 OR mgg.hidden > NOW())" +
         " AND (mgi.hidden != 1 OR mgi.hidden > NOW())" +
-        " ORDER BY mgi.itemtype ASC", [userId, courseId], (error, results, fields) => {
+        " ORDER BY mgi.itemtype DESC", [userId, courseId], (error, results, fields) => {
             if (error) manageError(error);
             else {
                 if (results !== undefined && results.length > 0) {
@@ -148,8 +148,8 @@ function getGrades(userId, courseId, callback) {
                         let grade = results[i];
                         let auxGradeObject = {};
                         // Sacamos la descripción de la nota, es decir, de qué es la nota
-                        if (grade.itemname !== undefined) auxGradeObject.description = grade.itemname;
-                        else if (grade.itemname === undefined && grade.itemtype === 'course') auxGradeObject.description = 'Nota de la asignatura';
+                        if (grade.itemname !== undefined && grade.itemname !== null) auxGradeObject.description = grade.itemname;
+                        else if ((grade.itemname === undefined || grade.itemname === null) && grade.itemtype === 'course') auxGradeObject.description = 'Nota de la asignatura';
                         // Nota obtenida
                         auxGradeObject.finalGrade = grade.finalgrade;
                         // Nota máxima
