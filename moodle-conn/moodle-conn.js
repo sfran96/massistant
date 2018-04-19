@@ -103,7 +103,7 @@ function getQuizStatus(userId, modId, callback) {
                                     connection.query("SELECT id AS attempted FROM `mdl_quiz_attemps`" +
                                         " WHERE userid = ?" +
                                         " AND quiz = ?" +
-                                        " state LIKE 'inprogress'", [userId, resultsCourse[0].instance], (error, resultsAttempted, fields) => {
+                                        " AND state LIKE 'inprogress'", [userId, resultsCourse[0].instance], (error, resultsAttempted, fields) => {
                                             if (error) manageError(error);
                                             else {
                                                 if (resultsAttempted != undefined && resultsAttempted.length > 0)
