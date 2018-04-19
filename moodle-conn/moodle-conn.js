@@ -90,7 +90,7 @@ function getQuizStatus(userId, modId, callback) {
             else {
                 if (resultsCourse != undefined && resultsCourse.length > 0) {
                     // Comprobamos que el usuario está matriculado en dicha asignatura
-                    connection.query("SELECT COUNT(*) AS enrolled FROM `mdl_user_enrolments` AS mue" +
+                    connection.query("SELECT mue.id AS enrolled FROM `mdl_user_enrolments` AS mue" +
                         " INNER JOIN `mdl_enrol` AS me" +
                         " ON mue.enrolid = me.id" +
                         " WHERE mue.userid = ?" +
@@ -98,18 +98,15 @@ function getQuizStatus(userId, modId, callback) {
                         " AND me.courseid = ?", [userId, resultsCourse[0].course], (error, resultsEnroled, fields) => {
                             if (error) manageError(error);
                             else {
-                                // TEST
-                                console.log("enrolled has a value of " + resultsEnroled.enrolled + " and its type is " + typeof resultsEnroled.enrolled)
-                                // TEST
-                                if (resultsEnroled != undefined && resultsEnroled.length > 0 && resultsEnroled.enrolled === '1') {
+                                if (resultsEnroled != undefined && resultsEnroled.length > 0) {
                                     // Comprobamos si existe algún intento por parte del usuario
-                                    connection.query("SELECT COUNT(*) AS attempted FROM `mdl_quiz_attemps`" +
+                                    connection.query("SELECT id AS attempted FROM `mdl_quiz_attemps`" +
                                         " WHERE userid = ?" +
                                         " AND quiz = ?" +
                                         " state LIKE 'inprogress'", [userId, resultsCourse[0].instance], (error, resultsAttempted, fields) => {
                                             if (error) manageError(error);
                                             else {
-                                                if (resultsAttempted != undefined && resultsAttempted.length > 0 && resultsAttempted.attempted > 1)
+                                                if (resultsAttempted != undefined && resultsAttempted.length > 0)
                                                     callback("Attempted");
                                                 else
                                                     callback("NotAttempted");
