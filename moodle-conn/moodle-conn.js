@@ -74,10 +74,10 @@ function getCourse(moduleName, courseId, callback) {
 /**
  * 
  * @param {number} userId 
- * @param {number} quizId 
+ * @param {number} modId 
  * @param {function(status)} callback 
  */
-function getQuizStatus(userId, quizId, callback) {
+function getQuizStatus(userId, modId, callback) {
     // Comprobar que existe dicho cuestionario
     connection.query("SELECT mcm.course, mcm.instance FROM `mdl_course_modules` AS mcm" +
         " INNER JOIN `mdl_quiz` AS mq" +
@@ -85,7 +85,7 @@ function getQuizStatus(userId, quizId, callback) {
         " INNER JOIN `mdl_modules` AS mm" +
         " ON mm.id= mcm.module" +
         " WHERE mcm.id = ?" +
-        " AND mm.name LIKE 'quiz'", [quizId], (error, resultsCourse, fields) => {
+        " AND mm.name LIKE 'quiz'", [modId], (error, resultsCourse, fields) => {
             if (error) manageError(error);
             else {
                 if (resultsCourse != undefined && resultsCourse.length > 0) {
@@ -98,6 +98,9 @@ function getQuizStatus(userId, quizId, callback) {
                         " AND me.courseid = ?", [userId, resultsCourse[0].course], (error, resultsEnroled, fields) => {
                             if (error) manageError(error);
                             else {
+                                // TEST
+                                console.log("enrolled has a value of " + resultsEnroled.enrolled + " and its type is " + typeof resultsEnroled.enrolled)
+                                // TEST
                                 if (resultsEnroled != undefined && resultsEnroled.length > 0 && resultsEnroled.enrolled === '1') {
                                     // Comprobamos si existe algún intento por parte del usuario
                                     connection.query("SELECT COUNT(*) AS attempted FROM `mdl_quiz_attemps`" +
