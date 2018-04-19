@@ -81,7 +81,7 @@
         // Se ejecuta para comprobar en qué página se encuentra el cliente
         socket.on('checkUserPositionRecieved', (object) => {
             console.log(object);
-            if ((typeof object !== 'undefined' && object[1]) || window.location.pathname.includes('course/view.php') || (window.location.pathname.includes('grade/report') && Utils.getQueryParam('id'))) {
+            if ((typeof object !== 'undefined' && !window.location.pathname.includes('quiz') && object[1]) || window.location.pathname.includes('course/view.php') || (window.location.pathname.includes('grade/report') && Utils.getQueryParam('id'))) {
                 // Asignar que el menú a usar es el da las asignaturas
                 menuOnUse = courseMenu;
                 if (object && object[0] === 'subjectMenu' && object.length > 1)
@@ -91,7 +91,7 @@
             } else if (window.location.pathname.includes('message')) {
                 // Asignar que el menú a usar es el da las asignaturas
                 menuOnUse = messageMenu;
-            } else if (window.location.pathname.includes('quiz')) {
+            } else if (window.location.pathname.includes('quiz/attempt.php')) {
                 // Asignar que el menú a usar es el de resolución de quiz
                 menuOnUse = quizMenu;
             } else {
@@ -251,13 +251,10 @@
                     }
                     break;
                 case "califications":
-                    if (!courseId)
-                        socket.emit('pathForGradesRequested', Utils.getQueryParam('id'));
-                    else
-                        socket.emit('pathForGradesRequested', courseId);
+                    socket.emit('pathForGradesRequested', courseId);
                     break;
                 case "navigate":
-                    if (!courseId) {
+                    if (window.location.pathname.includes('course/view.php')) {
                         showMessage("Para volver presiona la flecha con dirección izquierda.", 600000);
                         $("body").off('keyup');
                         $('body').on('keyup', Navigater.keyUpEventFunction);
@@ -507,14 +504,27 @@
             else if (pointer == 0)
                 $(subjectItems[subjectItems.length - 1]).css("border", "").css("padding", "");
             $(subjectItems[pointer]).css("border", "1px black solid").css("padding", "10px");
+
+            let text = $(subjectItems[pointer]).children("a").text();
+            Utils.textToSpeech(text);
         }
 
         function previousItem() {
-            if (pointer > 0) {
+            // Asignamos valor
+            if (pointer != 0 && pointer != -1)
                 pointer = (pointer - 1) % subjectItems.length;
+            else
+                pointer = subjectItems.length - 1;
+            if (pointer == subjectItems.length - 1) {
+                $(subjectItems[0]).css("border", "").css("padding", "");
+                $(subjectItems[pointer]).css("border", "1px black solid").css("padding", "10px");
+            } else {
                 $(subjectItems[pointer + 1]).css("border", "").css("padding", "");
                 $(subjectItems[pointer]).css("border", "1px black solid").css("padding", "10px");
             }
+
+            let text = $(subjectItems[pointer]).children("a").text();
+            Utils.textToSpeech(text);
         }
 
         function keyUpEventFunction(event) {
@@ -574,7 +584,8 @@
             // Recoger la URL actual
             let currentPage = getQueryParam("page");
             if (typeof page !== 'undefined' && currentPage <= 0) {
-                let referTo = `${window.location.origin}${window.location.pathname}?attempt=${Utils.getQueryParam('attempt')}&page=${Utils.getQueryParam('page') - 1}`;
+                let referTo = `${window.location.origin}${window.location.pathname}?attempt = ${Utils.getQueryParam('attempt')
+                    }& page=${Utils.getQueryParam('page') - 1}`;
                 window.location.replace(referTo);
             }
         }
