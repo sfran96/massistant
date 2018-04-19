@@ -100,7 +100,7 @@ function getQuizStatus(userId, modId, callback) {
                             else {
                                 if (resultsEnroled != undefined && resultsEnroled.length > 0) {
                                     // Comprobamos si existe algún intento por parte del usuario
-                                    connection.query("SELECT id AS attempted FROM `mdl_quiz_attemps`" +
+                                    connection.query("SELECT id AS attempted FROM `mdl_quiz_attempts`" +
                                         " WHERE userid = ?" +
                                         " AND quiz = ?" +
                                         " AND state LIKE 'inprogress'", [userId, resultsCourse[0].instance], (error, resultsAttempted, fields) => {
