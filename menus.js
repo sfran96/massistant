@@ -2,28 +2,28 @@
 const conf = require('./conf.json');// Opciones del submenú de la asignatura
 
 var courseMenu = [
-    { name: "Inicio", option: "home"},
-    { name: "Buscar (beta)", option: "search"},
-    { name: "Navegar", option: "navigate"},
-    { name: "Calificaciones", option: "califications"},
-    { name: "Profesores", option: "teachers"},
-    { name: "Menú global", option: "global"}
+    { name: "Inicio", option: "home" },
+    { name: "Buscar (beta)", option: "search" },
+    { name: "Navegar", option: "navigate" },
+    { name: "Calificaciones", option: "califications" },
+    { name: "Profesores", option: "teachers" },
+    { name: "Menú global", option: "global" }
 ]
 // Opciones del submenú de los mensajes
 var messageMenu = [
     { name: "Abrir", option: "open" },
-    { name: "Responder" , option: "reply"},
+    { name: "Responder", option: "reply" },
     { name: "Redactar", option: "write" },
     { name: "Eliminar", option: "delete" },
-    { name: "Menú global", option: "global"}
+    { name: "Menú global", option: "global" }
 ]
 // Opciones del menú de realización de un quiz
 var quizMenu = [
-    {name: "Responder pregunta", option: "answer"},
-    {name: "Siguiente pregunta", option: "next"},
-    {name: "Pregunta anterior", option: "previous"},
-    {name: "Enviar cuestionario", option: "send"},
-    {name: "Salir", option: "exit"}
+    { name: "Responder pregunta", option: "answer" },
+    { name: "Siguiente pregunta", option: "next" },
+    { name: "Pregunta anterior", option: "previous" },
+    { name: "Enviar cuestionario", option: "send" },
+    { name: "Salir", option: "exit" }
 ]
 
 // Opciones del menú global
@@ -36,11 +36,21 @@ var globalMenu = [
     { name: "Sobre MA", url: undefined, type: "about" }
 ]
 
+// Menús para el manejo de la página principal del quiz
+var quizStartMenu = [
+    { name: "Iniciar cuestionario", type: "start" },
+    { name: "Inicio de la asignatura", type: "home" }
+];
+var quizResumeMenu = [    
+    { name: "Reanudar cuestionario", type: "resume" },
+    { name: "Inicio de la asignatura", type: "home" }
+]
+
 // Menú devuelto en petición
 var menus = {
     courseMenu, messageMenu, quizMenu, globalMenu
 }
 
 module.exports = {
-    menus
+    menus, quizStartMenu
 }

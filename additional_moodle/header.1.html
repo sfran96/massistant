@@ -2,7 +2,7 @@
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
 <script>    
-    // Socket var
+    // Socket variable
     var socket = io('https://massistant.ddns.net:3000');
     // Opciones del submenú de la asignatura
     var courseMenu;
@@ -12,6 +12,8 @@
     var globalMenu;
     // Opciones del menú de resolución de quiz
     var quizMenu;
+    // Opciones del menú de la página de presentación del quiz
+    var quizHomeMenu;
     // Asignaturas del usuario
     var userSubjects;
     // Menú seleccionado (globalMenu por defecto)
@@ -615,6 +617,40 @@
         }
 
         function keyUpEventFunction(event) {
+            if (!isOnInput && socket.connected && !socket.disconnected) {
+                switch (event.keyCode) {
+                    // Left
+                    case 37:
+                        if (localStorage.getItem("visibleMass")) {
+                            $("body").off('keyup');
+                            $("body").on('keyup', Massistant.keyUpEventFunction);
+                            pointer = -1;
+                            subjectItems.css("border", "").css("padding", "");
+                            Massistant.hideMessage();
+                            Utils.textToSpeech("Vuelves a estar en el menú de manejo de asignaturas");
+                        }
+                        break;
+                    // Up
+                    case 38:
+                        if (localStorage.getItem("visibleMass")) {
+                            previousItem();
+                        }
+                        break;
+                    // Right
+                    case 39:
+                        if (localStorage.getItem("visibleMass")) {
+                            window.open($(subjectItems[pointer]).children("a")[0].href);
+                            Utils.textToSpeech("Has abierto una nueva pestaña, cierrala para volver a Moodle.");
+                        }
+                        break;
+                    // Down
+                    case 40:
+                        if (localStorage.getItem("visibleMass")) {
+                            nextItem();
+                        }
+                        break;
+                }
+            }
             switch (type) {
                 case 'multichoice':
                 case 'truefalse':
