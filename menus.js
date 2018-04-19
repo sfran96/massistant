@@ -17,6 +17,15 @@ var messageMenu = [
     { name: "Eliminar", option: "delete" },
     { name: "Menú global", option: "global"}
 ]
+// Opciones del menú de realización de un quiz
+var quizMenu = [
+    {name: "Responder pregunta", option: "answer"},
+    {name: "Siguiente pregunta", option: "next"},
+    {name: "Pregunta anterior", option: "previous"},
+    {name: "Enviar cuestionario", option: "send"},
+    {name: "Salir", option: "exit"}
+]
+
 // Opciones del menú global
 var globalMenu = [
     { name: "Página principal", url: `${conf.self.host}/my`, type: "home" },
@@ -29,7 +38,7 @@ var globalMenu = [
 
 // Menú devuelto en petición
 var menus = {
-    courseMenu, messageMenu, globalMenu
+    courseMenu, messageMenu, quizMenu, globalMenu
 }
 
 module.exports = {

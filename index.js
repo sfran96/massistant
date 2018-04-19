@@ -69,17 +69,20 @@ io.on('connection', function (socket) {
     });
 
     // Ejecutado para saber si un usuario se encuentra en una subpágina de una asignatura
-    socket.on('checkIfInCourseRequested', url => {
+    socket.on('checkUserPositionRequested', url => {
         let myURL = new URL(url);
         let path = url.replace(conf.self.host + "/mod/", '');
         let mmodule = path.split('/')[0];
         let params = new URLSearchParams(myURL.searchParams);
+        var delivered = [];
         if (url.includes('mod') && params.has('id') && mmodule !== 'undefined' && mmodule !== '')
             moodleConnection.getCourse(mmodule, params.get('id'), (subjectId) => {
-                socket.emit('checkIfInCourseRecieved', subjectId);
+                delivered.push('subjectMenu');
+                delivered.push(subjectId);
+                socket.emit('checkUserPositionRecieved', delivered);
             })
         else
-            socket.emit('checkIfInCourseRecieved');
+            socket.emit('checkUserPositionRecieved');
     });
 });
 

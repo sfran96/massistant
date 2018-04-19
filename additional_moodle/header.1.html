@@ -2,15 +2,16 @@
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
 <script>    
+    // Socket var
     var socket = io('https://massistant.ddns.net:3000');
-</script>
-<script>    
     // Opciones del submenú de la asignatura
     var courseMenu;
     // Opciones del submenú de los mensajes
     var messageMenu;
     // Opciones del menú global
     var globalMenu;
+    // Opciones del menú de resolución de quiz
+    var quizMenu;
     // Asignaturas del usuario
     var userSubjects;
     // Menú seleccionado (globalMenu por defecto)
@@ -40,7 +41,8 @@
         socket.on('disconnect', (reason) => {
             setTimeout(() => {
                 $(".massistant").css("background", "linear-gradient(14deg, rgba(184, 15, 15, 0.6) 0%, rgba(219, 66, 31, 0.6) 50%, rgba(232, 122, 44, 0.6) 100%)");
-                Massistant.showMessage("Se ha perdido la conexión con el servidor. Clica abajo para intentar restablecer la conexión.");
+                if (localStorage.getItem("visibleMass"))
+                    Massistant.showMessage("Se ha perdido la conexión con el servidor. Clica abajo para intentar restablecer la conexión.");
             }, 2500);
         });
 
@@ -56,7 +58,8 @@
         // Se ejecuta cuando el cliente se reconecta con el sistema de forma correcta
         socket.on('reconnect', (attemtNumber) => {
             $(".massistant").css("background", "linear-gradient(14deg, rgba(15, 184, 173, 0.6) 0%, rgba(31, 200, 219, 0.6) 50%, rgba(44, 181, 232, 0.6) 100%)");
-            Massistant.showMessage("Se ha reestablecido la conexión correctamente.");
+            if (localStorage.getItem("visibleMass"))
+                Massistant.showMessage("Se ha reestablecido la conexión correctamente.");
         });
 
         // Se ejecuta cuando el usuario recibe la información que había solicitado acerca de quién ha desarrollado el asistente
@@ -70,20 +73,23 @@
             globalMenu = menus.globalMenu;
             courseMenu = menus.courseMenu;
             messageMenu = menus.messageMenu;
+            quizMenu = menus.quizMenu;
 
-            socket.emit('checkIfInCourseRequested', window.location.href);
+            socket.emit('checkUserPositionRequested', window.location.href);
         });
 
         // Se ejecuta para comprobar en qué página se encuentra el cliente
-        socket.on('checkIfInCourseRecieved', (subjectId) => {
+        socket.on('checkUserPositionRecieved', (subjectId) => {
             console.log(subjectId);
-            if (subjectId || document.title.search("Course") !== -1 || document.title.search("Curso") !== -1 || (document.title.search("Grades") !== -1 && Utils.getQueryParam('id')) || (document.title.search("Calificaciones") !== -1 && Utils.getQueryParam('id'))) {
+            if (subjectId || window.location.pathname.includes('course') || (window.location.pathname.includes('grade/report') && Utils.getQueryParam('id'))) {
                 // Asignar que el menú a usar es el da las asignaturas
                 menuOnUse = courseMenu;
                 courseId = subjectId;
-            } else if (document.title.search("Messages") !== -1 || document.title.search("Mensajes") !== -1) {
+            } else if (window.location.pathname.includes('message')) {
                 // Asignar que el menú a usar es el da las asignaturas
                 menuOnUse = messageMenu;
+            } else if (window.location.pathname.includes('quiz')) {
+                // Asignar que el menú a usar es el de resolución de quiz
             } else {
                 // Asignar que el menú a usar es el global
                 menuOnUse = globalMenu;
@@ -234,7 +240,7 @@
                 case "home":
                     if (!courseId) {
                         showMessage("Ya estás en la página de entrada de esta asignatura.");
-                    }else{
+                    } else {
                         // TODO
                     }
                     break;
@@ -275,6 +281,15 @@
             }
         }
 
+        //Messages menu options
+        function quizGetInOptions() {
+            switch (menuOnUse[pointerMenu].option) {
+                default:
+                    showMessage("Esta opción no está disponible en estos momentos.");
+                    break;
+            }
+        }
+
         function getInTheItemOption() {
             if (pointerMenu != -1) {
                 // Si es una URL                
@@ -295,7 +310,13 @@
                     // Si es el menú de dentro de un curso
                     else if (menuOnUse === courseMenu) {
                         courseGetInOptions();
-                    } else if (menuOnUse === messageMenu) {
+                    }
+                    // Si es el menú de resolver un quiz
+                    else if (menuOnUse === quizMenu) {
+                        quizGetInOptions();
+                    }
+                    // Si es el menú de los mensajes
+                    else if (menuOnUse === messageMenu) {
                         messagesGetInOptions();
                     }
                 }
@@ -323,7 +344,7 @@
                         break;
                     // Left
                     case 37:
-                        if ($("#massistant").css("opacity") === "1" && menuHistory.length !== 0) {
+                        if (localStorage.getItem("visibleMass") && menuHistory.length !== 0) {
                             // Recogemos la información del menú anterior
                             let previousMenuInfo = menuHistory.pop();
                             // Recogemos el menú
@@ -340,14 +361,14 @@
                         break;
                     // Up
                     case 38:
-                        if ($("#massistant").css("opacity") === "1") {
+                        if (localStorage.getItem("visibleMass")) {
                             event.preventDefault();
                             goUpInTheMenu();
                         }
                         break;
                     // Right
                     case 39:
-                        if ($("#massistant").css("opacity") === "1") {
+                        if (localStorage.getItem("visibleMass")) {
                             event.preventDefault();
                             // Ocultar mensaje si está mostrandose alguno
                             hideMessage();
@@ -356,7 +377,7 @@
                         break;
                     // Down
                     case 40:
-                        if ($("#massistant").css("opacity") === "1") {
+                        if (localStorage.getItem("visibleMass")) {
                             event.preventDefault();
                             goDownInTheMenu();
                         }
@@ -374,7 +395,7 @@
                     case 39:
                     case 40:
                     case 77:
-                        if ($("#massistant").css("opacity") === "1")
+                        if (localStorage.getItem("visibleMass"))
                             event.preventDefault();
                         break;
                 }
@@ -382,7 +403,7 @@
         }
 
         function doubleClickMA() {
-            if ($('#massistant_popup').css('display') === "none") {
+            if (!localStorage.getItem("visibleMass")) {
                 localStorage.setItem("visibleMass", true);
                 $('#massistant').css({ "opacity": "1", "visibility": "visible" });
                 $('#massistant > div').css({ "visibility": "" });
@@ -495,7 +516,7 @@
                 switch (event.keyCode) {
                     // Left
                     case 37:
-                        if ($("#massistant").css("opacity") === "1") {
+                        if (localStorage.getItem("visibleMass")) {
                             $("body").off('keyup');
                             $("body").on('keyup', Massistant.keyUpEventFunction);
                             pointer = -1;
@@ -506,20 +527,20 @@
                         break;
                     // Up
                     case 38:
-                        if ($("#massistant").css("opacity") === "1") {
+                        if (localStorage.getItem("visibleMass")) {
                             previousItem();
                         }
                         break;
                     // Right
                     case 39:
-                        if ($("#massistant").css("opacity") === "1") {
+                        if (localStorage.getItem("visibleMass")) {
                             window.open($(subjectItems[pointer]).children("a")[0].href);
                             Utils.textToSpeech("Has abierto una nueva pestaña, cierrala para volver a Moodle.");
                         }
                         break;
                     // Down
                     case 40:
-                        if ($("#massistant").css("opacity") === "1") {
+                        if (localStorage.getItem("visibleMass")) {
                             nextItem();
                         }
                         break;
@@ -529,6 +550,73 @@
 
         return {
             keyUpEventFunction, nextItem
+        }
+    })();
+
+    /**
+     * QUIZ RESOLVER MODULE
+     **/
+    var QuizResolver = (() => {
+        let type = '';
+        let pointer = -1;
+
+        function nextQuestion() {
+            $($("form[id='responseform']  input[type='submit']")).click();
+        }
+
+        function previousQuestion() {
+            // Recoger la URL actual
+            let currentPage = getQueryParam("page");
+            if (typeof page !== 'undefined' && currentPage <= 0) {
+                let referTo = `${window.location.origin}${window.location.pathname}?attempt=${Utils.getQueryParam('attempt')}&page=${Utils.getQueryParam('page') - 1}`;
+                window.location.replace(referTo);
+            }
+        }
+
+        function finishAttempt() {
+            let attemptNumber = getQueryParam("attemptNumber");
+            if (typeof attemptNumber !== 'undefined') {
+                let referTo = $(".endtestlink")[0].href;
+                window.location.replace(referTo);
+            }
+        }
+
+        function navMultiChoiceUp() {
+
+        }
+
+        function navMultiChoiceDown() {
+
+        }
+
+        function goToEssay() {
+
+        }
+
+        function goToTextBox() {
+
+        }
+
+        function keyUpEventFunction(event) {
+            switch (type) {
+                case 'multichoice':
+                case 'truefalse':
+                    break;
+                case 'shortanswer':
+                    break;
+                case 'numerical':
+                    break;
+                case 'essay':
+                    break;
+                case 'calculatedmulti':
+                    break;
+                case 'calculatedsimple':
+                    break;
+                case 'gapselect':
+                    break;
+                default:
+                    break;
+            }
         }
     })();
 
