@@ -202,5 +202,5 @@ function manageError(error) {
 }
 
 module.exports = {
-    isUserLoggedIn, retrieveUserCourses, getCourse, getQuizStatus, getGrades
+    isUserLoggedIn, retrieveUserCourses, getCourse, getQuizStatus, getGrades, getTeachers
 }
