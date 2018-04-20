@@ -72,6 +72,9 @@
 
         // Se ejecuta para comprobar en qué página se encuentra el cliente
         socket.on('checkUserPositionReceived', (object) => {
+            if (object && object[0] === 'subjectMenu' && object.length > 1)
+                courseId = object[1];
+
             if (window.location.pathname.includes('message')) {
                 // Asignar que el menú a usar es el da las asignaturas
                 menuOnUse = menus.messageMenu;
@@ -154,8 +157,16 @@
 
         // Se ejecuta cuando el usuario recibe la información acerca de los profesores de una asignatura, que previamente ha solicitado
         socket.on('teachersInfoReceived', (teachers) => {
-            if (teachers !== undefined) {
-                console.log(teachers);
+            if (teachers !== undefined && teachers !== null && teachers.length > 0) {
+                let teachersInfoMenu = [];
+                teachers.forEach((teacher) => {
+                    teachersInfoMenu.push({
+                        name: `${teacher.firstname} ${teacher.lastname}`,
+                        url: `mailto:${teacher.email}`
+                    });
+                });
+                Massistant.showMessage("Estos son los profesores de esta asignatura, selecciona uno si quieres enviarle un correo electrónico, serás enviado a una aplicación externa.", 40000);
+                Massistant.getInMenu(teachersInfoMenu);
             } else {
                 Massistant.showMessage("Parece ser que no hay información disponible acerca de los profesores en estos momentos.");
             }
@@ -196,7 +207,7 @@
                         Utils.textToSpeech("Estás en el menú de manejo de mensajes");
                     } else if (menuOnUse == menus.globalMenu) {
                         Utils.textToSpeech("Estás en el menú global");
-                    } else if (menuOnUse == menus.quizMenu) {
+                    } else if (menuOnUse == menus.quizMenu || menuOnUse == menus.quizFinishMenu || menuOnUse == menus.quizStartMenu || menuOnUse == menus.quizResumeMenu) {
                         Utils.textToSpeech("Estás en el menú de resolución de cuestionarios");
                     }
                 }
@@ -249,17 +260,19 @@
         }
 
         function unhighlightMenuItem(index, isPressingDown) {
-            if (isPressingDown) {
-                if (index != -1 && index != 0) {
-                    $(menuItems[index - 1]).css("color", "").css("font-size", "").css("font-weight", "");
+            if (menuItems.length > 1) {
+                if (isPressingDown) {
+                    if (index != -1 && index != 0) {
+                        $(menuItems[index - 1]).css("color", "").css("font-size", "").css("font-weight", "");
+                    } else {
+                        $(menuItems[menuItems.length - 1]).css("color", "").css("font-size", "").css("font-weight", "");
+                    }
                 } else {
-                    $(menuItems[menuItems.length - 1]).css("color", "").css("font-size", "").css("font-weight", "");
+                    if (index !== menuItems.length - 1)
+                        $(menuItems[index + 1]).css("color", "").css("font-size", "").css("font-weight", "");
+                    else
+                        $(menuItems[0]).css("color", "").css("font-size", "").css("font-weight", "");
                 }
-            } else {
-                if (index !== menuItems.length - 1)
-                    $(menuItems[index + 1]).css("color", "").css("font-size", "").css("font-weight", "");
-                else
-                    $(menuItems[0]).css("color", "").css("font-size", "").css("font-weight", "");
             }
         }
 
@@ -305,7 +318,7 @@
                     }
                     break;
                 case "global":
-                    _getInGlobalMenu();
+                    getInMenu(menus.globalMenu);
                     break;
                 default:
                     showMessage("Esta opción no está disponible en estos momentos.");
@@ -317,7 +330,7 @@
         function messagesGetInOptions() {
             switch (menuOnUse[pointerMenu].option) {
                 case "global":
-                    _getInGlobalMenu();
+                    getInMenu(menus.globalMenu);
                     break;
                 default:
                     showMessage("Esta opción no está disponible en estos momentos.");
@@ -328,6 +341,17 @@
         //Messages menu options
         function quizGetInOptions() {
             switch (menuOnUse[pointerMenu].option) {
+                case 'resume':
+                    $($("form[action*='start']")[0].firstChild).children("input[type='submit']").click();
+                    break;
+                case 'home':
+                    window.location.replace(`${localStorage.getItem('host')}/course/view.php?id=${courseId}`);
+                    localStorage.setItem("wasRedirected", true);
+                    break;
+                case 'exit':
+                    window.location.replace(localStorage.getItem('host'));
+                    localStorage.setItem("wasRedirected", true);
+                    break;
                 default:
                     showMessage("Esta opción no está disponible en estos momentos.");
                     break;
@@ -367,11 +391,11 @@
             }
         }
 
-        function _getInGlobalMenu() {
+        function getInMenu(menu) {
             // Guardamos en qué menú nos encontrabamos en primer momento y en qué posición
             menuHistory.push({ position: pointerMenu, menu: menuOnUse });
             // Asignamos qué menú se muestra en estos momentos
-            menuOnUse = menus.globalMenu;
+            menuOnUse = menu;
             // Mostramos el menú
             showMenu(menuOnUse);
             // Puntero a cero
@@ -482,7 +506,7 @@
         };
 
         return {
-            showMenu, showMessage, hideMessage, highlightMenuItem, keyUpEventFunction, keyDownEventFunction, onclickma, doubleClickMA
+            showMenu, showMessage, hideMessage, highlightMenuItem, keyUpEventFunction, keyDownEventFunction, onclickma, doubleClickMA, getInMenu
         }
     })();
 
