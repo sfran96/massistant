@@ -118,12 +118,20 @@
 
         // Se ejecuta cuando el usuario recibe la URL de calificaciones de la asignatura a la que quiere acceder
         socket.on('gradesReceived', (gradeObjectsArray) => {
-            gradeObjectsArray.forEach((grade) => {
-                if (grade.finalGrade !== null)
-                    console.log(`Has obtenido una calificación de ${grade.finalGrade} sobre ${grade.maxGrade} en ${grade.description}`);
-                else
-                    console.log(`No tienes calificación asignada para ${grade.description}`);
-            })
+            let tts;
+            if (gradeObjectsArray !== undefined && gradeObjectsArray.length > 0) {
+                tts = "Estas son las calificaciones que tienes en esta asignatura: <ul>";
+                gradeObjectsArray.forEach((grade) => {
+                    if (grade.finalGrade !== null)
+                        tts += `<li>Un <strong>${grade.finalGrade} sobre ${grade.maxGrade}</strong> en ${grade.description}. </li>`;
+                    else
+                        tts += `<li><strong>Sin calificación</strong> asignada en ${grade.description}. </li>`;
+                });
+                tts += "</ul>";
+            } else {
+                tts = "No hay ninguna calificación asignada para esta asignatura.";
+            }
+            Massistant.showMessage(tts, 60000);
         });
 
         // Se ejecuta cuando el cliente entra en un cuestionario y el servidor le responde el estado
@@ -141,6 +149,17 @@
                 case 'Attempted':
                     menuOnUse = menus.quizResumeMenu;
                     break;
+            }
+        });
+
+        // Se ejecuta cuando el usuario recibe la información acerca de los profesores de una asignatura, que previamente ha solicitado
+        socket.on('teachersInfoReceived', (teachers) => {
+            if (teachers !== undefined) {
+                teachers.forEach((teacher) => {
+                    console.log(teacher);
+                })
+            } else {
+                Massistant.showMessage("Parece ser que no hay información disponible acerca de los profesores en estos momentos.");
             }
         });
     })();
@@ -273,6 +292,9 @@
                     break;
                 case "califications":
                     socket.emit('gradesRequested', courseId);
+                    break;
+                case 'teachers':
+                    socket.emit('teachersInfoRequested', courseId);
                     break;
                 case "navigate":
                     if (window.location.pathname.includes('course/view.php')) {

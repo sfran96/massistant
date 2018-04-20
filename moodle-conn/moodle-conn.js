@@ -149,7 +149,7 @@ function getGrades(userId, courseId, callback) {
                         let auxGradeObject = {};
                         // Sacamos la descripción de la nota, es decir, de qué es la nota
                         if (grade.itemname !== undefined && grade.itemname !== null) auxGradeObject.description = grade.itemname;
-                        else if ((grade.itemname === undefined || grade.itemname === null) && grade.itemtype === 'course') auxGradeObject.description = 'Nota de la asignatura';
+                        else if ((grade.itemname === undefined || grade.itemname === null) && grade.itemtype === 'course') auxGradeObject.description = 'la nota de la asignatura';
                         // Nota obtenida
                         auxGradeObject.finalGrade = grade.finalgrade;
                         // Nota máxima
@@ -162,6 +162,38 @@ function getGrades(userId, courseId, callback) {
             }
         });
 }
+
+/**
+ * 
+ * @param {number} courseId 
+ * @param {function(Object)} callback 
+ */
+function getTeachers(courseId, callback) {
+    if (courseId !== undefined && callback !== undefined && typeof courseId === 'number' && typeof callback === 'function') {
+        connection.query(`SELECT DISTINCT mu.id, mu.firstname, mu.lastname, mu.email FROM mdl_user AS mu 
+        INNER JOIN mdl_role_assignments AS mra
+        ON mra.userid = mu.id
+        INNER JOIN mdl_role AS mr
+        ON mr.id = mra.roleid
+        INNER JOIN mdl_user_enrolments AS mue
+        ON mue.userid = mu.id
+        INNER JOIN mdl_enrol AS me
+        ON me.id = mue.enrolid
+        WHERE me.courseid = ? AND mr.archetype LIKE '%teacher'`, [courseId], (error, results, fields) => {
+                if (error) manageError(error);
+                else {
+                    if (results !== undefined && results.length > 0) {
+                        let teachersA = [];
+                        callback(results);
+                    } else {
+                        callback();
+                    }
+                }
+            });
+    } else {
+        callback();
+    }
+};
 
 function manageError(error) {
     console.log("[ERROR]: Ha ocurrido un problema al intentar realizar la petición.\n" + error.message);

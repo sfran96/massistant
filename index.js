@@ -98,6 +98,13 @@ io.on('connection', function (socket) {
             socket.emit('gradesReceived', gradeObjectsArray);
         });
     });
+
+    // Ejecuta cuando el usuario solicita los profesores de una asignatura
+    socket.on('teachersInfoRequested', (courseId) => {
+        moodleConnection.getTeachers(courseId, (teacherArray) => {
+            socket.emit('teachersInfoReceived', teacherArray);
+        });
+    });
 });
 
 // Vigilar el fichero que contiene la información acerca de los menús, si cambia hay que cambiar la información que el servidor reenvía a los usuarios
