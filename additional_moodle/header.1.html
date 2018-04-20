@@ -155,9 +155,7 @@
         // Se ejecuta cuando el usuario recibe la información acerca de los profesores de una asignatura, que previamente ha solicitado
         socket.on('teachersInfoReceived', (teachers) => {
             if (teachers !== undefined) {
-                teachers.forEach((teacher) => {
-                    console.log(teacher);
-                })
+                console.log(teachers);
             } else {
                 Massistant.showMessage("Parece ser que no hay información disponible acerca de los profesores en estos momentos.");
             }

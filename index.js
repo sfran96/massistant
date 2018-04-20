@@ -101,9 +101,13 @@ io.on('connection', function (socket) {
 
     // Ejecuta cuando el usuario solicita los profesores de una asignatura
     socket.on('teachersInfoRequested', (courseId) => {
-        moodleConnection.getTeachers(courseId, (teacherArray) => {
-            socket.emit('teachersInfoReceived', teacherArray);
-        });
+        let courseIdInt = parseInt(courseId);
+        if (!isNaN(courseIdInt))
+            moodleConnection.getTeachers(courseIdInt, (teacherArray) => {
+                socket.emit('teachersInfoReceived', teacherArray);
+            });
+        else
+            socket.emit('teachersInfoReceived');
     });
 });
 
