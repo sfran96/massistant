@@ -59,7 +59,7 @@ function retrieveUserCourses(userId, callback) {
  * @param {function(subjectId)} callback 
  */
 function getCourse(moduleName, courseId, callback) {
-    if (courseId !== undefined && callback !== undefined && moduleName !== undefined && typeof courseId === 'number' && typeof callback === 'function') {
+    if (courseId !== undefined && callback !== undefined && moduleName !== undefined && typeof callback === 'function') {
         connection.query("SELECT mcm.course FROM `mdl_course_modules` AS mcm" +
             " INNER JOIN `mdl_modules` AS mm" +
             " ON mcm.module = mm.id" +
