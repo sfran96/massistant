@@ -23,7 +23,7 @@ const sharedsession = require("express-socket.io-session");
 const { URL, URLSearchParams } = require('url');
 /** Módulos propios utilizados **/
 const sessionControl = require("./session-control/session-cont");
-const moodleConnection = require("./moodle-conn/moodle-conn");
+const moodleConnection = require("./moodle-conn/moodle-conn").default;
 
 app.use(session);
 io.use(sharedsession(session));
@@ -83,13 +83,6 @@ io.on('connection', function (socket) {
             })
         else
             socket.emit('checkUserPositionReceived');
-    });
-
-    // Ejecutado para recabar información de que menú le viene mejor al usuario en cada momento dentro del quiz
-    socket.on('statusOfQuizRequested', (modId) => {
-        moodleConnection.getQuizStatus(socket.handshake.session.userId, modId, (status) => {
-            socket.emit('statusOfQuizReceived', status);
-        });
     });
 
     // Ejecutado cuando el usuario quiere saber su nota

@@ -78,12 +78,6 @@
             if (window.location.pathname.includes('message')) {
                 // Asignar que el menú a usar es el da las asignaturas
                 menuOnUse = menus.messageMenu;
-            } else if (window.location.pathname.includes('quiz/attempt.php')) {
-                // Asignar que el menú a usar es el de resolución de quiz
-                menuOnUse = menus.quizMenu;
-            } else if (window.location.pathname.includes('quiz/view.php')) {
-                if (Utils.getQueryParam('id'))
-                    socket.emit("statusOfQuizRequested", Utils.getQueryParam('id'));
             } else if ((typeof object !== 'undefined' && object[1]) || window.location.pathname.includes('course/view.php') || (window.location.pathname.includes('grade/report') && Utils.getQueryParam('id'))) {
                 // Asignar que el menú a usar es el da las asignaturas
                 menuOnUse = menus.courseMenu;
@@ -137,24 +131,6 @@
             Massistant.showMessage(tts, 60000);
         });
 
-        // Se ejecuta cuando el cliente entra en un cuestionario y el servidor le responde el estado
-        socket.on('statusOfQuizReceived', status => {
-            console.log("STATUS: " + status);
-            switch (status) {
-                case 'NotFound':
-                case 'NotEnrolled':
-                default:
-                    menuOnUse = menus.globalMenu;
-                    break;
-                case 'NotAttempted':
-                    menuOnUse = menus.quizStartMenu;
-                    break;
-                case 'Attempted':
-                    menuOnUse = menus.quizResumeMenu;
-                    break;
-            }
-        });
-
         // Se ejecuta cuando el usuario recibe la información acerca de los profesores de una asignatura, que previamente ha solicitado
         socket.on('teachersInfoReceived', (teachers) => {
             if (teachers !== undefined && teachers !== null && teachers.length > 0) {
@@ -165,7 +141,7 @@
                         url: `mailto:${teacher.email}`
                     });
                 });
-                Massistant.showMessage("Estos son los profesores de esta asignatura, selecciona uno si quieres enviarle un correo electrónico, serás enviado a una aplicación externa.", 40000);
+                Massistant.showMessage("Estos son los profesores de esta asignatura, selecciona uno si quieres enviarle un correo electrónico, serás redirigido a una aplicación externa.", 40000);
                 Massistant.getInMenu(teachersInfoMenu);
             } else {
                 Massistant.showMessage("Parece ser que no hay información disponible acerca de los profesores en estos momentos.");
@@ -207,9 +183,7 @@
                         Utils.textToSpeech("Estás en el menú de manejo de mensajes");
                     } else if (menuOnUse == menus.globalMenu) {
                         Utils.textToSpeech("Estás en el menú global");
-                    } else if (menuOnUse == menus.quizMenu || menuOnUse == menus.quizFinishMenu || menuOnUse == menus.quizStartMenu || menuOnUse == menus.quizResumeMenu) {
-                        Utils.textToSpeech("Estás en el menú de resolución de cuestionarios");
-                    }
+                    } 
                 }
             } else {
                 setTimeout(() => {
@@ -338,36 +312,6 @@
             }
         }
 
-        //Messages menu options
-        function quizGetInOptions() {
-            switch (menuOnUse[pointerMenu].option) {
-                case 'resume':
-                    $($("form[action*='start']")[0].firstChild).children("input[type='submit']").click();
-                    break;
-                case 'answer':
-                    let type = $("div[id*='q'][class*='que']")[0].className.split(/ +/g)[1];
-                    QuizResolver.answer(type);
-                    break;
-                case 'next':
-                    QuizResolver.nextQuestion();
-                    break;
-                case 'previous':
-                    QuizResolver.previousQuestion();
-                    break;
-                case 'home':
-                    window.location.replace(`${localStorage.getItem('host')}/course/view.php?id=${courseId}`);
-                    localStorage.setItem("wasRedirected", true);
-                    break;
-                case 'exit':
-                    window.location.replace(localStorage.getItem('host'));
-                    localStorage.setItem("wasRedirected", true);
-                    break;
-                default:
-                    showMessage("Esta opción no está disponible en estos momentos.");
-                    break;
-            }
-        }
-
         function getInTheItemOption() {
             if (pointerMenu != -1) {
                 // Si es una URL                
@@ -388,10 +332,6 @@
                     // Si es el menú de dentro de un curso
                     else if (menuOnUse === menus.courseMenu) {
                         courseGetInOptions();
-                    }
-                    // Si es el menú de resolver un quiz
-                    else if (menuOnUse === menus.quizMenu || menuOnUse === menus.quizStartMenu || menuOnUse === menus.quizResumeMenu || menuOnUse === menus.quizFinishMenu) {
-                        quizGetInOptions();
                     }
                     // Si es el menú de los mensajes
                     else if (menuOnUse === menus.messageMenu) {
@@ -644,112 +584,6 @@
         }
     })();
 
-    /**
-     * QUIZ RESOLVER MODULE
-     **/
-    var QuizResolver = (() => {
-        let type = '';
-        let pointer = -1;
-
-        function nextQuestion() {
-            let nextQ = $("a[id*='quiznav'][class*='thispage']").next();
-            if (nextQ.length === 1) {
-                nextQ[0].click();
-            } else {
-                Massistant.showMessage("No hay más preguntas en este cuestionario, procede a finalizarlo.");
-            }
-        }
-
-        function previousQuestion() {
-            let prevQ = $("a[id*='quiznav'][class*='thispage']").prev();
-            if (prevQ.length === 1) {
-                prevQ[0].click();
-            } else {
-                Massistant.showMessage("No se puede retroceder más, esta es la primera pregunta.");
-            }
-        }
-
-        function finishAttempt() {
-            let attemptNumber = getQueryParam("attempt");
-            if (typeof attemptNumber !== 'undefined') {
-                let referTo = $(".endtestlink")[0].href;
-                window.location.replace(referTo);
-            }
-        }
-
-        function navMultiChoiceUp() {
-
-        }
-
-        function navMultiChoiceDown() {
-
-        }
-
-        function goToEssay() {
-
-        }
-
-        function goToTextBox() {
-            $("input[type='text'][name*='answer']").focus();
-        }
-
-        function answer(type) {
-            switch (type) {
-                case 'multichoice':
-                case 'truefalse':
-                    break;
-                case 'shortanswer':
-                case 'numerical':
-                case 'calculatedsimple':
-                    showMessage("Una vez respondida la pregunta presiona 'entrar' o 'intro' para volver al menú.", 30000);
-                    goToTextBox();
-                    $("body").off('keyup');
-                    $("body").on('keyup', QuizResolver.keyUpEventFunction);
-                    $("body").off('keydown');
-                    $("body").on('keydown', QuizResolver.keyDownEventFunction);
-                    break;
-                case 'essay':
-                    break;
-                case 'calculatedmulti':
-                    break;
-                case 'gapselect':
-                    break;
-                default:
-                    break;
-            }
-        }
-        function keyUpEventFunction(event) {
-            if (socket.connected && !socket.disconnected) {
-                switch (event.keyCode) {
-                    // Enter
-                    case 13:
-                        $("body").off('keyup');
-                        $("body").on('keyup', Massistant.keyUpEventFunction);
-                        $("body").off('keydown');
-                        $("body").on('keydown', Massistant.keyDownEventFunction);
-                        $("input[type='text'][name*='answer']").blur();
-                        Massistant.hideMessage();
-                        break;
-                }
-            }
-        }
-
-        function keyDownEventFunction(event) {
-            console.log("??");
-            if (socket.connected && !socket.disconnected) {
-                switch (event.keyCode) {
-                    // Enter
-                    case 13:
-                        event.preventDefault();
-                        break;
-                }
-            }
-        }
-
-        return {
-            answer, keyUpEventFunction, keyDownEventFunction, nextQuestion, previousQuestion
-        }
-    })();
 
     // Opciones cargadas cuando el DOM se encuentra totalmente cargado
     $('document').ready(() => {

@@ -72,59 +72,6 @@ function getCourse(moduleName, courseId, callback) {
 }
 
 /**
- * 
- * @param {number} userId 
- * @param {number} modId 
- * @param {function(status)} callback 
- */
-function getQuizStatus(userId, modId, callback) {
-    // Comprobar que existe dicho cuestionario
-    connection.query("SELECT mcm.course, mcm.instance FROM `mdl_course_modules` AS mcm" +
-        " INNER JOIN `mdl_quiz` AS mq" +
-        " ON mcm.course = mq.course" +
-        " INNER JOIN `mdl_modules` AS mm" +
-        " ON mm.id= mcm.module" +
-        " WHERE mcm.id = ?" +
-        " AND mm.name LIKE 'quiz'", [modId], (error, resultsCourse, fields) => {
-            if (error) manageError(error);
-            else {
-                if (resultsCourse != undefined && resultsCourse.length > 0) {
-                    // Comprobamos que el usuario está matriculado en dicha asignatura
-                    connection.query("SELECT mue.id AS enrolled FROM `mdl_user_enrolments` AS mue" +
-                        " INNER JOIN `mdl_enrol` AS me" +
-                        " ON mue.enrolid = me.id" +
-                        " WHERE mue.userid = ?" +
-                        " AND mue.status = 0" +
-                        " AND me.courseid = ?", [userId, resultsCourse[0].course], (error, resultsEnroled, fields) => {
-                            if (error) manageError(error);
-                            else {
-                                if (resultsEnroled != undefined && resultsEnroled.length > 0) {
-                                    // Comprobamos si existe algún intento por parte del usuario
-                                    connection.query("SELECT id AS attempted FROM `mdl_quiz_attempts`" +
-                                        " WHERE userid = ?" +
-                                        " AND quiz = ?" +
-                                        " AND state LIKE 'inprogress'", [userId, resultsCourse[0].instance], (error, resultsAttempted, fields) => {
-                                            if (error) manageError(error);
-                                            else {
-                                                if (resultsAttempted != undefined && resultsAttempted.length > 0)
-                                                    callback("Attempted");
-                                                else
-                                                    callback("NotAttempted");
-                                            }
-                                        })
-                                } else {
-                                    callback("NotEnrolled");
-                                }
-                            }
-                        });
-                } else {
-                    callback("NotFound");
-                }
-            }
-        });
-}
-
-/**
  * Llama a la función 'callback' pasando como parámetro el array de notas, nota => {description, finalGrade, maxGrade}
  * @param {number} userId 
  * @param {number} courseId 
@@ -202,5 +149,5 @@ function manageError(error) {
 }
 
 module.exports = {
-    isUserLoggedIn, retrieveUserCourses, getCourse, getQuizStatus, getGrades, getTeachers
+    isUserLoggedIn, retrieveUserCourses, getCourse, getGrades, getTeachers
 }

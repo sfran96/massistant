@@ -16,15 +16,6 @@ var messageMenu = [
     { name: "Eliminar", option: "delete" },
     { name: "Menú global", option: "global" }
 ]
-// Opciones del menú de realización de un quiz
-var quizMenu = [
-    { name: "Responder pregunta", option: "answer" },
-    { name: "Siguiente pregunta", option: "next" },
-    { name: "Pregunta anterior", option: "previous" },
-    { name: "Finalizar cuestionario", option: "end" },
-    { name: "Salir", option: "exit" }
-]
-
 // Opciones del menú global
 var globalMenu = [
     { name: "Página principal", url: `${conf.self.host}/my`, type: "home" },
@@ -35,25 +26,9 @@ var globalMenu = [
     { name: "Sobre MA", url: undefined, type: "about" }
 ]
 
-// Menús para el manejo de la página principal del quiz
-var quizStartMenu = [
-    { name: "Iniciar cuestionario", option: "start" },
-    { name: "Inicio de la asignatura", option: "home", type: "home" }
-];
-var quizResumeMenu = [
-    { name: "Reanudar cuestionario", option: "resume" },
-    { name: "Inicio de la asignatura", option: "home", type: "home" }
-]
-var quizFinishMenu = [
-    { name: "Enviar solución del cuestionario", option: "send" },
-    { name: "Cambiar algún resultado", option: "change" },
-    { name: "Reiniciar cuestionario", option: "restart" },
-    { name: "Salir sin realizar ningún cambio", option: "exit", type: "home" }
-]
-
 // Menú devuelto en petición
 var menus = {
-    courseMenu, messageMenu, quizMenu, globalMenu, quizStartMenu, quizResumeMenu, quizFinishMenu
+    courseMenu, messageMenu, globalMenu
 }
 
 module.exports = {
