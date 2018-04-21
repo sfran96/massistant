@@ -111,11 +111,6 @@ io.on('connection', function (socket) {
     });
 });
 
-// Vigilar el fichero que contiene la información acerca de los menús, si cambia hay que cambiar la información que el servidor reenvía a los usuarios
-fs.watch('./menus.js', (event, filename) => {
-    menus = reload('./menus.js');
-});
-
 // Listen on configuration port
 server.listen(conf.self.port, () => {
     console.log(`Listening on port ${conf.self.port}...`);
