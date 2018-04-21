@@ -87,9 +87,13 @@ io.on('connection', function (socket) {
 
     // Ejecutado cuando el usuario quiere saber su nota
     socket.on('gradesRequested', (courseId) => {
-        moodleConnection.getGrades(socket.handshake.session.userId, courseId, (gradeObjectsArray) => {
-            socket.emit('gradesReceived', gradeObjectsArray);
-        });
+        let courseIdInt = parseInt(courseId);
+        if (!isNaN(courseIdInt))
+            moodleConnection.getGrades(socket.handshake.session.userId, courseId, (gradeObjectsArray) => {
+                socket.emit('gradesReceived', gradeObjectsArray);
+            });
+        else
+            socket.emit('gradesReceived');
     });
 
     // Ejecuta cuando el usuario solicita los profesores de una asignatura

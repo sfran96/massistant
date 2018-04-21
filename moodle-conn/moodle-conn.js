@@ -15,7 +15,7 @@ var connection = mysql.createPool({
  * @param {function(string)} callback 
  */
 function isUserLoggedIn(moodCookValue, callback) {
-    if (moodCookValue !== undefined && callback !== undefined && typeof moodCookValue === 'number' && typeof callback === 'function') {
+    if (moodCookValue !== undefined && callback !== undefined && typeof callback === 'function') {
         connection.query("SELECT * FROM `mdl_sessions` WHERE `sid` LIKE '" + moodCookValue + "'", (error, results, fields) => {
             if (error) manageError(error);
             // Si hay resultados
@@ -32,7 +32,7 @@ function isUserLoggedIn(moodCookValue, callback) {
  * @param {function(subjectsSql)} callback 
  */
 function retrieveUserCourses(userId, callback) {
-    if (userId !== undefined && callback !== undefined && typeof userId === 'number' && typeof callback === 'function') {
+    if (userId !== undefined && callback !== undefined && typeof callback === 'function') {
         let fechaActual = Date.now();
         connection.query("SELECT courses.id, courses.fullname FROM `mdl_course` AS `courses`" +
             " INNER JOIN `mdl_enrol` AS `user_asig` ON user_asig.courseid = courses.id" +
@@ -84,7 +84,7 @@ function getCourse(moduleName, courseId, callback) {
  * @param {function(Object)} callback 
  */
 function getGrades(userId, courseId, callback) {
-    if (courseId !== undefined && callback !== undefined && userId !== undefined && typeof courseId === 'number' && typeof callback === 'function' && typeof userId === 'number') {
+    if (courseId !== undefined && callback !== undefined && userId !== undefined && typeof callback === 'function') {
         connection.query("SELECT mgi.itemname, mgg.finalgrade, mgi.grademax, mgi.itemtype FROM `mdl_grade_items` AS mgi" +
             " INNER JOIN `mdl_grade_grades` AS mgg" +
             " ON mgi.id = mgg.itemid" +
@@ -124,7 +124,7 @@ function getGrades(userId, courseId, callback) {
  * @param {function(Object)} callback 
  */
 function getTeachers(courseId, callback) {
-    if (courseId !== undefined && callback !== undefined && typeof courseId === 'number' && typeof callback === 'function') {
+    if (courseId !== undefined && callback !== undefined&& typeof callback === 'function') {
         connection.query(`SELECT DISTINCT mu.id, mu.firstname, mu.lastname, mu.email FROM mdl_user AS mu 
         INNER JOIN mdl_role_assignments AS mra
         ON mra.userid = mu.id
