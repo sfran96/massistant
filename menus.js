@@ -3,7 +3,6 @@ const conf = require('./conf.json');// Opciones del submenú de la asignatura
 
 var courseMenu = [
     { name: "Inicio", option: "home" },
-    { name: "Buscar (beta)", option: "search" },
     { name: "Navegar", option: "navigate" },
     { name: "Calificaciones", option: "califications" },
     { name: "Profesores", option: "teachers" },
@@ -22,6 +21,7 @@ var quizMenu = [
     { name: "Responder pregunta", option: "answer" },
     { name: "Siguiente pregunta", option: "next" },
     { name: "Pregunta anterior", option: "previous" },
+    { name: "Finalizar cuestionario", option: "end" },
     { name: "Salir", option: "exit" }
 ]
 
@@ -46,7 +46,7 @@ var quizResumeMenu = [
 ]
 var quizFinishMenu = [
     { name: "Enviar solución del cuestionario", option: "send" },
-    { name: "Cambiar alguna resultado", option: "change" },
+    { name: "Cambiar algún resultado", option: "change" },
     { name: "Reiniciar cuestionario", option: "restart" },
     { name: "Salir sin realizar ningún cambio", option: "exit", type: "home" }
 ]
