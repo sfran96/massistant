@@ -1,7 +1,7 @@
 /**
  * Define el módulo encargado de la comprobación de sesión del usuario
  */
-const moodleConn = require('../moodle-conn/moodle-conn').default;
+const moodleConn = require('../moodle-conn/moodle-conn');
 const conf = require('../conf.json');
 const utils = require('../utils/utils');
 

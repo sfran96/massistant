@@ -74,7 +74,6 @@
         socket.on('checkUserPositionReceived', (object) => {
             if (object && object[0] === 'subjectMenu' && object.length > 1)
                 courseId = object[1];
-
             if (window.location.pathname.includes('message')) {
                 // Asignar que el menú a usar es el da las asignaturas
                 menuOnUse = menus.messageMenu;
