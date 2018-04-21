@@ -23,7 +23,7 @@ const sharedsession = require("express-socket.io-session");
 const { URL, URLSearchParams } = require('url');
 /** Módulos propios utilizados **/
 const sessionControl = require("./session-control/session-cont");
-const moodleConnection = require("./moodle-conn/moodle-conn").default;
+const moodleConnection = require("./moodle-conn/moodle-conn");
 
 app.use(session);
 io.use(sharedsession(session));
