@@ -15,13 +15,15 @@ var connection = mysql.createPool({
  * @param {function(string)} callback 
  */
 function isUserLoggedIn(moodCookValue, callback) {
-    connection.query("SELECT * FROM `mdl_sessions` WHERE `sid` LIKE '" + moodCookValue + "'", (error, results, fields) => {
-        if (error) manageError(error);
-        // Si hay resultados
-        else if (results != undefined && results.length > 0 && results[0].userid !== 0) {
-            callback(results[0].userid);
-        }
-    });
+    if (moodCookValue !== undefined && callback !== undefined && typeof moodCookValue === 'number' && typeof callback === 'function') {
+        connection.query("SELECT * FROM `mdl_sessions` WHERE `sid` LIKE '" + moodCookValue + "'", (error, results, fields) => {
+            if (error) manageError(error);
+            // Si hay resultados
+            else if (results != undefined && results.length > 0 && results[0].userid !== 0) {
+                callback(results[0].userid);
+            }
+        });
+    }
 }
 
 /**
@@ -30,22 +32,24 @@ function isUserLoggedIn(moodCookValue, callback) {
  * @param {function(subjectsSql)} callback 
  */
 function retrieveUserCourses(userId, callback) {
-    let fechaActual = Date.now();
-    connection.query("SELECT courses.id, courses.fullname FROM `mdl_course` AS `courses`" +
-        " INNER JOIN `mdl_enrol` AS `user_asig` ON user_asig.courseid = courses.id" +
-        " INNER JOIN `mdl_user_enrolments` AS `user_enr` ON user_enr.enrolid = user_asig.id" +
-        " WHERE user_enr.userid LIKE '" + userId +
-        "' AND user_enr.timestart <= " + fechaActual +
-        " AND (user_enr.timeend > " + fechaActual + " OR user_enr.timeend = 0)", (error, results, fields) => {
-            if (error) manageError(error);
-            else {
-                if (results != undefined && results.length > 0) {
-                    callback(results);
-                } else {
-                    callback([]);
+    if (userId !== undefined && callback !== undefined && typeof userId === 'number' && typeof callback === 'function') {
+        let fechaActual = Date.now();
+        connection.query("SELECT courses.id, courses.fullname FROM `mdl_course` AS `courses`" +
+            " INNER JOIN `mdl_enrol` AS `user_asig` ON user_asig.courseid = courses.id" +
+            " INNER JOIN `mdl_user_enrolments` AS `user_enr` ON user_enr.enrolid = user_asig.id" +
+            " WHERE user_enr.userid LIKE '" + userId +
+            "' AND user_enr.timestart <= " + fechaActual +
+            " AND (user_enr.timeend > " + fechaActual + " OR user_enr.timeend = 0)", (error, results, fields) => {
+                if (error) manageError(error);
+                else {
+                    if (results != undefined && results.length > 0) {
+                        callback(results);
+                    } else {
+                        callback([]);
+                    }
                 }
-            }
-        });
+            });
+    }
 }
 
 /**
@@ -55,20 +59,22 @@ function retrieveUserCourses(userId, callback) {
  * @param {function(subjectId)} callback 
  */
 function getCourse(moduleName, courseId, callback) {
-    connection.query("SELECT mcm.course FROM `mdl_course_modules` AS mcm" +
-        " INNER JOIN `mdl_modules` AS mm" +
-        " ON mcm.module = mm.id" +
-        " WHERE mcm.id = ?" +
-        "AND mm.name = ?", [courseId, moduleName], (error, results, fields) => {
-            if (error) manageError(error);
-            else {
-                if (results != undefined && results.length > 0) {
-                    callback(results[0].course);
-                } else {
-                    callback();
+    if (courseId !== undefined && callback !== undefined && moduleName !== undefined && typeof courseId === 'number' && typeof callback === 'function') {
+        connection.query("SELECT mcm.course FROM `mdl_course_modules` AS mcm" +
+            " INNER JOIN `mdl_modules` AS mm" +
+            " ON mcm.module = mm.id" +
+            " WHERE mcm.id = ?" +
+            "AND mm.name = ?", [courseId, moduleName], (error, results, fields) => {
+                if (error) manageError(error);
+                else {
+                    if (results != undefined && results.length > 0) {
+                        callback(results[0].course);
+                    } else {
+                        callback();
+                    }
                 }
-            }
-        });
+            });
+    }
 }
 
 /**
@@ -78,36 +84,38 @@ function getCourse(moduleName, courseId, callback) {
  * @param {function(Object)} callback 
  */
 function getGrades(userId, courseId, callback) {
-    connection.query("SELECT mgi.itemname, mgg.finalgrade, mgi.grademax, mgi.itemtype FROM `mdl_grade_items` AS mgi" +
-        " INNER JOIN `mdl_grade_grades` AS mgg" +
-        " ON mgi.id = mgg.itemid" +
-        " WHERE userid = ?" +
-        " AND mgi.courseid = ? " +
-        " AND (mgg.hidden != 1 OR mgg.hidden > NOW())" +
-        " AND (mgi.hidden != 1 OR mgi.hidden > NOW())" +
-        " ORDER BY mgi.itemtype DESC", [userId, courseId], (error, results, fields) => {
-            if (error) manageError(error);
-            else {
-                if (results !== undefined && results.length > 0) {
-                    // Objeto a devolver
-                    let arrayOfObjects = [];
-                    for (i = 0; i < results.length; i++) {
-                        let grade = results[i];
-                        let auxGradeObject = {};
-                        // Sacamos la descripción de la nota, es decir, de qué es la nota
-                        if (grade.itemname !== undefined && grade.itemname !== null) auxGradeObject.description = grade.itemname;
-                        else if ((grade.itemname === undefined || grade.itemname === null) && grade.itemtype === 'course') auxGradeObject.description = 'la nota de la asignatura';
-                        // Nota obtenida
-                        auxGradeObject.finalGrade = grade.finalgrade;
-                        // Nota máxima
-                        auxGradeObject.maxGrade = grade.grademax;
-                        arrayOfObjects.push(auxGradeObject);
-                    }
-                    callback(arrayOfObjects)
-                } else
-                    callback([]);
-            }
-        });
+    if (courseId !== undefined && callback !== undefined && userId !== undefined && typeof courseId === 'number' && typeof callback === 'function' && typeof userId === 'number') {
+        connection.query("SELECT mgi.itemname, mgg.finalgrade, mgi.grademax, mgi.itemtype FROM `mdl_grade_items` AS mgi" +
+            " INNER JOIN `mdl_grade_grades` AS mgg" +
+            " ON mgi.id = mgg.itemid" +
+            " WHERE userid = ?" +
+            " AND mgi.courseid = ? " +
+            " AND (mgg.hidden != 1 OR mgg.hidden > NOW())" +
+            " AND (mgi.hidden != 1 OR mgi.hidden > NOW())" +
+            " ORDER BY mgi.itemtype DESC", [userId, courseId], (error, results, fields) => {
+                if (error) manageError(error);
+                else {
+                    if (results !== undefined && results.length > 0) {
+                        // Objeto a devolver
+                        let arrayOfObjects = [];
+                        for (i = 0; i < results.length; i++) {
+                            let grade = results[i];
+                            let auxGradeObject = {};
+                            // Sacamos la descripción de la nota, es decir, de qué es la nota
+                            if (grade.itemname !== undefined && grade.itemname !== null) auxGradeObject.description = grade.itemname;
+                            else if ((grade.itemname === undefined || grade.itemname === null) && grade.itemtype === 'course') auxGradeObject.description = 'la nota de la asignatura';
+                            // Nota obtenida
+                            auxGradeObject.finalGrade = grade.finalgrade;
+                            // Nota máxima
+                            auxGradeObject.maxGrade = grade.grademax;
+                            arrayOfObjects.push(auxGradeObject);
+                        }
+                        callback(arrayOfObjects)
+                    } else
+                        callback([]);
+                }
+            });
+    }
 }
 
 /**
