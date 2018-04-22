@@ -1,7 +1,7 @@
 /** Archivo de configuración **/
 const conf = require('./conf.json');// Opciones del submenú de la asignatura
 
-var courseMenu = [
+const courseMenu = [
     { name: "Inicio", option: "home" },
     { name: "Navegar", option: "navigate" },
     { name: "Calificaciones", option: "califications" },
@@ -9,7 +9,7 @@ var courseMenu = [
     { name: "Menú global", option: "global" }
 ]
 // Opciones del submenú de los mensajes
-var messageMenu = [
+const messageMenu = [
     { name: "Abrir", option: "open" },
     { name: "Responder", option: "reply" },
     { name: "Redactar", option: "write" },
@@ -17,7 +17,7 @@ var messageMenu = [
     { name: "Menú global", option: "global" }
 ]
 // Opciones del menú global
-var globalMenu = [
+const globalMenu = [
     { name: "Página principal", url: `${conf.self.host}/my`, type: "home" },
     { name: "Asignaturas", url: undefined, type: "course" },
     { name: "Mensajes", url: `${conf.self.host}/message/index.php`, type: "message" },
@@ -26,9 +26,18 @@ var globalMenu = [
     { name: "Sobre MA", url: undefined, type: "about" }
 ]
 
+// Opciones del menú de manejo de entrega
+const assignEditMenu = [
+    {name: "Añadir fichero", option: "modify"},
+    {name: "Eliminar fichero", option: "delete"},
+    {name: "Guardar cambios", option: "save"},
+    {name: "Cancelar", option: "cancel"},
+    { name: "Menú global", option: "global" }
+]
+
 // Menú devuelto en petición
-var menus = {
-    courseMenu, messageMenu, globalMenu
+const menus = {
+    courseMenu, messageMenu, globalMenu, assignEditMenu
 }
 
 module.exports = {

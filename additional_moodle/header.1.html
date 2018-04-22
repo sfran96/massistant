@@ -77,6 +77,8 @@
             if (window.location.pathname.includes('message')) {
                 // Asignar que el menú a usar es el da las asignaturas
                 menuOnUse = menus.messageMenu;
+            } else if (window.location.pathname.includes('assign/view.php') && window.location.search.includes('editsubmission')) {
+                menuOnUse = menus.assignEditMenu;
             } else if ((typeof object !== 'undefined' && object[1]) || window.location.pathname.includes('course/view.php') || (window.location.pathname.includes('grade/report') && Utils.getQueryParam('id'))) {
                 // Asignar que el menú a usar es el da las asignaturas
                 menuOnUse = menus.courseMenu;
@@ -182,7 +184,7 @@
                         Utils.textToSpeech("Estás en el menú de manejo de mensajes");
                     } else if (menuOnUse == menus.globalMenu) {
                         Utils.textToSpeech("Estás en el menú global");
-                    } 
+                    }
                 }
             } else {
                 setTimeout(() => {
@@ -311,6 +313,54 @@
             }
         }
 
+        //Messages menu options
+        function assignEditGetInOptions() {
+            switch (menuOnUse[pointerMenu].option) {
+                case "modify":
+                    let addFileButton = $("div[class='fp-btn-add']");
+                    if (addFileButton.length > 0) {
+                        $("div[class='fp-btn-add']")[0].click();
+                        // Añadimos un handler para cuando se termine de realizar el cambio de subida o no de fichero
+                        setTimeout(() => {
+                            $("input[name='repo_upload_file']").change((focusEvent) => {
+                                $("button[class*='fp-upload-btn']")[0].click();
+                            });
+                            $("input[name='repo_upload_file']")[0].click();
+                        }, 500);
+                    } else {
+                        showMessage("Actualmente el máximo número de ficheros existe en esta entrega");
+                    }
+                    break;
+                case "delete":
+                    let filesToDelete = $("div[class='fp-file fp-hascontextmenu']");
+                    if (filesToDelete.length > 0) {
+                        $("div[class='fp-file fp-hascontextmenu']")[0].click();
+                        $("button[class='fp-file-delete']")[0].click()
+                        $("button[class='fp-dlg-butconfirm btn-primary btn']").click();
+                    } else {
+                        showMessage("No hay ficheros para eliminar en este momento.");
+                    }
+                    break;
+                case "save":
+                    let filesToUpload = $("div[class='fp-file fp-hascontextmenu']");
+                    if (filesToDelete.length > 0) {
+                        $("#id_submitbutton").click();
+                    } else {
+                        showMessage("Sube un fichero antes de enviar la entrega.");
+                    }
+                    break;
+                case "cancel":
+                    $("#id_cancel").click();
+                    break;
+                case "global":
+                    getInMenu(menus.globalMenu);
+                    break;
+                default:
+                    showMessage("Esta opción no está disponible en estos momentos.");
+                    break;
+            }
+        }
+
         function getInTheItemOption() {
             if (pointerMenu != -1) {
                 // Si es una URL                
@@ -335,6 +385,10 @@
                     // Si es el menú de los mensajes
                     else if (menuOnUse === menus.messageMenu) {
                         messagesGetInOptions();
+                    }
+                    // Si es el menú de control de entregas
+                    else if (menuOnUse === menus.assignEditMenu) {
+                        assignEditGetInOptions();
                     }
                 }
             }
