@@ -77,8 +77,11 @@
             if (window.location.pathname.includes('message')) {
                 // Asignar que el menú a usar es el da las asignaturas
                 menuOnUse = menus.messageMenu;
-            } else if (window.location.pathname.includes('assign/view.php') && window.location.search.includes('editsubmission')) {
-                menuOnUse = menus.assignEditMenu;
+            } else if (window.location.pathname.includes('assign/view.php')) {
+                if (window.location.search.includes('editsubmission'))
+                    menuOnUse = menus.assignEditMenu;
+                else
+                    menuOnUse = menus.assignMainMenu;
             } else if ((typeof object !== 'undefined' && object[1]) || window.location.pathname.includes('course/view.php') || (window.location.pathname.includes('grade/report') && Utils.getQueryParam('id'))) {
                 // Asignar que el menú a usar es el da las asignaturas
                 menuOnUse = menus.courseMenu;
@@ -316,17 +319,26 @@
         //Messages menu options
         function assignEditGetInOptions() {
             switch (menuOnUse[pointerMenu].option) {
+                case "editAssig":
+                    let editBttn = $("input[type='submit']");
+                    if (editBttn.length > 0)
+                        editBttn[0].click();
+                    else
+                        showMessage("No es posible modificar esta entrega");
+                    break;
                 case "modify":
                     let addFileButton = $("div[class='fp-btn-add']");
                     if (addFileButton.length > 0) {
                         $("div[class='fp-btn-add']")[0].click();
                         // Añadimos un handler para cuando se termine de realizar el cambio de subida o no de fichero
+                        showMessage("En breves se abrirá una ventana externa para que elijas el fichero que quieres subir.");
                         setTimeout(() => {
+                            hideMessage();
                             $("input[name='repo_upload_file']").change((focusEvent) => {
                                 $("button[class*='fp-upload-btn']")[0].click();
                             });
                             $("input[name='repo_upload_file']")[0].click();
-                        }, 500);
+                        }, 1000);
                     } else {
                         showMessage("Actualmente el máximo número de ficheros existe en esta entrega");
                     }
@@ -343,7 +355,7 @@
                     break;
                 case "save":
                     let filesToUpload = $("div[class='fp-file fp-hascontextmenu']");
-                    if (filesToDelete.length > 0) {
+                    if (filesToUpload.length > 0) {
                         $("#id_submitbutton").click();
                     } else {
                         showMessage("Sube un fichero antes de enviar la entrega.");
@@ -387,7 +399,7 @@
                         messagesGetInOptions();
                     }
                     // Si es el menú de control de entregas
-                    else if (menuOnUse === menus.assignEditMenu) {
+                    else if (menuOnUse === menus.assignEditMenu || menuOnUse === menus.assignMainMenu) {
                         assignEditGetInOptions();
                     }
                 }

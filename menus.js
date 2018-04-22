@@ -28,11 +28,16 @@ const globalMenu = [
 
 // Opciones del menú de manejo de entrega
 const assignEditMenu = [
-    {name: "Añadir fichero", option: "modify"},
-    {name: "Eliminar fichero", option: "delete"},
-    {name: "Guardar cambios", option: "save"},
-    {name: "Cancelar", option: "cancel"},
-    { name: "Menú global", option: "global" }
+    { name: "Añadir fichero", option: "modify" },
+    { name: "Eliminar fichero", option: "delete" },
+    { name: "Guardar cambios", option: "save" },
+    { name: "Cancelar", option: "cancel" },
+    { name: "Menú de asignatura", option: "course" }
+]
+
+const assingMainMenu = [
+    { name: "Editar entrega", option: "modify" },
+    { name: "Menú de asignatura", option: "course" }
 ]
 
 // Menú devuelto en petición
