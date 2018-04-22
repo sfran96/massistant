@@ -36,13 +36,13 @@ const assignEditMenu = [
 ]
 
 const assingMainMenu = [
-    { name: "Editar entrega", option: "modify" },
+    { name: "Editar entrega", option: "editAssig" },
     { name: "Menú de asignatura", option: "course" }
 ]
 
 // Menú devuelto en petición
 const menus = {
-    courseMenu, messageMenu, globalMenu, assignEditMenu
+    courseMenu, messageMenu, globalMenu, assignEditMenu, assingMainMenu
 }
 
 module.exports = {
