@@ -174,8 +174,8 @@ function getMessages(userId, callback) {
                                 }
                                 // Exista o no, se habrá creado el array y se añadirán los mensajes
                                 messages[message.useridto].push({
-                                    user1: message.useridto,
-                                    user2: userId,
+                                    user1: message.useridfrom,
+                                    user2: message.useridto,
                                     message: message.smallmessage,
                                     read: true
                                 });
@@ -186,7 +186,7 @@ function getMessages(userId, callback) {
                                 }
                                 // Exista o no, se habrá creado el array y se añadirán los mensajes
                                 messages[message.useridfrom].push({
-                                    user1: userId,
+                                    user1: message.useridfrom,
                                     user2: message.useridto,
                                     message: message.smallmessage,
                                     read: true
