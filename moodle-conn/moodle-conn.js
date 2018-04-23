@@ -178,7 +178,7 @@ function getMessages(userId, callback) {
                                         user1: message.useridfrom,
                                         user2: message.useridto,
                                         message: message.smallmessage,
-                                        read: true
+                                        read: 'unknown'
                                     });
                                 }
                             } else {
@@ -218,7 +218,7 @@ function getMessages(userId, callback) {
                                                     user1: message.useridfrom,
                                                     user2: message.useridto,
                                                     message: message.smallmessage,
-                                                    read: false
+                                                    read: 'unknown'
                                                 });
                                             }
                                         } else {
