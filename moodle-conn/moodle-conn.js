@@ -168,29 +168,33 @@ function getMessages(userId, callback) {
                             let message = results1[i];
                             // Si el mensaje tiene como origen el usuario que lo solicita
                             if (message.useridfrom == userId) {
-                                // Si no se ha añadido al objeto de mensajes leídos se crea 
-                                if (messages[message.useridto] === undefined) {
-                                    messages[message.useridto] = [];
+                                if (message.timeuserfromdeleted == 0) {
+                                    // Si no se ha añadido al objeto de mensajes leídos se crea 
+                                    if (messages[message.useridto] === undefined) {
+                                        messages[message.useridto] = [];
+                                    }
+                                    // Exista o no, se habrá creado el array y se añadirán los mensajes
+                                    messages[message.useridto].push({
+                                        user1: message.useridfrom,
+                                        user2: message.useridto,
+                                        message: message.smallmessage,
+                                        read: true
+                                    });
                                 }
-                                // Exista o no, se habrá creado el array y se añadirán los mensajes
-                                messages[message.useridto].push({
-                                    user1: message.useridfrom,
-                                    user2: message.useridto,
-                                    message: message.smallmessage,
-                                    read: true
-                                });
                             } else {
-                                // Si no se ha añadido al objeto de mensajes leídos se crea 
-                                if (messages[message.useridfrom] === undefined) {
-                                    messages[message.useridfrom] = [];
+                                if (message.timeusertodeleted == 0) {
+                                    // Si no se ha añadido al objeto de mensajes leídos se crea 
+                                    if (messages[message.useridfrom] === undefined) {
+                                        messages[message.useridfrom] = [];
+                                    }
+                                    // Exista o no, se habrá creado el array y se añadirán los mensajes
+                                    messages[message.useridfrom].push({
+                                        user1: message.useridfrom,
+                                        user2: message.useridto,
+                                        message: message.smallmessage,
+                                        read: true
+                                    });
                                 }
-                                // Exista o no, se habrá creado el array y se añadirán los mensajes
-                                messages[message.useridfrom].push({
-                                    user1: message.useridfrom,
-                                    user2: message.useridto,
-                                    message: message.smallmessage,
-                                    read: true
-                                });
                             }
                         }
                     }
@@ -204,29 +208,33 @@ function getMessages(userId, callback) {
                                         let message = results2[j];
                                         // Si el mensaje tiene como origen el usuario que lo solicita
                                         if (message.useridfrom == userId) {
-                                            // Si no se ha añadido al objeto de mensajes leídos se crea 
-                                            if (messages[message.useridto] === undefined) {
-                                                messages[message.useridto] = [];
+                                            if (message.timeuserfromdeleted == 0) {
+                                                // Si no se ha añadido al objeto de mensajes leídos se crea 
+                                                if (messages[message.useridto] === undefined) {
+                                                    messages[message.useridto] = [];
+                                                }
+                                                // Exista o no, se habrá creado el array y se añadirán los mensajes
+                                                messages[message.useridto].push({
+                                                    user1: message.useridfrom,
+                                                    user2: message.useridto,
+                                                    message: message.smallmessage,
+                                                    read: false
+                                                });
                                             }
-                                            // Exista o no, se habrá creado el array y se añadirán los mensajes
-                                            messages[message.useridto].push({
-                                                user1: message.useridfrom,
-                                                user2: message.useridto,
-                                                message: message.smallmessage,
-                                                read: false
-                                            });
                                         } else {
-                                            // Si no se ha añadido al objeto de mensajes leídos se crea 
-                                            if (messages[message.useridfrom] === undefined) {
-                                                messages[message.useridfrom] = [];
+                                            if (message.timeusertodeleted == 0) {
+                                                // Si no se ha añadido al objeto de mensajes leídos se crea 
+                                                if (messages[message.useridfrom] === undefined) {
+                                                    messages[message.useridfrom] = [];
+                                                }
+                                                // Exista o no, se habrá creado el array y se añadirán los mensajes
+                                                messages[message.useridfrom].push({
+                                                    user1: message.useridfrom,
+                                                    user2: message.useridto,
+                                                    message: message.smallmessage,
+                                                    read: false
+                                                });
                                             }
-                                            // Exista o no, se habrá creado el array y se añadirán los mensajes
-                                            messages[message.useridfrom].push({
-                                                user1: message.useridfrom,
-                                                user2: message.useridto,
-                                                message: message.smallmessage,
-                                                read: false
-                                            });
                                         }
                                     }
                                 }
