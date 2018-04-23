@@ -106,6 +106,16 @@ io.on('connection', function (socket) {
         else
             socket.emit('teachersInfoReceived');
     });
+
+    socket.on('messagesRequested', () => {
+        let userIdInt = parseInt(socket.handshake.session.userId);
+        if (!isNan(userIdInt))
+            moodleConnection.getMessages(userId, (messages) => {
+                socket.emit('messagesReceived', messages);
+            });
+        else
+            socket.emit('messagesReceived');
+    });
 });
 
 // Listen on configuration port

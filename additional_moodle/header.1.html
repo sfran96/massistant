@@ -1,8 +1,8 @@
-<script src="https://massistant.ddns.net:3000/socket.io/socket.io.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.0/socket.io.js"></script>
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
 <script>    
-    // Socket variable
+    // Socket variable 
     var socket = io('https://massistant.ddns.net:3000');
     // Diccionario de menús
     var menus;
@@ -72,29 +72,33 @@
 
         // Se ejecuta para comprobar en qué página se encuentra el cliente
         socket.on('checkUserPositionReceived', (object) => {
-            if (object && object[0] === 'subjectMenu' && object.length > 1)
-                courseId = object[1];
-            if (window.location.pathname.includes('message')) {
-                // Asignar que el menú a usar es el da las asignaturas
-                menuOnUse = menus.messageMenu;
-            } else if (window.location.pathname.includes('assign/view.php')) {
-                if (window.location.search.includes('editsubmission'))
-                    menuOnUse = menus.assignEditMenu;
-                else
-                    menuOnUse = menus.assignMainMenu;
-            } else if ((typeof object !== 'undefined' && object[1]) || window.location.pathname.includes('course/view.php') || (window.location.pathname.includes('grade/report') && Utils.getQueryParam('id'))) {
-                // Asignar que el menú a usar es el da las asignaturas
-                menuOnUse = menus.courseMenu;
+            setTimeout(() => {
                 if (object && object[0] === 'subjectMenu' && object.length > 1)
                     courseId = object[1];
-                else
-                    courseId = Utils.getQueryParam('id');
-            } else {
-                // Asignar que el menú a usar es el global
-                menuOnUse = menus.globalMenu;
-            }
-            // Mostrar el menú
-            Massistant.showMenu(menuOnUse);
+                if (window.location.pathname.includes('message')) {
+                    // Asignar que el menú a usar es el da las asignaturas
+                    menuOnUse = menus.messageMenu;
+                    socket.emit("messagesRequested");
+                } else if (window.location.pathname.includes('assign/view.php')) {
+                    console.log(`It is ${M.pageloadstarttime}`);
+                    if (window.location.search.includes('editsubmission') || M.form_filemanager)
+                        menuOnUse = menus.assignEditMenu;
+                    else
+                        menuOnUse = menus.assingMainMenu;
+                } else if ((typeof object !== 'undefined' && object[1]) || window.location.pathname.includes('course/view.php') || (window.location.pathname.includes('grade/report') && Utils.getQueryParam('id'))) {
+                    // Asignar que el menú a usar es el da las asignaturas
+                    menuOnUse = menus.courseMenu;
+                    if (object && object[0] === 'subjectMenu' && object.length > 1)
+                        courseId = object[1];
+                    else
+                        courseId = Utils.getQueryParam('id');
+                } else {
+                    // Asignar que el menú a usar es el global
+                    menuOnUse = menus.globalMenu;
+                }
+                // Mostrar el menú
+                Massistant.showMenu(menuOnUse);
+            }, 500);
         });
 
         // Se ejecuta cuando el usuario recibe las asignaturas de las que está matricualdo
@@ -150,6 +154,11 @@
             } else {
                 Massistant.showMessage("Parece ser que no hay información disponible acerca de los profesores en estos momentos.");
             }
+        });
+
+        // Se ejecuta cuando el usuario recibe la información acerca de los mensajes que ha recibido
+        socket.on('messagesReceived', (messages) => {
+            console.log(messages);
         });
     })();
 
@@ -307,6 +316,14 @@
         //Messages menu options
         function messagesGetInOptions() {
             switch (menuOnUse[pointerMenu].option) {
+                case "open":
+                    break;
+                case "reply":
+                    break;
+                case "write":
+                    break;
+                case "delete":
+                    break;
                 case "global":
                     getInMenu(menus.globalMenu);
                     break;
@@ -328,14 +345,14 @@
                     break;
                 case "modify":
                     let addFileButton = $("div[class='fp-btn-add']");
-                    if (addFileButton.length > 0) {
+                    if (addFileButton.length > 0 && $("div[class='fp-btn-add']").css("display") !== "none") {
                         $("div[class='fp-btn-add']")[0].click();
                         // Añadimos un handler para cuando se termine de realizar el cambio de subida o no de fichero
                         showMessage("En breves se abrirá una ventana externa para que elijas el fichero que quieres subir.");
                         setTimeout(() => {
-                            hideMessage();
                             $("input[name='repo_upload_file']").change((focusEvent) => {
                                 $("button[class*='fp-upload-btn']")[0].click();
+                                hideMessage();
                             });
                             $("input[name='repo_upload_file']")[0].click();
                         }, 1000);
@@ -364,8 +381,8 @@
                 case "cancel":
                     $("#id_cancel").click();
                     break;
-                case "global":
-                    getInMenu(menus.globalMenu);
+                case "course":
+                    getInMenu(menus.courseMenu);
                     break;
                 default:
                     showMessage("Esta opción no está disponible en estos momentos.");
@@ -399,7 +416,7 @@
                         messagesGetInOptions();
                     }
                     // Si es el menú de control de entregas
-                    else if (menuOnUse === menus.assignEditMenu || menuOnUse === menus.assignMainMenu) {
+                    else if (menuOnUse === menus.assignEditMenu || menuOnUse === menus.assingMainMenu) {
                         assignEditGetInOptions();
                     }
                 }
@@ -649,6 +666,9 @@
         }
     })();
 
+    var Message = (() => {
+
+    })();
 
     // Opciones cargadas cuando el DOM se encuentra totalmente cargado
     $('document').ready(() => {
@@ -660,6 +680,14 @@
         });
 
         $('input').focusout(() => {
+            isOnInput = false;
+        });
+
+        $('textarea').focusin(() => {
+            isOnInput = true;
+        });
+
+        $('textarea').focusout(() => {
             isOnInput = false;
         });
 
