@@ -109,7 +109,7 @@ io.on('connection', function (socket) {
 
     socket.on('messagesRequested', () => {
         let userIdInt = parseInt(socket.handshake.session.userId);
-        if (!isNan(userIdInt))
+        if (!isNaN(userIdInt))
             moodleConnection.getMessages(userId, (messages) => {
                 socket.emit('messagesReceived', messages);
             });
