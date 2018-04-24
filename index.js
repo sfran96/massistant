@@ -38,22 +38,6 @@ const per = 10; // Cada 10 segundos
  * @param {function} next Pasa al siguiente módulo del middleware (connection) si todo es correcto
  */
 function checkGoodUse(socket, next) {
-    // // Comprobamos que tenga alguna sesión iniciada, sino, creamos la variable
-    // if (connections[socket.handshake.address] === undefined) {
-    //     connections[socket.handshake.address] = 0;
-    // }
-    // // Si no supera un límite por IP, se aumenta el contandor Y se pasa al siguiente módulo
-    // if (connections[socket.handshake.address] < 100) {
-    //     // Añadimos un valor más a las conexiones que utiliza
-    //     connections[socket.handshake.address]++;
-    //     next();
-    // }
-    // // Sino, simplemente se cierra la conexión
-    // else {
-    //     socket.disconnect();
-    // }
-
-
     let current = Date.now();
     let timePassed;
     let user = connectionLastTime[socket.handshake.address];

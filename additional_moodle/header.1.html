@@ -26,6 +26,8 @@
     var navigatingSubject;
     // Subject ID assigned
     var courseId;
+    // Users with info retreived
+    var usersWithInfo = 0;
 
     /**
      * SOCKETS MODULE
@@ -165,9 +167,13 @@
                 let usersId = Object.keys(messages);
                 if (usersId.length > 0) {
                     for (i = 0; i < usersId.length; i++) {
-                        messagesItems.push({
-                            "name": usersId[i]
-                        });
+                        if (usersId[i] >= 0) {
+                            messagesItems.push({
+                                "name": "...",
+                                "id": usersId[i]
+                            });
+                            socket.emit('userInfoRequested', usersId[i]);
+                        }
                     }
                 }
             }
@@ -175,7 +181,20 @@
 
         // Se ejecuta cuando el usuario recibe la información acerca de otro usuario
         socket.on('userInfoReceived', (user) => {
-            console.log(user);
+            // Si está en la zona de mensajes
+            if (messagesItems !== undefined && menuOnUse == messagesItems) {
+                for (j = 0; j < messagesItems.length; j++) {
+                    if (messagesItems[j].id == user.id) {
+                        messagesItems.name = `${user.firstname} ${user.lastname}`;
+                        usersWithInfo++;
+                        break;
+                    }
+                }
+                if (usersWithInfo === messagesItems.length) {
+                    usersWithInfo = 0;
+                    Massistant.showMenu(messagesItems);
+                }
+            }
         });
     })();
 
