@@ -5,7 +5,46 @@
     // Socket variable 
     var socket = io('https://massistant.ddns.net:3000');
     // Diccionario de menús
-    var menus;
+    const courseMenu = [
+        { name: "Inicio", option: "home" },
+        { name: "Navegar", option: "navigate" },
+        { name: "Calificaciones", option: "califications" },
+        { name: "Profesores", option: "teachers" },
+        { name: "Menú global", option: "global" }
+    ]
+    // Opciones del submenú de los mensajes
+    const messageMenu = [
+        { name: "Abrir", option: "open" },
+        { name: "Menú global", option: "global" }
+    ]
+    // Opciones del menú global
+    const globalMenu = [
+        { name: "Página principal", url: `${M.cfg.wwwroot}/my`, type: "home" },
+        { name: "Asignaturas", url: undefined, type: "course" },
+        { name: "Mensajes", url: `${M.cfg.wwwroot}/message/index.php`, type: "message" },
+        { name: "Calificaciones", url: `${M.cfg.wwwroot}/grade/report/overview/index.php`, type: "clasification" },
+        { name: "Configuración", url: undefined, type: "config" },
+        { name: "Sobre MA", url: undefined, type: "about" }
+    ]
+
+    // Opciones del menú de manejo de entrega
+    const assignEditMenu = [
+        { name: "Añadir fichero", option: "modify" },
+        { name: "Eliminar fichero", option: "delete" },
+        { name: "Guardar cambios", option: "save" },
+        { name: "Cancelar", option: "cancel" },
+        { name: "Menú de asignatura", option: "course" }
+    ]
+
+    const assingMainMenu = [
+        { name: "Editar entrega", option: "editAssig" },
+        { name: "Menú de asignatura", option: "course" }
+    ]
+
+    // Menú devuelto en petición
+    const menus = {
+        courseMenu, messageMenu, globalMenu, assignEditMenu, assingMainMenu
+    }
     // Menú seleccionado (globalMenu por defecto)
     var menuOnUse;
     // Menús visitados
@@ -47,8 +86,7 @@
             // Cambiar a color de conectado
             $(".massistant").css("background", "linear-gradient(14deg, rgba(15, 184, 173, 0.6) 0%, rgba(31, 200, 219, 0.6) 50%, rgba(44, 181, 232, 0.6) 100%)");
             $("#massistant_popup").css("visibility", "visible");
-            // Solicitar menú
-            socket.emit('menusRequested');
+            socket.emit('checkUserPositionRequested', window.location.href);
         });
 
         socket.on('hostInfo', (host) => {
@@ -65,13 +103,6 @@
         // Se ejecuta cuando el usuario recibe la información que había solicitado acerca de quién ha desarrollado el asistente
         socket.on('aboutReceived', (text) => {
             Massistant.showMessage(text, 20000);
-        });
-
-        // Se ejecuta cuando el cliente recibe la información acerca de los menús disponibles
-        socket.on('menusReceived', (menus) => {
-            // Guardamos todos los datos
-            this.menus = menus;
-            socket.emit('checkUserPositionRequested', window.location.href);
         });
 
         // Se ejecuta para comprobar en qué página se encuentra el cliente
@@ -170,7 +201,8 @@
                         if (usersId[i] >= 0) {
                             messagesItems.push({
                                 "name": "...",
-                                "id": usersId[i]
+                                "id": usersId[i],
+                                "messages": messages[usersId[i]]
                             });
                             socket.emit('userInfoRequested', usersId[i]);
                         }
@@ -181,19 +213,15 @@
 
         // Se ejecuta cuando el usuario recibe la información acerca de otro usuario
         socket.on('userInfoReceived', (user) => {
-            // Si está en la zona de mensajes
-            if (messagesItems !== undefined && menuOnUse == messagesItems) {
-                for (j = 0; j < messagesItems.length; j++) {
-                    if (messagesItems[j].id == user.id) {
-                        messagesItems.name = `${user.firstname} ${user.lastname}`;
-                        usersWithInfo++;
-                        break;
-                    }
+            for (j = 0; j < messagesItems.length; j++) {
+                if (messagesItems[j].id == user.id) {
+                    messagesItems[j].name = `${user.firstname} ${user.lastname}`;
+                    usersWithInfo++;
+                    break;
                 }
-                if (usersWithInfo === messagesItems.length) {
-                    usersWithInfo = 0;
-                    Massistant.showMenu(messagesItems);
-                }
+            }
+            if (usersWithInfo === messagesItems.length) {
+                usersWithInfo = 0;
             }
         });
     })();
@@ -357,18 +385,33 @@
             switch (menuOnUse[pointerMenu].option) {
                 case "open":
                     Massistant.getInMenu(messagesItems);
+                    menuOnUse.forEach((mI) => {
+                        mI.option = "open_read";
+                    })
                     break;
-                case "reply":
-                    break;
-                case "write":
-                    break;
-                case "delete":
+                case "open_read":
+                    let tts = "Se leerán los últimos diez mensajes de la conversación: </br></br>";
+                    for (i = 0; i < menuOnUse[pointerMenu].messages.length && i < 10; i++) {
+                        message = menuOnUse[pointerMenu].messages[i];
+                        let estado = "";
+                        if (message.read == false)
+                            estado = "(Sin leer) ";
+                        if (menuOnUse[pointerMenu].id == message.user1) {
+                            tts += `<strong>${estado}Recibiste:</strong> ${message.message}. </br>`;
+                            if (message.read == false)
+                                socket.emit('messageRead', message.msgId);
+                        } else {
+                            tts += `<strong>Escribiste:</strong> ${message.message}. </br>`;
+                        }
+                    }
+                    tts += "</ul>";
+                    showMessage(tts, 120000);
                     break;
                 case "global":
                     getInMenu(menus.globalMenu);
                     break;
                 default:
-                    showMessage("Esta opción no está disponible en estos momentos.");
+                    showMessage("Esta opción no está disponible.");
                     break;
             }
         }
@@ -452,7 +495,7 @@
                         courseGetInOptions();
                     }
                     // Si es el menú de los mensajes
-                    else if (menuOnUse === menus.messageMenu) {
+                    else if (menuOnUse === menus.messageMenu || menuOnUse === messagesItems) {
                         messagesGetInOptions();
                     }
                     // Si es el menú de control de entregas
@@ -704,10 +747,6 @@
         return {
             keyUpEventFunction, nextItem
         }
-    })();
-
-    var Message = (() => {
-
     })();
 
     // Opciones cargadas cuando el DOM se encuentra totalmente cargado

@@ -1,7 +1,6 @@
 /** Archivo de configuración y menús **/
 var reload = require('require-reload')(require);
 const conf = require('./conf.json');
-const menus = reload('./menus.js');
 /** Módulos externos utilizados **/
 const fs = require('fs');
 const https = require('https');
@@ -27,7 +26,7 @@ const moodleConnection = require("./moodle-conn/moodle-conn");
 
 // Control de DoS
 // ["ip"]: {lastTime, allowance}
-const connectionLastTime = {};    
+const connectionLastTime = {};
 // Definimos el número de peticiones que se permite por intervalo de tiempo
 const rate = 5; // Máximo 5 solicitudes
 const per = 10; // Cada 10 segundos
@@ -84,11 +83,6 @@ io.use(sessionControl.checkUserStatus);
 io.on('connection', function (socket) {
     // Cuando el usuario se "desconecta del socket", cierra la pestaña del navegador, por ejemplo.
     socket.on('disconnecting', (reason) => {
-    });
-
-    // Cuando el usuario solicita los distintos menús disponibles
-    socket.on('menusRequested', () => {
-        socket.emit('menusReceived', menus.menus)
     });
 
     // Cuando el usuario solicita información acerca de Massistant
@@ -175,6 +169,14 @@ io.on('connection', function (socket) {
             moodleConnection.getUserInfo(userIdInt, (user) => {
                 socket.emit('userInfoReceived', user);
             });
+    });
+
+    // Ejecutado cuando el usuario lee un mensaje que no había leído
+    socket.on('messageRead', (msgId) => {
+        let userIdInt = parseInt(socket.handshake.session.userId);
+        let msgIdInt = parseInt(msgId);
+        if (!isNaN(userIdInt) && !isNaN(msgIdInt))
+            moodleConnection.readMessage(msgIdIntm, userIdInt);
     });
 });
 

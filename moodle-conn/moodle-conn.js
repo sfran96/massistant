@@ -175,6 +175,7 @@ function getMessages(userId, callback) {
                                     }
                                     // Exista o no, se habrá creado el array y se añadirán los mensajes
                                     messages[message.useridto].push({
+                                        id: message.id,
                                         user1: message.useridfrom,
                                         user2: message.useridto,
                                         message: message.smallmessage,
@@ -189,6 +190,7 @@ function getMessages(userId, callback) {
                                     }
                                     // Exista o no, se habrá creado el array y se añadirán los mensajes
                                     messages[message.useridfrom].push({
+                                        id: message.id,
                                         user1: message.useridfrom,
                                         user2: message.useridto,
                                         message: message.smallmessage,
@@ -215,6 +217,7 @@ function getMessages(userId, callback) {
                                                 }
                                                 // Exista o no, se habrá creado el array y se añadirán los mensajes
                                                 messages[message.useridto].push({
+                                                    id: message.id,
                                                     user1: message.useridfrom,
                                                     user2: message.useridto,
                                                     message: message.smallmessage,
@@ -229,6 +232,7 @@ function getMessages(userId, callback) {
                                                 }
                                                 // Exista o no, se habrá creado el array y se añadirán los mensajes
                                                 messages[message.useridfrom].push({
+                                                    id: message.id,
                                                     user1: message.useridfrom,
                                                     user2: message.useridto,
                                                     message: message.smallmessage,
@@ -249,6 +253,11 @@ function getMessages(userId, callback) {
     }
 }
 
+/**
+ * 
+ * @param {number} userId 
+ * @param {function} callback 
+ */
 function getUserInfo(userId, callback) {
     if (userId !== undefined && typeof userId === 'number' && callback !== undefined && typeof callback === 'function') {
         connection.query("SELECT id, firstname, lastname, email FROM mdl_user WHERE id = ?", [userId], (error, results, fields) => {
@@ -267,6 +276,38 @@ function getUserInfo(userId, callback) {
     }
 }
 
+function readMessage(msgId, userId) {
+    if (userId !== undefined && typeof userId === 'number' && msgId !== undefined && typeof msgId === 'number') {
+        connection.query("SELECT * FROM mdl_message WHERE id = ? AND userto = ?", [msgId, userId], (error, results, fields) => {
+            // Hay error
+            if (error) manageError(error);
+            // No hay error
+            else {
+                // Copiar en la tabla de leídos
+                if (results !== undefined && results.length === 1) {
+                    let message = results[0];
+                    delete message.id;
+                    message.timeread = Date.now();
+                    connection.query(`INSERT INTO mdl_message_read (useridfrom, useridto, subject, fullmessage, fullmessageformat, fullmessagehtml, smallmessage, notification, contexturl, contexturlname, timecreated, timeread, timeuserfromdeleted, timeusertodeleted) VALUES (${message.useridfrom},${message.useridto},${message.subject},${message.fullmessage},${message.fullmessageformat},${message.fullmessagehtml},${message.smallmessage},${message.notification},${message.contexturl},${message.contexturlname},${message.timecreated},${message.timeread},${message.timeuserfromdeleted},${message.timeusertodeleted});`, (error, results, fields) => {
+                        if (error) manageError(error);
+                        else {
+                            if (results !== undefined && results.length === 1) {
+                                connection.query(`DELETE FROM mdl_message WHERE id = ? AND userto = ?`, [msgId, userId], (error, results, fields) {
+                                    if (error) manageError(error);
+                                })
+                            }
+                        }
+                    })
+                }
+            }
+        });
+    }
+}
+
+/**
+ * 
+ * @param {MysqlError} error 
+ */
 function manageError(error) {
     console.log("[ERROR]: Ha ocurrido un problema al intentar realizar la petición.\n" + error.message);
     if (error.sql)
@@ -274,5 +315,5 @@ function manageError(error) {
 }
 
 module.exports = {
-    isUserLoggedIn, retrieveUserCourses, getCourse, getGrades, getTeachers, getMessages, getUserInfo
+    isUserLoggedIn, retrieveUserCourses, getCourse, getGrades, getTeachers, getMessages, getUserInfo, readMessage
 }
