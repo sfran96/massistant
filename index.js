@@ -37,7 +37,7 @@ const connections = {};
  */
 function checkGoodUse(socket, next) {
     // Comprobamos que tenga alguna sesión iniciada, sino, creamos la variable
-    if (!connections[socket.handshake.address]) {
+    if (connections[socket.handshake.address] !== undefined) {
         connections[socket.handshake.address] = 0;
     }
     // Si no supera un límite por IP, se aumenta el contandor Y se pasa al siguiente módulo
