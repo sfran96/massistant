@@ -53,8 +53,8 @@ function checkGoodUse(socket, next) {
     }
 };
 
-app.use(checkGoodUse);
 app.use(session);
+io.use(checkGoodUse);
 io.use(sharedsession(session));
 io.use(sessionControl.checkUserStatus);
 
