@@ -21,19 +21,9 @@ const session = require("express-session")({
 });
 const sharedsession = require("express-socket.io-session");
 const { URL, URLSearchParams } = require('url');
-const RateLimit = require('express-rate-limit');
 /** Módulos propios utilizados **/
 const sessionControl = require("./session-control/session-cont");
 const moodleConnection = require("./moodle-conn/moodle-conn");
-
-// DoS Module
-var limiter = new RateLimit({
-    windowMs: 60 * 1000, // 1 minute
-    max: 10, // limit each IP to 10 requests per windowMs 
-    delayMs: 0 // disable delaying - full speed until the max limit is reached 
-});
-
-app.use(limiter);
 app.use(session);
 io.use(sharedsession(session));
 io.use(sessionControl.checkUserStatus);
