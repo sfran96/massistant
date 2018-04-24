@@ -49,6 +49,7 @@ function checkGoodUse(socket, next) {
     // Sino, simplemente se cierra la conexión
     else {
         socket.disconnect();
+        console.log(`Usuario con IP ${socket.handshake.address} está haciendo un uso indebido.`);
     }
 };
 
@@ -65,7 +66,7 @@ io.on('connection', function (socket) {
             connections[socket.handshake.address]--;
         }
         // Si no quedan más conexiones, se elimina del registro
-         else {
+        else {
             delete connections[socket.handshake.address];
         }
     });
