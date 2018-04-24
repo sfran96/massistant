@@ -278,7 +278,7 @@ function getUserInfo(userId, callback) {
 
 function readMessage(msgId, userId) {
     if (userId !== undefined && typeof userId === 'number' && msgId !== undefined && typeof msgId === 'number') {
-        connection.query("SELECT * FROM mdl_message WHERE id = ? AND userto = ?", [msgId, userId], (error, results, fields) => {
+        connection.query("SELECT * FROM mdl_message WHERE id = ? AND useridto = ?", [msgId, userId], (error, results, fields) => {
             // Hay error
             if (error) manageError(error);
             // No hay error
