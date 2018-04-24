@@ -20,6 +20,8 @@
     var menuItems;
     // Subject items
     var subjectItems;
+    // Messages items
+    var messagesItems = [];
     // Boolean inSubject navigation mode
     var navigatingSubject;
     // Subject ID assigned
@@ -158,7 +160,17 @@
 
         // Se ejecuta cuando el usuario recibe la información acerca de los mensajes que ha recibido
         socket.on('messagesReceived', (messages) => {
-            console.log(messages);
+            messagesItems = [];
+            if (messages !== undefined && typeof messages === 'object') {
+                let usersId = Object.keys(messages);
+                if (usersId.length > 0) {
+                    for (i = 0; i < usersId.length; i++) {
+                        messagesItems.push({
+                            "name": usersId[i]
+                        });
+                    }
+                }
+            }
         });
 
         // Se ejecuta cuando el usuario recibe la información acerca de otro usuario
@@ -247,7 +259,10 @@
         }
 
         function highlightMenuItem(index) {
-            Utils.textToSpeech("Opción:" + menuOnUse[index].name);
+            setTimeout(() => {
+                if (pointerMenu === index)
+                    Utils.textToSpeech("Opción:" + menuOnUse[index].name);
+            }, 300);
             $(menuItems[index]).css("color", "#21b8d1").css({ "font-size": "30px", "font-weight": "bold" });
         }
 
@@ -322,6 +337,7 @@
         function messagesGetInOptions() {
             switch (menuOnUse[pointerMenu].option) {
                 case "open":
+                    Massistant.getInMenu(messagesItems);
                     break;
                 case "reply":
                     break;

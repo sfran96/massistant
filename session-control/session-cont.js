@@ -16,7 +16,8 @@ function checkUserStatus(socket, next) {
     // Si la cookie está definida, y no se ha registrado su sesión en el sistema de sockets, buscar en la base de datos SQL
     if ((cookieMoodle != "" || cookieMoodle != undefined)) {
         if (socket.handshake.session.cookieMoodle != cookieMoodle) {
-            moodleConn.isUserLoggedIn(cookieMoodle, (userId) => {
+            let callerIP = socket.handshake.address;
+            moodleConn.isUserLoggedIn(cookieMoodle, callerIP, (userId) => {
                 socket.handshake.session.userId = userId;
                 socket.handshake.session.cookieMoodle = cookieMoodle;
                 _whenLoggedIn(socket);
