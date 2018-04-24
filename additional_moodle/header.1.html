@@ -399,7 +399,7 @@
                         if (menuOnUse[pointerMenu].id == message.user1) {
                             tts += `<strong>${estado}Recibiste:</strong> ${message.message}. </br>`;
                             if (message.read == false)
-                                socket.emit('messageRead', message.msgId);
+                                socket.emit('messageRead', message.id);
                         } else {
                             tts += `<strong>Escribiste:</strong> ${message.message}. </br>`;
                         }

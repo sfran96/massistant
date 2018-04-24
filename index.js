@@ -176,7 +176,7 @@ io.on('connection', function (socket) {
         let userIdInt = parseInt(socket.handshake.session.userId);
         let msgIdInt = parseInt(msgId);
         if (!isNaN(userIdInt) && !isNaN(msgIdInt))
-            moodleConnection.readMessage(msgIdIntm, userIdInt);
+            moodleConnection.readMessage(msgIdInt, userIdInt);
     });
 });
 
