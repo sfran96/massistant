@@ -288,7 +288,7 @@ function readMessage(msgId, userId) {
                     let message = results[0];
                     delete message.id;
                     message.timeread = Date.now();
-                    connection.query(`INSERT INTO mdl_message_read (useridfrom, useridto, subject, fullmessage, fullmessageformat, fullmessagehtml, smallmessage, notification, contexturl, contexturlname, timecreated, timeread, timeuserfromdeleted, timeusertodeleted) VALUES (${message.useridfrom},${message.useridto},${message.subject},${message.fullmessage},${message.fullmessageformat},${message.fullmessagehtml},${message.smallmessage},${message.notification},${message.contexturl},${message.contexturlname},${message.timecreated},${message.timeread},${message.timeuserfromdeleted},${message.timeusertodeleted});`, (error, results, fields) => {
+                    connection.query(`INSERT INTO mdl_message_read (useridfrom, useridto, subject, fullmessage, fullmessageformat, fullmessagehtml, smallmessage, notification, contexturl, contexturlname, timecreated, timeread, timeuserfromdeleted, timeusertodeleted) VALUES (${message.useridfrom},${message.useridto},'${message.subject}','${message.fullmessage}',${message.fullmessageformat},'${message.fullmessagehtml}','${message.smallmessage}',${message.notification},'${message.contexturl}','${message.contexturlname}',${message.timecreated},${message.timeread},${message.timeuserfromdeleted},${message.timeusertodeleted});`, (error, results, fields) => {
                         if (error) manageError(error);
                         else {
                             if (results !== undefined && results.length === 1) {
