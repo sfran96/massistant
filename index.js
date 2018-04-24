@@ -24,6 +24,34 @@ const { URL, URLSearchParams } = require('url');
 /** Módulos propios utilizados **/
 const sessionControl = require("./session-control/session-cont");
 const moodleConnection = require("./moodle-conn/moodle-conn");
+
+
+
+// Control de DoS
+const connections = {};
+
+/**
+ * 
+ * @param {SocketIO.Socket} socket Socket del usuario que solicita el servicio
+ * @param {function} next Pasa al siguiente módulo del middleware (connection) si todo es correcto
+ */
+function checkGoodUse(socket, next) {
+    // Comprobamos que tenga alguna sesión iniciada, sino, creamos la variable
+    if (!connections[socket.handshake.address]) {
+        connections[socket.handshake.address] = 0;
+    }
+    // Si no supera un límite por IP, se aumenta el contandor Y se pasa al siguiente módulo
+    if (connections[socket.handshake.address] < 100) {
+        // Añadimos un valor más a las conexiones que utiliza
+        connections[socket.handshake.address]++;
+        next();
+    }
+    // Sino, simplemente se cierra la conexión
+    else {
+        socket.disconnect();
+    }
+};
+
 app.use(session);
 io.use(sharedsession(session));
 io.use(sessionControl.checkUserStatus);
@@ -31,8 +59,14 @@ io.use(sessionControl.checkUserStatus);
 io.on('connection', function (socket) {
     // Cuando el usuario se "desconecta del socket", cierra la pestaña del navegador, por ejemplo.
     socket.on('disconnecting', (reason) => {
-        var rooms = Object.keys(socket.rooms);
-        socket.to(rooms[0]).emit("socket-left", "Una de tus pestañas ha sido cerrada/recargada.");
+        // Se elimina del contador una conexión
+        if (connections[socket.handshake.address] > 0) {
+            connections[socket.handshake.address]--;
+        }
+        // Si no quedan más conexiones, se elimina del registro
+         else {
+            delete connections[socket.handshake.address];
+        }
     });
 
     // Cuando el usuario solicita los distintos menús disponibles
