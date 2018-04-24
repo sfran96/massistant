@@ -25,10 +25,9 @@ const { URL, URLSearchParams } = require('url');
 const sessionControl = require("./session-control/session-cont");
 const moodleConnection = require("./moodle-conn/moodle-conn");
 
-
-
 // Control de DoS
-const connections = {};
+// ["ip"]: {lastTime, allowance}
+const connectionLastTime = {};
 
 /**
  * 
@@ -36,19 +35,57 @@ const connections = {};
  * @param {function} next Pasa al siguiente módulo del middleware (connection) si todo es correcto
  */
 function checkGoodUse(socket, next) {
-    // Comprobamos que tenga alguna sesión iniciada, sino, creamos la variable
-    if (connections[socket.handshake.address] === undefined) {
-        connections[socket.handshake.address] = 0;
+    // // Comprobamos que tenga alguna sesión iniciada, sino, creamos la variable
+    // if (connections[socket.handshake.address] === undefined) {
+    //     connections[socket.handshake.address] = 0;
+    // }
+    // // Si no supera un límite por IP, se aumenta el contandor Y se pasa al siguiente módulo
+    // if (connections[socket.handshake.address] < 100) {
+    //     // Añadimos un valor más a las conexiones que utiliza
+    //     connections[socket.handshake.address]++;
+    //     next();
+    // }
+    // // Sino, simplemente se cierra la conexión
+    // else {
+    //     socket.disconnect();
+    // }
+
+    // Definimos el número de peticiones que se permite por intervalo de tiempo
+    let rate = 5; // Máximo 5 solicitudes
+    let per = 10; // Cada 10 segundos
+    let allowance = rate;
+    let current = Date.now();
+    let timePassed;
+
+    // Si no existe una entrada para el usuario, se crea
+    if (connectionLastTime[socket.handshake.address] === undefined) {
+        connectionLastTime[socket.handshake.address] = {
+            lastTime: undefined,
+            allowance = rate
+        }
     }
-    // Si no supera un límite por IP, se aumenta el contandor Y se pasa al siguiente módulo
-    if (connections[socket.handshake.address] < 100) {
-        // Añadimos un valor más a las conexiones que utiliza
-        connections[socket.handshake.address]++;
-        next();
+
+    // Si se ha conectado alguna vez se calcula cuanto ha pasado desde la última vez
+    if (connectionLastTime[socket.handshake.address].lastTime !== undefined) {
+        timePassed = current - connectionLastTime[socket.handshake.address].last;
+    } else {
+        timePassed = 100000;
     }
-    // Sino, simplemente se cierra la conexión
-    else {
+    // Guardamos cuando se solicitó por última vez
+    connectionLastTime[socket.handshake.address].lastTime = current;
+
+    // Calculamos la permitibilidad del usuario
+    allowance += timePassed * (rate / per);
+    if (allowance > rate) {
+        allowance = rate;
+    }
+    if (allowance < 1.0) {
+        // Desconectamos al usuario
         socket.disconnect();
+    } else {
+        // Lo pasamos al siguiente middleware
+        next();
+        allowance -= 1.0;
     }
 };
 
@@ -60,14 +97,6 @@ io.use(sessionControl.checkUserStatus);
 io.on('connection', function (socket) {
     // Cuando el usuario se "desconecta del socket", cierra la pestaña del navegador, por ejemplo.
     socket.on('disconnecting', (reason) => {
-        // Se elimina del contador una conexión
-        if (connections[socket.handshake.address] > 0) {
-            connections[socket.handshake.address]--;
-        }
-        // Si no quedan más conexiones, se elimina del registro
-        else {
-            delete connections[socket.handshake.address];
-        }
     });
 
     // Cuando el usuario solicita los distintos menús disponibles
