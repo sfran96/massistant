@@ -49,7 +49,6 @@ function checkGoodUse(socket, next) {
     // Sino, simplemente se cierra la conexión
     else {
         socket.disconnect();
-        console.log(`Usuario con IP ${socket.handshake.address} está haciendo un uso indebido.`);
     }
 };
 
