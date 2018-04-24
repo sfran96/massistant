@@ -16,7 +16,7 @@ var connection = mysql.createPool({
  */
 function isUserLoggedIn(moodCookValue, callback) {
     if (moodCookValue !== undefined && callback !== undefined && typeof callback === 'function') {
-        connection.query("SELECT * FROM `mdl_sessions` WHERE `sid` LIKE '" + moodCookValue + "'", (error, results, fields) => {
+        connection.query("SELECT * FROM `mdl_sessions` WHERE `sid` LIKE '" + moodCookValue + "' AND timemodified > (UNIX_TIMESTAMP()-15*60*60)", (error, results, fields) => {
             if (error) manageError(error);
             // Si hay resultados
             else if (results != undefined && results.length > 0 && results[0].userid !== 0) {
@@ -90,8 +90,8 @@ function getGrades(userId, courseId, callback) {
             " ON mgi.id = mgg.itemid" +
             " WHERE userid = ?" +
             " AND mgi.courseid = ? " +
-            " AND (mgg.hidden != 1 OR mgg.hidden > NOW())" +
-            " AND (mgi.hidden != 1 OR mgi.hidden > NOW())" +
+            " AND (mgg.hidden != 1 OR mgg.hidden > UNIX_TIMESTAMP())" +
+            " AND (mgi.hidden != 1 OR mgi.hidden > UNIX_TIMESTAMP())" +
             " ORDER BY mgi.itemtype DESC", [userId, courseId], (error, results, fields) => {
                 if (error) manageError(error);
                 else {
@@ -249,6 +249,24 @@ function getMessages(userId, callback) {
     }
 }
 
+function getUserInfo(userId, callback) {
+    if (userId !== undefined && typeof userId === 'number' && callback !== undefined && typeof callback === 'function') {
+        connection.query("SELECT id, firstname, lastname, email FROM mdl_user WHERE id = ?", [userId], (error, results, fields) => {
+            // Hay error
+            if (error) manageError(error);
+            // No hay error
+            else {
+                // Existen resultados
+                if (results !== undefined && results.length === 1) {
+                    callback(results[0]);
+                }
+            }
+        });
+    } else {
+        callback();
+    }
+}
+
 function manageError(error) {
     console.log("[ERROR]: Ha ocurrido un problema al intentar realizar la petición.\n" + error.message);
     if (error.sql)
@@ -256,5 +274,5 @@ function manageError(error) {
 }
 
 module.exports = {
-    isUserLoggedIn, retrieveUserCourses, getCourse, getGrades, getTeachers, getMessages
+    isUserLoggedIn, retrieveUserCourses, getCourse, getGrades, getTeachers, getMessages, getUserInfo
 }

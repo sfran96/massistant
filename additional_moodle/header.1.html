@@ -160,6 +160,11 @@
         socket.on('messagesReceived', (messages) => {
             console.log(messages);
         });
+
+        // Se ejecuta cuando el usuario recibe la información acerca de otro usuario
+        socket.on('userInfoReceived', (user) => {
+            console.log(user);
+        });
     })();
 
     /**

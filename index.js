@@ -107,6 +107,7 @@ io.on('connection', function (socket) {
             socket.emit('teachersInfoReceived');
     });
 
+    // Ejecutado cuando el usuario solicita los mensajes que son suyos
     socket.on('messagesRequested', () => {
         let userIdInt = parseInt(socket.handshake.session.userId);
         if (!isNaN(userIdInt))
@@ -115,6 +116,15 @@ io.on('connection', function (socket) {
             });
         else
             socket.emit('messagesReceived');
+    });
+
+    // Ejecutado cuando el usuario solicita información acerca de otro usuario
+    socket.on('userInfoRequested', (userId) => {
+        let userIdInt = parseInt(userId);
+        if (!isNaN(userIdInt))
+            moodleConnection.getUserInfo(userIdInt, (user) => {
+                socket.emit('userInfoReceived', user);
+            });
     });
 });
 
