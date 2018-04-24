@@ -291,11 +291,9 @@ function readMessage(msgId, userId) {
                     connection.query(`INSERT INTO mdl_message_read (useridfrom, useridto, subject, fullmessage, fullmessageformat, fullmessagehtml, smallmessage, notification, contexturl, contexturlname, timecreated, timeread, timeuserfromdeleted, timeusertodeleted) VALUES (${message.useridfrom},${message.useridto},'${message.subject}','${message.fullmessage}',${message.fullmessageformat},'${message.fullmessagehtml}','${message.smallmessage}',${message.notification},'${message.contexturl}','${message.contexturlname}',${message.timecreated},${message.timeread},${message.timeuserfromdeleted},${message.timeusertodeleted});`, (error, results, fields) => {
                         if (error) manageError(error);
                         else {
-                            if (results !== undefined && results.length === 1) {
-                                connection.query(`DELETE FROM mdl_message WHERE id = ? AND useridto = ?`, [msgId, userId], (error, results, fields) => {
-                                    if (error) manageError(error);
-                                })
-                            }
+                            connection.query(`DELETE FROM mdl_message WHERE id = ? AND useridto = ?`, [msgId, userId], (error, results, fields) => {
+                                if (error) manageError(error);
+                            });
                         }
                     })
                 }
