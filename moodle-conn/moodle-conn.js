@@ -292,7 +292,7 @@ function readMessage(msgId, userId) {
                         if (error) manageError(error);
                         else {
                             if (results !== undefined && results.length === 1) {
-                                connection.query(`DELETE FROM mdl_message WHERE id = ? AND userto = ?`, [msgId, userId], (error, results, fields) => {
+                                connection.query(`DELETE FROM mdl_message WHERE id = ? AND useridto = ?`, [msgId, userId], (error, results, fields) => {
                                     if (error) manageError(error);
                                 })
                             }
