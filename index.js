@@ -27,7 +27,10 @@ const moodleConnection = require("./moodle-conn/moodle-conn");
 
 // Control de DoS
 // ["ip"]: {lastTime, allowance}
-const connectionLastTime = {};
+const connectionLastTime = {};    
+// Definimos el número de peticiones que se permite por intervalo de tiempo
+const rate = 5; // Máximo 5 solicitudes
+const per = 10; // Cada 10 segundos
 
 /**
  * 
@@ -50,42 +53,42 @@ function checkGoodUse(socket, next) {
     //     socket.disconnect();
     // }
 
-    // Definimos el número de peticiones que se permite por intervalo de tiempo
-    let rate = 5; // Máximo 5 solicitudes
-    let per = 10; // Cada 10 segundos
-    let allowance = rate;
+
     let current = Date.now();
     let timePassed;
+    let user = connectionLastTime[socket.handshake.address];
 
     // Si no existe una entrada para el usuario, se crea
-    if (connectionLastTime[socket.handshake.address] === undefined) {
-        connectionLastTime[socket.handshake.address] = {
+    if (user === undefined) {
+        user = {
             lastTime: undefined,
-            allowance = rate
+            allowance: rate
         }
     }
 
     // Si se ha conectado alguna vez se calcula cuanto ha pasado desde la última vez
-    if (connectionLastTime[socket.handshake.address].lastTime !== undefined) {
-        timePassed = current - connectionLastTime[socket.handshake.address].last;
+    if (user.lastTime !== undefined) {
+        timePassed = current - user.last;
     } else {
         timePassed = 100000;
     }
     // Guardamos cuando se solicitó por última vez
-    connectionLastTime[socket.handshake.address].lastTime = current;
+    user.lastTime = current;
 
     // Calculamos la permitibilidad del usuario
-    allowance += timePassed * (rate / per);
-    if (allowance > rate) {
-        allowance = rate;
+    user.allowance += timePassed * (rate / per);
+    if (user.allowance > rate) {
+        user.allowance = rate;
     }
-    if (allowance < 1.0) {
+
+    // Comparamos
+    if (user.allowance < 1.0) {
         // Desconectamos al usuario
         socket.disconnect();
     } else {
         // Lo pasamos al siguiente middleware
         next();
-        allowance -= 1.0;
+        user.allowance -= 1.0;
     }
 };
 
