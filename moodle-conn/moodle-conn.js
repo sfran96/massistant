@@ -16,7 +16,7 @@ var connection = mysql.createPool({
  */
 function isUserLoggedIn(moodCookValue, callerIP, callback) {
     if (moodCookValue !== undefined && callback !== undefined && typeof callback === 'function') {
-        connection.query(`SELECT * FROM mdl_sessions WHERE sid LIKE '${moodCookValue}' AND timemodified > (UNIX_TIMESTAMP()-15*60*60) AND ('%${callerIP}' LIKE firstip OR '%${callerIP}' LIKE lastip)`, (error, results, fields) => {
+        connection.query(`SELECT * FROM mdl_sessions WHERE sid LIKE '${moodCookValue}' AND timemodified > (UNIX_TIMESTAMP()-15*60*60) AND ('${callerIP}' LIKE CONCAT('%',firstip) OR '${callerIP}' LIKE CONCAT('%',lastip))`, (error, results, fields) => {
             if (error) manageError(error);
             // Si hay resultados
             else if (results != undefined && results.length > 0 && results[0].userid !== 0) {
