@@ -1,7 +1,11 @@
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.0/socket.io.js"></script>
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-<script src="https://code.responsivevoice.org/responsivevoice.js"></script>
-<script>    
+"use restrict";
+
+/**
+ * Envuelve todo el sistema de MAssistant (Moodle Assistant)
+ * @author Francis Santos <francis.santosd@alumnos.upm.es>
+ * @version 0.8
+ */
+var MA = (() => {
     // Socket variable 
     var socket = io('https://massistant.ddns.net:3000');
     // Diccionario de menús
@@ -48,29 +52,32 @@
     var menuHistory = [];
     // Última vez clicado
     var lastClick;
-    // ¿Está en input?
+    // Variable que controla si el usuario se encuentra escribiendo, por ejemplo, en una caja de texto
     var isOnInput = false;
-    // Puntero
+    // Puntero del menú que se muestre por pantalla en cada momento
     var pointerMenu = -1;
-    // Menu items
+    // Elementos del menu, que representan la versión DOM del objeto menuOnUse
     var menuItems;
-    // Subject items
+    // Menú dinámico que contiene la información acerca de las asignaturas en las que está matriculado un usuario
     var subjectItems;
-    // Messages items
+    // Menú dinámico que contiene la información acerca de los mensajes que ha recibido/enviado un usuario
     var messagesItems = [];
-    // Boolean inSubject navigation mode
+    // Interruptor que contiene información acerca de si el usuario se encuentra navegando una asignatura o no
     var navigatingSubject;
-    // Subject ID assigned
+    // Identificador de la asignatura en la que se encuentra un usuario (si se encuentra en alguno de sus módulos)
     var courseId;
-    // Users with info retreived
+    // Usuarios sobre los que se ha conseguido obtener información tras la petición, utilizado, por ejemplo, cuando se solicitan los mensajes
     var usersWithInfo = 0;
 
     /**
-     * SOCKETS MODULE
-     **/
+     * Funcionalidades de los sockets
+     */
     var Sockets = (function () {
+
         // Se ejecuta cuando el cliente pierde la conexión con el sistema
         socket.on('disconnect', (reason) => {
+            // Pasado un tiempo (2.5s) desde la conexión el color del ícono que representa el sistema en el lado del cliente cambia de color para indicar un problema en la conexión,
+            // a la vez que muestra un mensaje por pantalla (y reproduce su contenido si está configurado así por el usuario)
             setTimeout(() => {
                 $(".massistant").css("background", "linear-gradient(14deg, rgba(184, 15, 15, 0.6) 0%, rgba(219, 66, 31, 0.6) 50%, rgba(232, 122, 44, 0.6) 100%)");
                 if (localStorage.getItem("visibleMass"))
@@ -80,18 +87,15 @@
 
         // Se ejecuta cuando el cliente se conecta de forma correcta con el sistema
         socket.on('connect', (reason) => {
-            // Cambiar a color de conectado
+            // Si el cliente se conecta y es identificado de forma correcta se cambia el color del ícono indicando que todo se ha realizado de forma correcta
             $(".massistant").css("background", "linear-gradient(14deg, rgba(15, 184, 173, 0.6) 0%, rgba(31, 200, 219, 0.6) 50%, rgba(44, 181, 232, 0.6) 100%)");
             $("#massistant_popup").css("visibility", "visible");
             socket.emit('checkUserPositionRequested', window.location.href);
         });
 
-        socket.on('hostInfo', (host) => {
-            localStorage.setItem('host', host);
-        });
-
         // Se ejecuta cuando el cliente se reconecta con el sistema de forma correcta
         socket.on('reconnect', (attemtNumber) => {
+            // Cambia de color al color normal y se notifica al usuario que se ha reestablecido la conexión de forma correcta
             $(".massistant").css("background", "linear-gradient(14deg, rgba(15, 184, 173, 0.6) 0%, rgba(31, 200, 219, 0.6) 50%, rgba(44, 181, 232, 0.6) 100%)");
             if (localStorage.getItem("visibleMass"))
                 Massistant.showMessage("Se ha reestablecido la conexión correctamente.");
@@ -102,7 +106,7 @@
             Massistant.showMessage(text, 20000);
         });
 
-        // Se ejecuta para comprobar en qué página se encuentra el cliente
+        // Se ejecuta para comprobar en qué página se encuentra el cliente en cada momento y qué menú mostrar en consecuencia
         socket.on('checkUserPositionReceived', (object) => {
             setTimeout(() => {
                 if (object && object[0] === 'subjectMenu' && object.length > 1)
@@ -112,7 +116,6 @@
                     menuOnUse = menus.messageMenu;
                     socket.emit("messagesRequested");
                 } else if (window.location.pathname.includes('assign/view.php')) {
-                    console.log(`It is ${M.pageloadstarttime}`);
                     if (window.location.search.includes('editsubmission') || M.form_filemanager)
                         menuOnUse = menus.assignEditMenu;
                     else
@@ -139,15 +142,7 @@
             if (menus.userSubjects != undefined && menus.userSubjects.length > 0) {
                 // Preguntamos qué asignatura quiere visitar
                 Massistant.showMessage("¿Qué asignatura quieres visitar?", 6000000);
-                // Guardamos en qué menú nos encontrabamos en primer momento y en qué posición
-                menuHistory.push({ position: pointerMenu, menu: menuOnUse });
-                // Asignamos qué menú se muestra en estos momentos
-                menuOnUse = menus.userSubjects;
-                // Mostramos el menú
-                Massistant.showMenu(menuOnUse);
-                // Puntero a cero
-                pointerMenu = 0;
-                Massistant.highlightMenuItem(pointerMenu);
+                Massistant.getInMenu(menus.userSubjects);
             } else {
                 Massistant.showMessage("Parece ser que no estás matriculado de ninguna asignatura.");
             }
@@ -155,6 +150,7 @@
 
         // Se ejecuta cuando el usuario recibe la URL de calificaciones de la asignatura a la que quiere acceder
         socket.on('gradesReceived', (gradeObjectsArray) => {
+            // Variable que contendrá el texto a mostrar en formato HTML, a la vez que será lo enviado a la API Text-To-Speech para reproducirlo si así lo ha permitido el cliente
             let tts;
             if (gradeObjectsArray !== undefined && gradeObjectsArray.length > 0) {
                 tts = "Estas son las calificaciones que tienes en esta asignatura: <ul>";
@@ -224,12 +220,21 @@
     })();
 
     /**
-     * MENUS MODULE
-     **/
+     * Funcionalidades principales de MAssistant como:
+     *  - Manejo de menús
+     *  - Manejo de mensajes
+     *  - Control de las preferencias del usuario
+     */
     var Massistant = (() => {
-        // Función para mostrar en forma de menú todas las opciones
+
+        /**
+         * Función para mostrar en forma de menú todas las opciones del objeto que se le proporciona
+         * @typedef {{name:string,option?:string,url?:string,type?:string,any?:any}} menuObject
+         * @param {menuObject} data Menú a mostrar
+         */
         function showMenu(data) {
             if (data !== undefined) {
+                // Representación HTML de la variable que se pasa como parametro para mostrarlo en el contenedor correspondiente
                 var htmlRepresentation = "";
                 data.forEach((value, index) => {
                     htmlRepresentation += `<div class="massistant_menu_option massistant_menu_option_${value.type}">${value.name}<\/div>`;
@@ -237,9 +242,10 @@
                 $("#massistant_menu_content").html(htmlRepresentation);
                 $("#massistant_menu").css({ "visibility": "visible" });
 
-                // Asignamos el valor a la "lista"
+                // Asignamos el valor a la "lista" utilizada para recorrer las opciones del menú
                 menuItems = $("#massistant_menu div.massistant_menu_option");
 
+                // Si el usuario tiene configurado que se muestre el asistente de sesiones anteriores
                 if (localStorage.getItem("visibleMass")) {
                     $('#massistant').css({ "opacity": "1", "visibility": "visible" });
                     $("#massistant_popup").css({ "display": "block" });
@@ -266,7 +272,11 @@
             }
         }
 
-        // Muestra un mensaje con el HTML que se le asigne en "message" y que desaparece en un intervalo específicado "timeout"
+        /**
+         * Muestra un mensaje durante un intervalo asignado
+         * @param {string} message Mensaje a mostrar (acepta HTML)
+         * @param {number} timeout Tiempo durante el cual se muestra el mensaje, por defecto son 10s
+         */
         function showMessage(message, timeout) {
             Utils.textToSpeech(message);
             $("#massistant_message").css("visibility", "visible");
@@ -276,7 +286,9 @@
             }, timeout || 10000);
         }
 
-        // Oculta el mensaje, se ejecuta cuando se pulsa la "x"
+        /**
+         * Oculta el mensaje y para la reproducción si se está reproduciendo
+         */
         function hideMessage() {
             if (responsiveVoice.isPlaying())
                 responsiveVoice.cancel();
@@ -284,6 +296,10 @@
             $("#massistant_message_content").empty();
         }
 
+        /**
+         * Función que permite que el usuario navegue el menú, opción que hace que se desplace hasta
+         * la opción superior a la actual
+         */
         function goUpInTheMenu() {
             // Asignamos valor
             if (pointerMenu != 0 && pointerMenu != -1)
@@ -294,6 +310,10 @@
             unhighlightMenuItem(pointerMenu, false);
         }
 
+        /**
+         * Función que permite que el usuario navegue el menú, opción que hace que se desplace hasta
+         * la opción inferior a la actual
+         */
         function goDownInTheMenu() {
             // Asignamos valor
             pointerMenu = (pointerMenu + 1) % menuItems.length;
@@ -302,6 +322,10 @@
 
         }
 
+        /**
+         * Destaca la opción del menú que se está seleccionando en estos momento
+         * @param {number} index posición actual del puntero
+         */
         function highlightMenuItem(index) {
             setTimeout(() => {
                 if (pointerMenu === index)
@@ -310,6 +334,11 @@
             $(menuItems[index]).css("color", "#21b8d1").css({ "font-size": "30px", "font-weight": "bold" });
         }
 
+        /**
+         * Deshace el destacar la opción que anteriormente estaba seleccionada
+         * @param {number} index posición actual del puntero
+         * @param {boolean} isPressingDown especifica si el usuario quiere ir hacia abajo o hacia arriba
+         */
         function unhighlightMenuItem(index, isPressingDown) {
             if (menuItems.length > 1) {
                 if (isPressingDown) {
@@ -327,7 +356,10 @@
             }
         }
 
-        // Global menu options
+        /**
+         * Opciones disponibles que se ejecutan cuando el usuario intenta acceder a alguna opción
+         * del menú global
+         */
         function globalGetInOptions() {
             switch (menuOnUse[pointerMenu].type) {
                 case "course":
@@ -343,7 +375,10 @@
             }
         }
 
-        // Course menu options
+        /**
+         * Opciones disponibles que se ejecutan cuando el usuario intenta acceder a alguna opción
+         * del menú de manejo de un curso/asignatura
+         */
         function courseGetInOptions() {
             switch (menuOnUse[pointerMenu].option) {
                 case "home":
@@ -362,8 +397,7 @@
                     if (window.location.pathname.includes('course/view.php')) {
                         showMessage("Para volver presiona la flecha con dirección izquierda.", 600000);
                         $("body").off('keyup');
-                        $('body').on('keyup', Navigater.keyUpEventFunction);
-                        Navigater.nextItem();
+                        $('body').on('keyup', CourseNav.keyUpEventFunction);
                     } else {
                         showMessage('No es posible realizar esta acción desde este espacio.');
                     }
@@ -377,7 +411,10 @@
             }
         }
 
-        //Messages menu options
+        /**
+         * Opciones disponibles que se ejecutan cuando el usuario intenta acceder a alguna opción
+         * del menú de manejo de mensajes
+         */
         function messagesGetInOptions() {
             switch (menuOnUse[pointerMenu].option) {
                 case "open":
@@ -413,7 +450,10 @@
             }
         }
 
-        //Messages menu options
+        /**
+         * Opciones disponibles que se ejecutan cuando el usuario intenta acceder a alguna opción
+         * del menú de manejo de entregas
+         */
         function assignEditGetInOptions() {
             switch (menuOnUse[pointerMenu].option) {
                 case "editAssig":
@@ -470,6 +510,9 @@
             }
         }
 
+        /**
+         * Controlador de opciones según el menú usado en cada momento
+         */
         function getInTheItemOption() {
             if (pointerMenu != -1) {
                 // Si es una URL                
@@ -485,7 +528,7 @@
                     }
                     // Si es el menú de encontrar curso
                     else if (menuOnUse === menus.userSubjects) {
-                        (() => { })(); // Nothing
+                        (() => { })(); // Nada
                     }
                     // Si es el menú de dentro de un curso
                     else if (menuOnUse === menus.courseMenu) {
@@ -503,6 +546,11 @@
             }
         }
 
+        /**
+         * Introduce al usuario en el menú que se pasa como argumento, guardando los datos acerca
+         * del menú en el que se encontraba anteriormente
+         * @param {menuObject} menu Menú en el que se quiere navegar
+         */
         function getInMenu(menu) {
             // Guardamos en qué menú nos encontrabamos en primer momento y en qué posición
             menuHistory.push({ position: pointerMenu, menu: menuOnUse });
@@ -515,6 +563,10 @@
             Utils.textToSpeech("Para volver al menú anterior presiona la flecha con dirección izquierda");
         }
 
+        /**
+         * Función que controla qué hacer con el tecleo del usuario
+         * @param {KeyboardEvent} event Evento que ha desencadenado esta llamada
+         */
         function keyUpEventFunction(event) {
             if (!isOnInput && socket.connected && !socket.disconnected) {
                 switch (event.keyCode) {
@@ -566,8 +618,11 @@
             }
         }
 
+        /**
+         * Función que controla qué hacer con el tecleo del usuario
+         * @param {KeyboardEvent} event Evento que ha desencadenado esta llamada
+         */
         function keyDownEventFunction(event) {
-            console.log(event.keyCode);
             if (!isOnInput && socket.connected && !socket.disconnected) {
                 switch (event.keyCode) {
                     case 37:
@@ -582,6 +637,10 @@
             }
         }
 
+        /**
+         * Función que se ejecuta cuando el usuario realiza un doble click en el ícono,
+         * desencadena una ocultación o aparición del menú
+         */
         function doubleClickMA() {
             if (!localStorage.getItem("visibleMass")) {
                 localStorage.setItem("visibleMass", true);
@@ -599,7 +658,10 @@
             }
         }
 
-        // Se ejecuta cuando se realiza click en el ícono
+        /**
+         * Función que se ejecuta cuando el usuario realiza un click en el ícono,
+         * principalmente para la reconexión del asistente
+         */
         function onclickma() {
             // ¿Es doble click?
             let newClick = Date.now();
@@ -618,13 +680,15 @@
         };
 
         return {
-            showMenu, showMessage, hideMessage, highlightMenuItem, keyUpEventFunction, keyDownEventFunction, onclickma, doubleClickMA, getInMenu
+            showMenu, showMessage, hideMessage, highlightMenuItem, keyUpEventFunction, keyDownEventFunction, onclickma, getInMenu, doubleClickMA
         }
     })();
 
     /**
-     * UTILS MODULE 
-     **/
+     * Módulo que contiene opciones como:
+     *  - Text-to-speech
+     *  - Obtención de parámetro de la consulta (query) presente en la URL
+     */
     var Utils = (() => {
 
         // Realiza la función de reproducir el audio
@@ -638,7 +702,9 @@
 
         /**
          * Función que recoge el parámetro que le indiques de la URL
-         * @param {string} name
+         * @typedef {(string|undefined)} qConsulta
+         * @param {string} name Nombre del parámetro a recoger
+         * @returns {qConsulta} Valor del parámetro en la consulta
          **/
         function getQueryParam(name) {
             let paramsString = window.location.search.replace('?', '');
@@ -669,9 +735,9 @@
     })();
 
     /**
-     * NAVIGATOR MODULE
+     * COURSE NAVIGATOR MODULE
      **/
-    var Navigater = (() => {
+    var CourseNav = (() => {
         let pointer = -1;
 
         function nextItem() {
@@ -727,8 +793,11 @@
                     // Right
                     case 39:
                         if (localStorage.getItem("visibleMass")) {
-                            window.open($(subjectItems[pointer]).children("a")[0].href);
-                            Utils.textToSpeech("Has abierto una nueva pestaña, cierrala para volver a Moodle.");
+                            let nw = window.open($(subjectItems[pointer]).children("a")[0].href);
+                            if (!nw)
+                                window.location.replace($(subjectItems[pointer]).children("a")[0].href);
+                            else
+                                Utils.textToSpeech("Has abierto una nueva pestaña, cierrala para volver a Moodle.");
                         }
                         break;
                     // Down
@@ -742,7 +811,7 @@
         }
 
         return {
-            keyUpEventFunction, nextItem
+            keyUpEventFunction
         }
     })();
 
@@ -750,6 +819,8 @@
     $('document').ready(() => {
 
         $('#massistant_icon').click(Massistant.onclickma);
+        $('#massistant_message_close_btn').click(Massistant.hideMessage);
+        $('#massistant_menu_close_btn').click(Massistant.doubleClickMA());
 
         $('input').focusin(() => {
             isOnInput = true;
@@ -774,145 +845,4 @@
         // Guardamos todos los elementos importantes para la navegación
         subjectItems = $(".activityinstance");
     });
-</script>
-
-<style>
-    p#massistant_menu_msg {
-        margin: 20px 10px 0px 10px;
-        text-align: center;
-    }
-
-    div.massistant {
-        cursor: pointer;
-        position: fixed;
-        height: 70px;
-        width: 70px;
-        background: linear-gradient(14deg, rgba(188, 186, 186, 0.6) 0%, rgba(78, 78, 78, 0.6) 50%, rgba(218, 218, 218, 0.6) 100%) repeat scroll 0% 0%;
-        margin: -115px 12px 12px 0px;
-        right: 0;
-        text-align: center;
-        line-height: 70px;
-        font-size: 30px;
-        border: 0px solid transparent;
-        border-radius: 100px;
-        bottom: 0;
-    }
-
-    div#massistant {
-        -webkit-touch-callout: none;
-        -webkit-user-select: none;
-        -khtml-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        opacity: 0.3;
-    }
-
-    div#massistant:hover {
-        opacity: 1;
-    }
-
-    div.massistant_popup {
-        position: fixed;
-        margin: auto 12px 82px 0px;
-        right: 0;
-        bottom: 0;
-        visibility: hidden;
-        display: none;
-    }
-
-    div.massistant_box {
-        max-height: 450px;
-        max-width: 400px;
-        background: #f5f5f5;
-        box-shadow: 0px 0px 10px #AAA;
-        border-radius: 6px;
-        visibility: hidden;
-        padding: 5px;
-        margin-bottom: 10px;
-        margin-left: 10px;
-        position: relative;
-    }
-
-    div.massistant_popupbox_close_btn {
-        position: absolute;
-        height: 20px;
-        width: 20px;
-        margin-right: 5px;
-        line-height: 20px;
-        text-align: center;
-        font-size: 20px;
-        cursor: pointer;
-        font-family: calibri;
-        right: 0;
-    }
-
-    .massistant_menu_option {
-        text-align: left;
-        margin-bottom: 20px;
-        font-size: 28px;
-        word-break: inherit;
-        line-height: 30px;
-        padding-left: 45px;
-    }
-
-    .massistant_popupbox_content {
-        font-size: 20px;
-        word-break: inherit;
-        line-height: 25px;
-        margin: 25px;
-        cursor: context-menu;
-    }
-
-    .massistant_menu_option_course {
-        background: url(https://image.flaticon.com/icons/svg/103/103340.svg) no-repeat;
-        background-size: 30px;
-    }
-
-    .massistant_menu_option_message {
-        background: url(https://image.flaticon.com/icons/svg/126/126516.svg) no-repeat;
-        background-size: 30px;
-    }
-
-    .massistant_menu_option_clasification {
-        background: url(https://image.flaticon.com/icons/svg/782/782702.svg) no-repeat;
-        background-size: 30px;
-    }
-
-    .massistant_menu_option_about {
-        background: url(https://image.flaticon.com/icons/svg/685/685815.svg) no-repeat;
-        background-size: 30px;
-    }
-
-    .massistant_menu_option_menu_toggle {
-        background: url(https://image.flaticon.com/icons/svg/109/109682.svg) no-repeat;
-        background-size: 30px;
-    }
-
-    .massistant_menu_option_config {
-        background: url(https://image.flaticon.com/icons/svg/70/70367.svg) no-repeat;
-        background-size: 30px;
-    }
-
-    .massistant_menu_option_home {
-        background: url(https://image.flaticon.com/icons/svg/263/263115.svg) no-repeat;
-        background-size: 30px;
-    }
-
-    .massistant_menu_option_undefined {
-        background: url(https://image.flaticon.com/icons/svg/90/90492.svg) no-repeat;
-        background-size: 30px;
-    }
-
-    @media screen and (max-height: 759px) and (min-width: 600px) {
-        div.massistant_box {
-            display: inline-block;
-        }
-    }
-
-    @media screen and (max-width: 600px) {
-        div#massistant {
-            display: none;
-        }
-    }
-</style>
+})();
