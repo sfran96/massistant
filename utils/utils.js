@@ -33,15 +33,20 @@ function log(value) {
     let fechaArchivo = `${fecha.getDay()}${fecha.getMonth()}${fecha.getFullYear()}`;
     let pathLog = `../logs/${fechaArchivo}.log`;
 
-    // Comprobamos si existe el fichero
-    fs.exists(pathLog, (exists) => {
-        let printable = `[${fecha.getHours()}:${fecha.getMinutes()}:${fecha.getSeconds}] ${value}`;
-        if (exists) {
-            fs.appendFileSync(pathLog, printable);
-        } else {
-            fs.writeFileSync(pathLog, printable);
-        }
-        console.log(printable);
+    fs.exists('../logs', (dirExists) => {
+        if (!dirExists)
+            fs.mkdirSync('../logs');
+        // Comprobamos si existe el fichero
+        fs.exists(pathLog, (exists) => {
+            let printable = `[${fecha.getHours()}:${fecha.getMinutes()}:${fecha.getSeconds}] ${value}`;
+            if (exists) {
+                fs.appendFileSync(pathLog, printable);
+            } else {
+                fs.write
+                fs.writeFileSync(pathLog, printable);
+            }
+            console.log(printable);
+        });
     })
 }
 
