@@ -52,6 +52,7 @@ function checkGoodUse(socket, next) {
             lastTime: undefined,
             allowance: rate
         }
+        user = connectionLastTime[socket.handshake.address];
     }
 
     // Si se ha conectado alguna vez se calcula cuanto ha pasado desde la última vez
