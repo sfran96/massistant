@@ -33,8 +33,8 @@ const utils = require("./utils/utils");
 // ["ip"]: {lastTime, allowance}
 const connectionLastTime = {};
 // Definimos el número de peticiones que se permite por intervalo de tiempo
-const rate = 15; // Máximo 5 solicitudes
-const per = 10000; // Cada 10 segundos
+const rate = 30; // Máximo 30 solicitudes
+const per = 60000; // Cada 60 segundos
 
 /**
  * Función encargada de comprobar que el usuario no está realizando un mal uso de la aplicación
