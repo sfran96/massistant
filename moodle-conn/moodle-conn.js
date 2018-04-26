@@ -1,5 +1,6 @@
 var mysql = require('mysql');
 var conf = require('../conf.json');
+const utils = require('../utils/utils');
 
 var connection = mysql.createPool({
     connectionLimit: 50,
@@ -307,9 +308,9 @@ function readMessage(msgId, userId) {
  * @param {MysqlError} error 
  */
 function manageError(error) {
-    console.log("[ERROR]: Ha ocurrido un problema al intentar realizar la petición.\n" + error.message);
+    utils.log("[ERROR]: Ha ocurrido un problema al intentar realizar la petición.\n" + error.message);
     if (error.sql)
-        console.log("SQL: " + error.sql);
+        utils.log("SQL: " + error.sql);
 }
 
 module.exports = {

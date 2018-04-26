@@ -32,12 +32,11 @@ function checkUserStatus(socket, next) {
 }
 
 /**
- * 
+ * Función que se ejecuta cuando el usuario se encuentra con una sesión iniciada
  * @param {SocketIO.Socket} socket Socket del usuario que solicita el servicio
  */
 function _whenLoggedIn(socket) {
     socket.join(socket.handshake.session.userId);
-    socket.emit('hostInfo', conf.self.host);
 }
 
 module.exports = {
