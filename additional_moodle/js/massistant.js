@@ -2,6 +2,7 @@
  * Envuelve todo el sistema de MAssistant (Moodle Assistant)
  * @author Francis Santos <francis.santosd@alumnos.upm.es>
  * @version 0.8
+ * @namespace MA
  */
 var MA = (() => {
     // Socket variable 
@@ -69,10 +70,16 @@ var MA = (() => {
 
     /**
      * Funcionalidades de los sockets
+     * @memberOf MA
+     * @namespace Sockets
      */
     var Sockets = (function () {
 
-        // Se ejecuta cuando el cliente pierde la conexión con el sistema
+        /** 
+         * Se ejecuta cuando el cliente pierde la conexión con el sistema
+         * @event disconnect
+         * @memberOf MA.Sockets
+         */
         socket.on('disconnect', (reason) => {
             // Pasado un tiempo (2.5s) desde la conexión el color del ícono que representa el sistema en el lado del cliente cambia de color para indicar un problema en la conexión,
             // a la vez que muestra un mensaje por pantalla (y reproduce su contenido si está configurado así por el usuario)
@@ -83,7 +90,11 @@ var MA = (() => {
             }, 2500);
         });
 
-        // Se ejecuta cuando el cliente se conecta de forma correcta con el sistema
+        /** 
+         * Se ejecuta cuando el cliente se conecta de forma correcta con el sistema
+         * @event connect
+         * @memberOf MA.Sockets
+         */
         socket.on('connect', (reason) => {
             // Si el cliente se conecta y es identificado de forma correcta se cambia el color del ícono indicando que todo se ha realizado de forma correcta
             $(".massistant").css("background", "linear-gradient(14deg, rgba(15, 184, 173, 0.6) 0%, rgba(31, 200, 219, 0.6) 50%, rgba(44, 181, 232, 0.6) 100%)");
@@ -91,7 +102,11 @@ var MA = (() => {
             socket.emit('checkUserPositionRequested', window.location.href);
         });
 
-        // Se ejecuta cuando el cliente se reconecta con el sistema de forma correcta
+        /** 
+         * Se ejecuta cuando el cliente se reconecta con el sistema de forma correcta
+         * @event reconnect
+         * @memberOf MA.Sockets
+         */
         socket.on('reconnect', (attemtNumber) => {
             // Cambia de color al color normal y se notifica al usuario que se ha reestablecido la conexión de forma correcta
             $(".massistant").css("background", "linear-gradient(14deg, rgba(15, 184, 173, 0.6) 0%, rgba(31, 200, 219, 0.6) 50%, rgba(44, 181, 232, 0.6) 100%)");
@@ -99,12 +114,20 @@ var MA = (() => {
                 Massistant.showMessage("Se ha reestablecido la conexión correctamente.");
         });
 
-        // Se ejecuta cuando el usuario recibe la información que había solicitado acerca de quién ha desarrollado el asistente
+        /**
+         * Se ejecuta cuando el usuario recibe la información que había solicitado acerca de quién ha desarrollado el asistente
+         * @event aboutReceived
+         * @memberOf MA.Sockets
+         */
         socket.on('aboutReceived', (text) => {
             Massistant.showMessage(text, 20000);
         });
 
-        // Se ejecuta para comprobar en qué página se encuentra el cliente en cada momento y qué menú mostrar en consecuencia
+        /**
+         * Se ejecuta para comprobar en qué página se encuentra el cliente en cada momento y qué menú mostrar en consecuencia
+         * @event checkUserPositionReceived
+         * @memberOf MA.Sockets
+         */
         socket.on('checkUserPositionReceived', (object) => {
             setTimeout(() => {
                 if (object && object[0] === 'subjectMenu' && object.length > 1)
@@ -134,7 +157,11 @@ var MA = (() => {
             }, 500);
         });
 
-        // Se ejecuta cuando el usuario recibe las asignaturas de las que está matricualdo
+        /**
+         * Se ejecuta cuando el usuario recibe las asignaturas de las que está matricualdo
+         * @event coursesReceived
+         * @memberOf MA.Sockets
+         */
         socket.on('coursesReceived', (subjects) => {
             menus.userSubjects = subjects;
             if (menus.userSubjects != undefined && menus.userSubjects.length > 0) {
@@ -146,7 +173,11 @@ var MA = (() => {
             }
         });
 
-        // Se ejecuta cuando el usuario recibe la URL de calificaciones de la asignatura a la que quiere acceder
+        /**
+         * Se ejecuta cuando el usuario recibe la URL de calificaciones de la asignatura a la que quiere acceder
+         * @event gradesReceived
+         * @memberOf MA.Sockets
+         */
         socket.on('gradesReceived', (gradeObjectsArray) => {
             // Variable que contendrá el texto a mostrar en formato HTML, a la vez que será lo enviado a la API Text-To-Speech para reproducirlo si así lo ha permitido el cliente
             let tts;
@@ -165,7 +196,11 @@ var MA = (() => {
             Massistant.showMessage(tts, 60000);
         });
 
-        // Se ejecuta cuando el usuario recibe la información acerca de los profesores de una asignatura, que previamente ha solicitado
+        /**
+         * Se ejecuta cuando el usuario recibe la información acerca de los profesores de una asignatura, que previamente ha solicitado
+         * @event teachersInfoReceived
+         * @memberOf MA.Sockets
+         */
         socket.on('teachersInfoReceived', (teachers) => {
             if (teachers !== undefined && teachers !== null && teachers.length > 0) {
                 let teachersInfoMenu = [];
@@ -182,7 +217,11 @@ var MA = (() => {
             }
         });
 
-        // Se ejecuta cuando el usuario recibe la información acerca de los mensajes que ha recibido
+        /**
+         * Se ejecuta cuando el usuario recibe la información acerca de los mensajes que ha recibido
+         * @event messagesReceived
+         * @memberOf MA.Sockets
+         */
         socket.on('messagesReceived', (messages) => {
             messagesItems = [];
             if (messages !== undefined && typeof messages === 'object') {
@@ -202,7 +241,11 @@ var MA = (() => {
             }
         });
 
-        // Se ejecuta cuando el usuario recibe la información acerca de otro usuario
+        /**
+         * Se ejecuta cuando el usuario recibe la información acerca de otro usuario
+         * @event userInfoReceived
+         * @memberOf MA.Sockets
+         */
         socket.on('userInfoReceived', (user) => {
             for (j = 0; j < messagesItems.length; j++) {
                 if (messagesItems[j].id == user.id) {
@@ -219,16 +262,20 @@ var MA = (() => {
 
     /**
      * Funcionalidades principales de MAssistant como:
-     *  - Manejo de menús
-     *  - Manejo de mensajes
-     *  - Control de las preferencias del usuario
+     *  </br>- Manejo de menús
+     *  </br>- Manejo de mensajes
+     *  </br>- Control de las preferencias del usuario
+     * @memberOf MA
+     * @namespace Massistant
      */
     var Massistant = (() => {
 
         /**
          * Función para mostrar en forma de menú todas las opciones del objeto que se le proporciona
-         * @typedef {{name:string,option?:string,url?:string,type?:string,any?:any}} menuObject
+         * @typedef {{name:string,option:string,url:string,type:string,any:any}} menuObject
          * @param {menuObject} data Menú a mostrar
+         * @memberOf MA.Massistant
+         * @method showMenu
          */
         function showMenu(data) {
             if (data !== undefined) {
@@ -274,6 +321,8 @@ var MA = (() => {
          * Muestra un mensaje durante un intervalo asignado
          * @param {string} message Mensaje a mostrar (acepta HTML)
          * @param {number} timeout Tiempo durante el cual se muestra el mensaje, por defecto son 10s
+         * @memberOf MA.Massistant
+         * @method showMessage
          */
         function showMessage(message, timeout) {
             Utils.textToSpeech(message);
@@ -286,6 +335,8 @@ var MA = (() => {
 
         /**
          * Oculta el mensaje y para la reproducción si se está reproduciendo
+         * @memberOf MA.Massistant
+         * @method hideMessage
          */
         function hideMessage() {
             if (responsiveVoice.isPlaying())
@@ -297,6 +348,8 @@ var MA = (() => {
         /**
          * Función que permite que el usuario navegue el menú, opción que hace que se desplace hasta
          * la opción superior a la actual
+         * @memberOf MA.Massistant
+         * @method goUpInTheMenu
          */
         function goUpInTheMenu() {
             // Asignamos valor
@@ -311,6 +364,8 @@ var MA = (() => {
         /**
          * Función que permite que el usuario navegue el menú, opción que hace que se desplace hasta
          * la opción inferior a la actual
+         * @memberOf MA.Massistant
+         * @method goDownInTheMenu
          */
         function goDownInTheMenu() {
             // Asignamos valor
@@ -322,7 +377,9 @@ var MA = (() => {
 
         /**
          * Destaca la opción del menú que se está seleccionando en estos momento
-         * @param {number} index posición actual del puntero
+         * @param {number} index Posición actual del puntero
+         * @memberOf MA.Massistant
+         * @method highlightMenuItem
          */
         function highlightMenuItem(index) {
             setTimeout(() => {
@@ -334,8 +391,10 @@ var MA = (() => {
 
         /**
          * Deshace el destacar la opción que anteriormente estaba seleccionada
-         * @param {number} index posición actual del puntero
+         * @param {number} index Posición actual del puntero
          * @param {boolean} isPressingDown especifica si el usuario quiere ir hacia abajo o hacia arriba
+         * @memberOf MA.Massistant
+         * @method unhighlightMenuItem
          */
         function unhighlightMenuItem(index, isPressingDown) {
             if (menuItems.length > 1) {
@@ -357,6 +416,8 @@ var MA = (() => {
         /**
          * Opciones disponibles que se ejecutan cuando el usuario intenta acceder a alguna opción
          * del menú global
+         * @memberOf MA.Massistant
+         * @method globalGetInOptions
          */
         function globalGetInOptions() {
             switch (menuOnUse[pointerMenu].type) {
@@ -376,6 +437,8 @@ var MA = (() => {
         /**
          * Opciones disponibles que se ejecutan cuando el usuario intenta acceder a alguna opción
          * del menú de manejo de un curso/asignatura
+         * @memberOf MA.Massistant
+         * @method courseGetInOptions
          */
         function courseGetInOptions() {
             switch (menuOnUse[pointerMenu].option) {
@@ -412,6 +475,8 @@ var MA = (() => {
         /**
          * Opciones disponibles que se ejecutan cuando el usuario intenta acceder a alguna opción
          * del menú de manejo de mensajes
+         * @memberOf MA.Massistant
+         * @method messagesGetInOptions
          */
         function messagesGetInOptions() {
             switch (menuOnUse[pointerMenu].option) {
@@ -451,6 +516,8 @@ var MA = (() => {
         /**
          * Opciones disponibles que se ejecutan cuando el usuario intenta acceder a alguna opción
          * del menú de manejo de entregas
+         * @memberOf MA.Massistant
+         * @method assignEditGetInOptions
          */
         function assignEditGetInOptions() {
             switch (menuOnUse[pointerMenu].option) {
@@ -510,6 +577,8 @@ var MA = (() => {
 
         /**
          * Controlador de opciones según el menú usado en cada momento
+         * @memberOf MA.Massistant
+         * @method getInTheItemOption
          */
         function getInTheItemOption() {
             if (pointerMenu != -1) {
@@ -548,6 +617,8 @@ var MA = (() => {
          * Introduce al usuario en el menú que se pasa como argumento, guardando los datos acerca
          * del menú en el que se encontraba anteriormente
          * @param {menuObject} menu Menú en el que se quiere navegar
+         * @memberOf MA.Massistant
+         * @method getInMenu
          */
         function getInMenu(menu) {
             // Guardamos en qué menú nos encontrabamos en primer momento y en qué posición
@@ -564,6 +635,8 @@ var MA = (() => {
         /**
          * Función que controla qué hacer con el tecleo del usuario
          * @param {KeyboardEvent} event Evento que ha desencadenado esta llamada
+         * @memberOf MA.Massistant
+         * @method keyUpEventFunction
          */
         function keyUpEventFunction(event) {
             if (!isOnInput && socket.connected && !socket.disconnected) {
@@ -619,6 +692,8 @@ var MA = (() => {
         /**
          * Función que controla qué hacer con el tecleo del usuario
          * @param {KeyboardEvent} event Evento que ha desencadenado esta llamada
+         * @memberOf MA.Massistant
+         * @method keyDownEventFunction
          */
         function keyDownEventFunction(event) {
             if (!isOnInput && socket.connected && !socket.disconnected) {
@@ -638,6 +713,8 @@ var MA = (() => {
         /**
          * Función que se ejecuta cuando el usuario realiza un doble click en el ícono,
          * desencadena una ocultación o aparición del menú
+         * @memberOf MA.Massistant
+         * @method doubleClickMA
          */
         function doubleClickMA() {
             if (!localStorage.getItem("visibleMass")) {
@@ -659,6 +736,8 @@ var MA = (() => {
         /**
          * Función que se ejecuta cuando el usuario realiza un click en el ícono,
          * principalmente para la reconexión del asistente
+         * @memberOf MA.Massistant
+         * @method onclickma
          */
         function onclickma() {
             // ¿Es doble click?
@@ -686,10 +765,17 @@ var MA = (() => {
      * Módulo que contiene opciones como:
      *  - Text-to-speech
      *  - Obtención de parámetro de la consulta (query) presente en la URL
+     * @memberOf MA
+     * @namespace Utils
      */
     var Utils = (() => {
 
-        // Realiza la función de reproducir el audio
+        /**
+         * Realiza la función de convertir el texto en voz
+         * @param {string} text Texto a convertir en texto, puede ser HTML
+         * @memberOf MA.Utils
+         * @method textToSpeech
+         */
         function textToSpeech(text) {
             if (responsiveVoice.isPlaying())
                 responsiveVoice.cancel();
@@ -703,6 +789,8 @@ var MA = (() => {
          * @typedef {(string|undefined)} qConsulta
          * @param {string} name Nombre del parámetro a recoger
          * @returns {qConsulta} Valor del parámetro en la consulta
+         * @memberOf MA.Utils
+         * @method getQueryParam
          **/
         function getQueryParam(name) {
             let paramsString = window.location.search.replace('?', '');
@@ -734,6 +822,8 @@ var MA = (() => {
 
     /**
      * Módulo que contiene las opciones de navegar dentro de un curso
+     * @memberOf MA
+     * @namespace CourseNav
      */
     var CourseNav = (() => {
         // Puntero con la información de dónde se encuentra el usuario en cada momento
@@ -741,7 +831,9 @@ var MA = (() => {
 
         /**
          * Navega al siguiente elemento, capaz de recorrerlo en forma de módulo
-         */
+         * @memberOf MA.CourseNav
+         * @method nextItem
+         */         
         function nextItem() {
             pointer = (pointer + 1) % subjectItems.length;
             if (pointer != 0)
@@ -756,6 +848,8 @@ var MA = (() => {
 
         /**
          * Navegar al elemento anterior, capaz de recorrerlo en forma de módulo
+         * @memberOf MA.CourseNav
+         * @method previousItem
          */
         function previousItem() {
             // Asignamos valor
@@ -778,6 +872,8 @@ var MA = (() => {
         /**
          * Función que controla qué hacer con el tecleo del usuario
          * @param {KeyboardEvent} event Evento que ha desencadenado esta llamada
+         * @memberOf MA.CourseNav
+         * @method keyUpEventFunction
          */
         function keyUpEventFunction(event) {
             if (!isOnInput && socket.connected && !socket.disconnected) {
