@@ -48,7 +48,7 @@ function checkGoodUse(socket, next) {
 
     // Si no existe una entrada para el usuario, se crea
     if (user === undefined) {
-        user = {
+        connectionLastTime[socket.handshake.address] = {
             lastTime: undefined,
             allowance: rate
         }
@@ -69,6 +69,7 @@ function checkGoodUse(socket, next) {
         user.allowance = rate;
     }
 
+    utils.log('Allowance is: ' + user.allowance);
     // Comparamos
     if (user.allowance < 1.0) {
         // Desconectamos al usuario
