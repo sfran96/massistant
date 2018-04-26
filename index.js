@@ -65,7 +65,7 @@ function checkGoodUse(socket, next) {
     if (user.allowance > rate) {
         user.allowance = rate;
     }
-
+    console.log(`users: ${user.allowance}, timePassed: ${timePassed}, rate: ${rate}, per: ${per}`);
     utils.log('Allowance is: ' + user.allowance);
     // Comparamos
     if (user.allowance < 1.0) {
