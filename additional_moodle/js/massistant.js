@@ -830,7 +830,7 @@ var MA = (() => {
         // Asignar los eventos de click
         $('#massistant_icon').on('click', Massistant.onclickma);
         $('#massistant_message_close_btn').on('click', Massistant.hideMessage);
-        $('#massistant_menu_close_btn').on('click', Massistant.doubleClickMA());
+        $('#massistant_menu_close_btn').on('click', Massistant.doubleClickMA);
 
         $('input').focusin(() => {
             isOnInput = true;
