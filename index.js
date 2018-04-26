@@ -34,7 +34,7 @@ const utils = require("./utils/utils");
 const connectionLastTime = {};
 // Definimos el número de peticiones que se permite por intervalo de tiempo
 const rate = 5; // Máximo 5 solicitudes
-const per = 10; // Cada 10 segundos
+const per = 10000; // Cada 10 segundos
 
 /**
  * Función encargada de comprobar que el usuario no está realizando un mal uso de la aplicación
@@ -49,7 +49,7 @@ function checkGoodUse(socket, next) {
     // Si no existe una entrada para el usuario, se crea
     if (user === undefined) {
         connectionLastTime[socket.handshake.address] = {
-            lastTime: current + 10,
+            lastTime: current + 10000,
             allowance: rate
         }
         user = connectionLastTime[socket.handshake.address];
