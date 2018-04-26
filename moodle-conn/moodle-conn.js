@@ -17,7 +17,7 @@ var connection = mysql.createPool({
  */
 function isUserLoggedIn(moodCookValue, callerIP, callback) {
     if (moodCookValue !== undefined && callback !== undefined && typeof callback === 'function') {
-        connection.query(`SELECT * FROM mdl_sessions WHERE sid LIKE '${moodCookValue}' AND timemodified > (UNIX_TIMESTAMP()-15*60*60) AND ('${callerIP}' LIKE CONCAT('%',firstip) OR '${callerIP}' LIKE CONCAT('%',lastip))`, (error, results, fields) => {
+        connection.query(`SELECT * FROM mdl_sessions WHERE sid LIKE ? AND timemodified > (UNIX_TIMESTAMP()-15*60*60) AND (? LIKE CONCAT('%',firstip) OR ? LIKE CONCAT('%',lastip))`, [moodCookValue, callerIP, callerIP], (error, results, fields) => {
             if (error) manageError(error);
             // Si hay resultados
             else if (results != undefined && results.length > 0 && results[0].userid !== 0) {
@@ -38,9 +38,9 @@ function retrieveUserCourses(userId, callback) {
         connection.query("SELECT courses.id, courses.fullname FROM `mdl_course` AS `courses`" +
             " INNER JOIN `mdl_enrol` AS `user_asig` ON user_asig.courseid = courses.id" +
             " INNER JOIN `mdl_user_enrolments` AS `user_enr` ON user_enr.enrolid = user_asig.id" +
-            " WHERE user_enr.userid LIKE '" + userId +
-            "' AND user_enr.timestart <= " + fechaActual +
-            " AND (user_enr.timeend > " + fechaActual + " OR user_enr.timeend = 0)", (error, results, fields) => {
+            " WHERE user_enr.userid LIKE ?" +
+            " AND user_enr.timestart <= ?" +
+            " AND (user_enr.timeend > ? OR user_enr.timeend = 0)", [userId, fechaActual, fechaActual], (error, results, fields) => {
                 if (error) manageError(error);
                 else {
                     if (results != undefined && results.length > 0) {
@@ -160,7 +160,7 @@ function getMessages(userId, callback) {
     if (userId !== undefined && typeof userId === 'number') {
         // Primero leemos los leídos
         let messages = {};
-        connection.query(`SELECT * FROM mdl_message_read WHERE useridfrom = ${userId} OR useridto = ${userId} ORDER BY timecreated DESC`, (error1, results1, fields1) => {
+        connection.query(`SELECT * FROM mdl_message_read WHERE useridfrom = ? OR useridto = ? ORDER BY timecreated DESC`, [userId, userId], (error1, results1, fields1) => {
             if (error1) manageError(error1);
             else {
                 if (results1 !== undefined) {
@@ -202,7 +202,7 @@ function getMessages(userId, callback) {
                         }
                     }
                     // Ahora los no leídos
-                    connection.query(`SELECT * FROM mdl_message WHERE useridfrom = ${userId} OR useridto = ${userId} ORDER BY timecreated DESC`, (error2, results2, fields2) => {
+                    connection.query(`SELECT * FROM mdl_message WHERE useridfrom = ? OR useridto = ? ORDER BY timecreated DESC`, [userId, userId], (error2, results2, fields2) => {
                         if (error2) manageError(error2);
                         else {
                             if (results2 !== undefined)
