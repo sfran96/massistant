@@ -31,18 +31,17 @@ function getCookie(cname, cookies) {
 function log(value) {
     let fecha = new Date();
     let fechaArchivo = `${fecha.getDay()}${fecha.getMonth()}${fecha.getFullYear()}`;
-    let pathLog = `../logs/${fechaArchivo}.log`;
+    let pathLog = `${__dirname}/logs/${fechaArchivo}.log`;
 
-    fs.exists('../logs', (dirExists) => {
+    fs.exists(`${__dirname}/logs`, (dirExists) => {
         if (!dirExists)
-            fs.mkdirSync('../logs');
+            fs.mkdirSync(`${__dirname}/logs`);
         // Comprobamos si existe el fichero
         fs.exists(pathLog, (exists) => {
             let printable = `[${fecha.getHours()}:${fecha.getMinutes()}:${fecha.getSeconds}] ${value}`;
             if (exists) {
                 fs.appendFileSync(pathLog, printable);
             } else {
-                fs.write
                 fs.writeFileSync(pathLog, printable);
             }
             console.log(printable);
