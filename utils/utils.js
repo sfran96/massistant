@@ -38,7 +38,7 @@ function log(value) {
             fs.mkdirSync(`${__dirname}/logs`);
         // Comprobamos si existe el fichero
         fs.exists(pathLog, (exists) => {
-            let printable = `[${fecha.getHours()}:${fecha.getMinutes()}:${fecha.getSeconds}] ${value}`;
+            let printable = `[${fecha.getHours()}:${fecha.getMinutes()}:${fecha.getSeconds()}] ${value}`;
             if (exists) {
                 fs.appendFileSync(pathLog, printable);
             } else {
