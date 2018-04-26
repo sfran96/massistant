@@ -50,6 +50,7 @@ function checkGoodUse(socket, next) {
     if (user === undefined) {
         connectionLastTime[socket.handshake.address] = {
             lastTime: current + 10000,
+            lastEvent: 0,
             allowance: rate
         }
         user = connectionLastTime[socket.handshake.address];
@@ -65,13 +66,15 @@ function checkGoodUse(socket, next) {
     if (user.allowance > rate) {
         user.allowance = rate;
     }
-    console.log(`users: ${user}, timePassed: ${timePassed}, rate: ${rate}, per: ${per}`);
-    utils.log('Allowance is: ' + user.allowance);
     // Comparamos
     if (user.allowance < 1.0) {
         // Desconectamos al usuario
         socket.disconnect();
-        utils.log(`El usuario con IP=${socket.handshake.address} ha realizado más consultas de las contempladas por un uso correcto.`);
+        // Si han pasado más de cinco minutos se escribe en el fichero
+        if (user.lastEvent > current + 5 * 60 * 1000) {
+            utils.log(`El usuario con IP=${socket.handshake.address} ha realizado más consultas de las contempladas por un uso correcto.`);
+            user.lastEvent = current;
+        }
     } else {
         // Lo pasamos al siguiente middleware
         next();
