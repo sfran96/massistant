@@ -1,5 +1,3 @@
-"use restrict";
-
 /**
  * Envuelve todo el sistema de MAssistant (Moodle Assistant)
  * @author Francis Santos <francis.santosd@alumnos.upm.es>

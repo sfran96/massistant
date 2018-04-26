@@ -16,6 +16,5 @@ require.config({
 	}
 });
 
-define(['jquery', 'socketioclient', 'responsivevoice'], ($, io, responsiveVoice) => {
-	require('massistant');
+define(['jquery', 'socketioclient', 'responsivevoice', 'massistant'], ($, io, responsiveVoice) => {
 })

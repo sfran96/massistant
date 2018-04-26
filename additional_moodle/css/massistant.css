@@ -1,0 +1,138 @@
+p#massistant_menu_msg {
+    margin: 20px 10px 0px 10px;
+    text-align: center;
+}
+
+div.massistant {
+    cursor: pointer;
+    position: fixed;
+    height: 70px;
+    width: 70px;
+    background: linear-gradient(14deg, rgba(188, 186, 186, 0.6) 0%, rgba(78, 78, 78, 0.6) 50%, rgba(218, 218, 218, 0.6) 100%) repeat scroll 0% 0%;
+    margin: -115px 12px 12px 0px;
+    right: 0;
+    text-align: center;
+    line-height: 70px;
+    font-size: 30px;
+    border: 0px solid transparent;
+    border-radius: 100px;
+    bottom: 0;
+}
+
+div#massistant {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    opacity: 0.3;
+}
+
+div#massistant:hover {
+    opacity: 1;
+}
+
+div.massistant_popup {
+    position: fixed;
+    margin: auto 12px 82px 0px;
+    right: 0;
+    bottom: 0;
+    visibility: hidden;
+    display: none;
+}
+
+div.massistant_box {
+    max-height: 450px;
+    max-width: 400px;
+    background: #f5f5f5;
+    box-shadow: 0px 0px 10px #AAA;
+    border-radius: 6px;
+    visibility: hidden;
+    padding: 5px;
+    margin-bottom: 10px;
+    margin-left: 10px;
+    position: relative;
+}
+
+div.massistant_popupbox_close_btn {
+    position: absolute;
+    height: 20px;
+    width: 20px;
+    margin-right: 5px;
+    line-height: 20px;
+    text-align: center;
+    font-size: 20px;
+    cursor: pointer;
+    font-family: calibri;
+    right: 0;
+}
+
+.massistant_menu_option {
+    text-align: left;
+    margin-bottom: 20px;
+    font-size: 28px;
+    word-break: inherit;
+    line-height: 30px;
+    padding-left: 45px;
+}
+
+.massistant_popupbox_content {
+    font-size: 20px;
+    word-break: inherit;
+    line-height: 25px;
+    margin: 25px;
+    cursor: context-menu;
+}
+
+.massistant_menu_option_course {
+    background: url(https://image.flaticon.com/icons/svg/103/103340.svg) no-repeat;
+    background-size: 30px;
+}
+
+.massistant_menu_option_message {
+    background: url(https://image.flaticon.com/icons/svg/126/126516.svg) no-repeat;
+    background-size: 30px;
+}
+
+.massistant_menu_option_clasification {
+    background: url(https://image.flaticon.com/icons/svg/782/782702.svg) no-repeat;
+    background-size: 30px;
+}
+
+.massistant_menu_option_about {
+    background: url(https://image.flaticon.com/icons/svg/685/685815.svg) no-repeat;
+    background-size: 30px;
+}
+
+.massistant_menu_option_menu_toggle {
+    background: url(https://image.flaticon.com/icons/svg/109/109682.svg) no-repeat;
+    background-size: 30px;
+}
+
+.massistant_menu_option_config {
+    background: url(https://image.flaticon.com/icons/svg/70/70367.svg) no-repeat;
+    background-size: 30px;
+}
+
+.massistant_menu_option_home {
+    background: url(https://image.flaticon.com/icons/svg/263/263115.svg) no-repeat;
+    background-size: 30px;
+}
+
+.massistant_menu_option_undefined {
+    background: url(https://image.flaticon.com/icons/svg/90/90492.svg) no-repeat;
+    background-size: 30px;
+}
+
+@media screen and (max-height: 759px) and (min-width: 600px) {
+    div.massistant_box {
+        display: inline-block;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    div#massistant {
+        display: none;
+    }
+}
