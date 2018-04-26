@@ -49,18 +49,14 @@ function checkGoodUse(socket, next) {
     // Si no existe una entrada para el usuario, se crea
     if (user === undefined) {
         connectionLastTime[socket.handshake.address] = {
-            lastTime: undefined,
+            lastTime: current,
             allowance: rate
         }
         user = connectionLastTime[socket.handshake.address];
     }
 
-    // Si se ha conectado alguna vez se calcula cuanto ha pasado desde la última vez
-    if (user.lastTime !== undefined) {
-        timePassed = current - user.last;
-    } else {
-        timePassed = 100000;
-    }
+    // Se calcula cuanto ha pasado desde la última vez
+    timePassed = current - user.last;
     // Guardamos cuando se solicitó por última vez
     user.lastTime = current;
 
