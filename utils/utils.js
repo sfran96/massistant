@@ -32,6 +32,7 @@ function log(value) {
     let fecha = new Date();
     let fechaArchivo = `${fecha.getDay()}${fecha.getMonth()}${fecha.getFullYear()}`;
     let pathLog = `${__dirname}/logs/${fechaArchivo}.log`;
+    console.log(pathLog);
 
     fs.exists(`${__dirname}/logs`, (dirExists) => {
         if (!dirExists)
