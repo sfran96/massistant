@@ -73,6 +73,7 @@ function checkGoodUse(socket, next) {
     if (user.allowance < 1.0) {
         // Desconectamos al usuario
         socket.disconnect();
+        utils.log(`El usuario con IP=${socket.handshake.address} ha realizado más consultas de las contempladas por un uso correcto.`);
     } else {
         // Lo pasamos al siguiente middleware
         next();
