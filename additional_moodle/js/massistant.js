@@ -735,11 +735,15 @@ var MA = (() => {
     })();
 
     /**
-     * COURSE NAVIGATOR MODULE
-     **/
+     * Módulo que contiene las opciones de navegar dentro de un curso
+     */
     var CourseNav = (() => {
+        // Puntero con la información de dónde se encuentra el usuario en cada momento
         let pointer = -1;
 
+        /**
+         * Navega al siguiente elemento, capaz de recorrerlo en forma de módulo
+         */
         function nextItem() {
             pointer = (pointer + 1) % subjectItems.length;
             if (pointer != 0)
@@ -752,6 +756,9 @@ var MA = (() => {
             Utils.textToSpeech(text);
         }
 
+        /**
+         * Navegar al elemento anterior, capaz de recorrerlo en forma de módulo
+         */
         function previousItem() {
             // Asignamos valor
             if (pointer != 0 && pointer != -1)
@@ -770,6 +777,10 @@ var MA = (() => {
             Utils.textToSpeech(text);
         }
 
+        /**
+         * Función que controla qué hacer con el tecleo del usuario
+         * @param {KeyboardEvent} event Evento que ha desencadenado esta llamada
+         */
         function keyUpEventFunction(event) {
             if (!isOnInput && socket.connected && !socket.disconnected) {
                 switch (event.keyCode) {
@@ -818,6 +829,7 @@ var MA = (() => {
     // Opciones cargadas cuando el DOM se encuentra totalmente cargado
     $('document').ready(() => {
 
+        // Asignar los eventos de click
         $('#massistant_icon').click(Massistant.onclickma);
         $('#massistant_message_close_btn').click(Massistant.hideMessage);
         $('#massistant_menu_close_btn').click(Massistant.doubleClickMA());
