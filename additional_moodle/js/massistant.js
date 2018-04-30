@@ -696,7 +696,19 @@ var MA = (() => {
                 case "activation":
                     userConfig.activated = !userConfig.activated;
                     setTimeout(() => {
-                        doubleClickMA(true);
+                        if (userConfig.activated) {
+                            $('#massistant').css({ "opacity": "1", "visibility": "visible" });
+                            $('#massistant > div').css({ "visibility": "" });
+                            $('#massistant_popup').css({ "display": "block" });
+                            showMenu(menuOnUse);
+                        }
+                        else {
+                            if (responsiveVoice.isPlaying())
+                                responsiveVoice.cancel();
+                            $('#massistant').css({ "opacity": "", "visibility": "" });
+                            $('#massistant_popup').css({ "display": "none" });
+                            changeUserConfig("activation");
+                        }
                     }, 5000);
                     break;
                 case "pitch":
@@ -818,7 +830,7 @@ var MA = (() => {
          * @memberOf MA.Massistant
          * @method doubleClickMA
          */
-        function doubleClickMA(notRecurrent) {
+        function doubleClickMA() {
             if (!userConfig.activated) {
                 $('#massistant').css({ "opacity": "1", "visibility": "visible" });
                 $('#massistant > div').css({ "visibility": "" });
@@ -832,8 +844,7 @@ var MA = (() => {
                 $('#massistant_popup').css({ "display": "none" });
                 changeUserConfig("activation");
             }
-            if (!notRecurrent)
-                changeUserConfig("activation");
+            changeUserConfig("activation");
         }
 
         /**
