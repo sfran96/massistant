@@ -83,13 +83,15 @@ var MA = (() => {
             retreivedConfig = JSON.parse(localStorage.getItem('userConfig'));
         }
 
-        if (retreivedConfig === undefined)
+        if (retreivedConfig === undefined) {
             retreivedConfig = {
                 pitch: 0,
                 volume: 1,
                 rate: 1,
                 activated: true
             }
+            localStorage.setItem('userConfig', JSON.stringify(retreivedConfig));
+        }
 
         return retreivedConfig;
     }
