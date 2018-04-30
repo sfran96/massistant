@@ -706,6 +706,7 @@ var MA = (() => {
                     userConfig.speed = (userConfig.speed + 1) % 10;
                     break;
             }
+            localStorage.setItem("userConfig", JSON.stringify(userConfig));
         }
 
         /**
@@ -816,7 +817,7 @@ var MA = (() => {
          */
         function doubleClickMA() {
             if (!userConfig.activated) {
-                userConfig.activated = true;
+                changeUserConfig("activation");
                 $('#massistant').css({ "opacity": "1", "visibility": "visible" });
                 $('#massistant > div').css({ "visibility": "" });
                 $('#massistant_popup').css({ "display": "block" });
@@ -827,7 +828,7 @@ var MA = (() => {
                     responsiveVoice.cancel();
                 $('#massistant').css({ "opacity": "", "visibility": "" });
                 $('#massistant_popup').css({ "display": "none" });
-                userConfig.activated = false;
+                changeUserConfig("activation");
             }
         }
 
