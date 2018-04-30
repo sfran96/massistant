@@ -1,3 +1,9 @@
+/**
+ * @author Francis Santos Liranzo <francis.santosd@alumnos.upm.es>
+ * @version 0.8
+ * @namespace MoodleConnection
+ */
+
 var mysql = require('mysql');
 var conf = require('../conf.json');
 const utils = require('../utils/utils');
@@ -12,8 +18,10 @@ var connection = mysql.createPool({
 
 /**
  * Función encargada de comprobar si el usuario que solicita la petición HTTP se encuentra con una sesión iniciada según Moodle
- * @param {string} moodCookValue 
- * @param {function(string)} callback 
+ * @param {string} moodCookValue Valor de la sesión
+ * @param {function(string)} callback Función a llamar cuando se obtena el resultado de la consulta SQL
+ * @method isUserLoggedIn
+ * @memberOf MoodleConnection
  */
 function isUserLoggedIn(moodCookValue, callerIP, callback) {
     if (moodCookValue !== undefined && callback !== undefined && typeof callback === 'function') {
@@ -29,8 +37,10 @@ function isUserLoggedIn(moodCookValue, callerIP, callback) {
 
 /**
  * Función para obtener las asignaturas que tiene un usuario matriculado
- * @param {number} userId 
- * @param {function(subjectsSql)} callback 
+ * @param {number} userId Identificador del usuario
+ * @param {function(subjectsSql)} callback Función a llamar cuando se obtena el resultado de la consulta SQL
+ * @method retrieveUserCourses
+ * @memberOf MoodleConnection
  */
 function retrieveUserCourses(userId, callback) {
     if (userId !== undefined && callback !== undefined && typeof callback === 'function') {
@@ -54,10 +64,12 @@ function retrieveUserCourses(userId, callback) {
 }
 
 /**
- * 
- * @param {string} moduleName 
- * @param {number} courseId 
- * @param {function(subjectId)} callback 
+ * Función que obtiene un id del curso en el que se encuentra un usuario según
+ * @param {string} moduleName Nombre del módulo
+ * @param {number} courseId Id del curso
+ * @param {function(subjectId)} callback Función a llamar cuando se obtena el resultado de la consulta SQL
+ * @method getCourse
+ * @memberOf MoodleConnection
  */
 function getCourse(moduleName, courseId, callback) {
     if (courseId !== undefined && callback !== undefined && moduleName !== undefined && typeof callback === 'function') {
@@ -80,9 +92,11 @@ function getCourse(moduleName, courseId, callback) {
 
 /**
  * Llama a la función 'callback' pasando como parámetro el array de notas, nota => {description, finalGrade, maxGrade}
- * @param {number} userId 
- * @param {number} courseId 
- * @param {function(Object)} callback 
+ * @param {number} userId Id del usuario
+ * @param {number} courseId Id del curso 
+ * @param {function(Object)} callback Función a llamar cuando se obtena el resultado de la consulta SQL
+ * @method getGrades
+ * @memberOf MoodleConnection
  */
 function getGrades(userId, courseId, callback) {
     if (courseId !== undefined && callback !== undefined && userId !== undefined && typeof callback === 'function') {
@@ -120,9 +134,10 @@ function getGrades(userId, courseId, callback) {
 }
 
 /**
- * 
- * @param {number} courseId 
- * @param {function(Object)} callback 
+ * Función para obtener la información acerca de los profesores de una asignatura
+ * @param {number} courseId Id de la asignatura
+ * @param {function(Object)} callback Función a llamar cuando se obtena el resultado de la consulta SQL
+ * @memberOf MoodleConnection
  */
 function getTeachers(courseId, callback) {
     if (courseId !== undefined && callback !== undefined && typeof callback === 'function') {
@@ -152,9 +167,10 @@ function getTeachers(courseId, callback) {
 };
 
 /**
- * 
- * @param {number} userId 
- * @param {function(Object)} callback
+ * Función para obtener los mensajes de un usuario
+ * @param {number} userId Identificador del usuario
+ * @param {function(Object)} callback Función a llamar cuando se obtena el resultado de la consulta SQL
+ * @memberOf MoodleConnection
  */
 function getMessages(userId, callback) {
     if (userId !== undefined && typeof userId === 'number') {
@@ -255,9 +271,10 @@ function getMessages(userId, callback) {
 }
 
 /**
- * 
- * @param {number} userId 
- * @param {function} callback 
+ * Función que se encarga de obtener información acerca de un usuario
+ * @param {number} userId Identificador del usuario a buscar
+ * @param {function} callback Función a llamar cuando se obtena el resultado de la consulta SQL
+ * @memberOf MoodleConnection
  */
 function getUserInfo(userId, callback) {
     if (userId !== undefined && typeof userId === 'number' && callback !== undefined && typeof callback === 'function') {
@@ -277,6 +294,12 @@ function getUserInfo(userId, callback) {
     }
 }
 
+/**
+ * Función para notificar que un mensaje ha sido leído por un usuario y que se proceda a pasar a la bandeja de leídos
+ * @param {string} msgId Id del mensaje
+ * @param {number} userId Id del usuario
+ * @memberOf MoodleConnection
+ */
 function readMessage(msgId, userId) {
     if (userId !== undefined && typeof userId === 'number' && msgId !== undefined && typeof msgId === 'number') {
         connection.query("SELECT * FROM mdl_message WHERE id = ? AND useridto = ?", [msgId, userId], (error, results, fields) => {
@@ -304,8 +327,9 @@ function readMessage(msgId, userId) {
 }
 
 /**
- * 
- * @param {MysqlError} error 
+ * Función que se ejecuta cuando ocurre cualquier error SQL
+ * @param {MysqlError} error Objeto del error
+ * @memberOf MoodleConnection
  */
 function manageError(error) {
     utils.log("[ERROR]: Ha ocurrido un problema al intentar realizar la petición.\n" + error.message);

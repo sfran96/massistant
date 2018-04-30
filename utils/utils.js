@@ -1,11 +1,18 @@
+/**
+ * @author Francis Santos Liranzo <francis.santosd@alumnos.upm.es>
+ * @version 0.8
+ * @namespace Utils
+ */
+
 const fs = require('fs');
 
 /**
  * Función encargada de devolver el valor de una cookie
  * @param {string} cname El nombre de la cookie a recoger
  * @param {string} cookies Define las cookies del usuario (cookie1=cd;cookie2=ab)
+ * @returns {string} Valor de la cookie solicitada
  * @method getCookie
- * @returns {string} valor de la cookie solicitada
+ * @memberOf Utils
  */
 function getCookie(cname, cookies) {
     var name = cname + "=";
@@ -27,6 +34,7 @@ function getCookie(cname, cookies) {
  * Genera un log para cada mensaje, uno para cada día
  * @param {any} value Valor a guardar en el fichero del log
  * @method log
+ * @memberOf Utils
  */
 function log(value) {
     let fecha = new Date();

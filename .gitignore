@@ -3,4 +3,5 @@
 playground/
 ecosystem.config.js
 package-lock.json
-*/js/out/
+*/out/
+out/

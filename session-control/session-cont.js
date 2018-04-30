@@ -1,4 +1,10 @@
 /**
+ * @author Francis Santos Liranzo <francis.santosd@alumnos.upm.es>
+ * @version 0.8
+ * @namespace SessionControl
+ */
+
+/**
  * Define el módulo encargado de la comprobación de sesión del usuario
  */
 const moodleConn = require('../moodle-conn/moodle-conn');
@@ -6,9 +12,11 @@ const conf = require('../conf.json');
 const utils = require('../utils/utils');
 
 /**
- * 
+ * Comprueba si el usuario se encuentra con una sesión inicada
  * @param {SocketIO.Socket} socket Socket del usuario que solicita el servicio
  * @param {function} next Pasa al siguiente módulo del middleware (connection) si todo es correcto
+ * @method checkUserStatus
+ * @memberOf SessionControl
  */
 function checkUserStatus(socket, next) {
     // Comprobamos que tiene la cookie iniciada
@@ -34,6 +42,8 @@ function checkUserStatus(socket, next) {
 /**
  * Función que se ejecuta cuando el usuario se encuentra con una sesión iniciada
  * @param {SocketIO.Socket} socket Socket del usuario que solicita el servicio
+ * @method _whenLoggedIn
+ * @memberOf SessionControl
  */
 function _whenLoggedIn(socket) {
     socket.join(socket.handshake.session.userId);

@@ -1,6 +1,7 @@
 /**
  * @author Francis Santos Liranzo <francis.santosd@alumnos.upm.es>
  * @version 0.8
+ * @namespace Index
  */
 /** Archivo de configuración y menús **/
 var reload = require('require-reload')(require);
@@ -40,6 +41,7 @@ const per = 60000; // Cada 60 segundos
  * Función encargada de comprobar que el usuario no está realizando un mal uso de la aplicación
  * @param {SocketIO.Socket} socket Socket del usuario que solicita el servicio
  * @param {function} next Pasa al siguiente módulo del middleware (connection) si todo es correcto
+ * @memberOf Index
  */
 function checkGoodUse(socket, next) {
     let current = Date.now();
@@ -92,6 +94,7 @@ io.on('connection', function (socket) {
     /** 
      * Cuando el usuario se "desconecta del socket", cierra la pestaña del navegador, por ejemplo.
      * @event disconnecting
+     * @memberOf Index
      */
     socket.on('disconnecting', (reason) => {
     });
@@ -99,6 +102,7 @@ io.on('connection', function (socket) {
     /**  
      * Cuando el usuario solicita información acerca de Massistant
      * @event aboutRequested
+     * @memberOf Index
     */
     socket.on('aboutRequested', () => {
         let text = "Soy <i>MAssistant (Moodle Assistant)<\/i>, pretendo ayudarte a utilizar Moodle de una forma más sencilla e intuitiva como alumno.<br\/>Desarrollado por <strong>Francis Santos<\/strong> como proyecto de fin de carrera en el segundo periodo del curso 2017/2018.";
@@ -108,6 +112,7 @@ io.on('connection', function (socket) {
     /** 
      * Cuando el usuario solicita entrar en una de las asignaturas que tiene matriculado
      * @event coursesRequested
+     * @memberOf Index
      */
     socket.on('coursesRequested', () => {
         // Solicitamos dicha información a la base de datos
@@ -126,6 +131,7 @@ io.on('connection', function (socket) {
     /**
      * Cuando el usuario solicita visitar la página de calificaciones de una asignatura
      * @event pathForGradesRequested
+     * @memberOf Index
      */
     socket.on('pathForGradesRequested', subjectId => {
         let toReturn = `${conf.self.host}/grade/report/index.php?id=${subjectId}`;
@@ -135,6 +141,7 @@ io.on('connection', function (socket) {
     /**
      * Ejecutado para saber si un usuario se encuentra en una subpágina de una asignatura
      * @event checkUserPositionRequested
+     * @memberOf Index
      */
     socket.on('checkUserPositionRequested', url => {
         let myURL = new URL(url);
@@ -155,6 +162,7 @@ io.on('connection', function (socket) {
     /**
      * Ejecutado cuando el usuario quiere saber su nota
      * @event gradesRequested
+     * @memberOf Index
      */
     socket.on('gradesRequested', (courseId) => {
         let courseIdInt = parseInt(courseId);
@@ -169,6 +177,7 @@ io.on('connection', function (socket) {
     /**
      * Ejecuta cuando el usuario solicita los profesores de una asignatura
      * @event teachersInfoRequested
+     * @memberOf Index
      */
     socket.on('teachersInfoRequested', (courseId) => {
         let courseIdInt = parseInt(courseId);
@@ -183,6 +192,7 @@ io.on('connection', function (socket) {
     /**
      * Ejecutado cuando el usuario solicita los mensajes que son suyos
      * @event messagesRequested
+     * @memberOf Index
      */
     socket.on('messagesRequested', () => {
         let userIdInt = parseInt(socket.handshake.session.userId);
@@ -197,6 +207,7 @@ io.on('connection', function (socket) {
     /**
      * Ejecutado cuando el usuario solicita información acerca de otro usuario
      * @event userInfoRequested
+     * @memberOf Index
      */
     socket.on('userInfoRequested', (userId) => {
         let userIdInt = parseInt(userId);
@@ -209,12 +220,17 @@ io.on('connection', function (socket) {
     /**
      * Ejecutado cuando el usuario lee un mensaje que no había leído
      * @event messageRead
+     * @memberOf Index
      */
     socket.on('messageRead', (msgId) => {
         let userIdInt = parseInt(socket.handshake.session.userId);
         let msgIdInt = parseInt(msgId);
         if (!isNaN(userIdInt) && !isNaN(msgIdInt))
             moodleConnection.readMessage(msgIdInt, userIdInt);
+    });
+
+    socket.on('updateSettings', (UserConfig) => {
+
     });
 });
 

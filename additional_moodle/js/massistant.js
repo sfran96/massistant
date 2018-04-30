@@ -41,9 +41,16 @@ var MA = (() => {
         { name: "Editar entrega", option: "editAssig" },
         { name: "Menú de asignatura", option: "course" }
     ]
+    // Opciones de la configuración del widget
+    const configMenu = [
+        { name: "Activar/Desactivar", option: "activation" },
+        { name: "Cambiar pitch", option: "pitch" },
+        { name: "Cambiar volumen", option: "volume" },
+        { name: "Cambair velocidad", option: "speed" }
+    ]
     // Menú devuelto en petición
     const menus = {
-        courseMenu, messageMenu, globalMenu, assignEditMenu, assingMainMenu
+        courseMenu, messageMenu, globalMenu, assignEditMenu, assingMainMenu, configMenu
     }
     // Menú seleccionado (globalMenu por defecto)
     var menuOnUse;
@@ -67,6 +74,25 @@ var MA = (() => {
     var courseId;
     // Usuarios sobre los que se ha conseguido obtener información tras la petición, utilizado, por ejemplo, cuando se solicitan los mensajes
     var usersWithInfo = 0;
+    // Configuración del usuario
+    var userConfig = getUserConfig();
+
+    function getUserConfig() {
+        let retreivedConfig;
+        if (localStorage.getItem('userConfig')) {
+            retreivedConfig = JSON.parse(localStorage.getItem('userConfig'));
+        }
+
+        if (retreivedConfig === undefined)
+            retreivedConfig = {
+                pitch: 0,
+                volume: 1,
+                rate: 1,
+                activated: true
+            }
+
+        return retreivedConfig;
+    }
 
     /**
      * Funcionalidades de los sockets
@@ -85,7 +111,7 @@ var MA = (() => {
             // a la vez que muestra un mensaje por pantalla (y reproduce su contenido si está configurado así por el usuario)
             setTimeout(() => {
                 $(".massistant").css("background", "linear-gradient(14deg, rgba(184, 15, 15, 0.6) 0%, rgba(219, 66, 31, 0.6) 50%, rgba(232, 122, 44, 0.6) 100%)");
-                if (localStorage.getItem("visibleMass"))
+                if (userConfig.activated)
                     Massistant.showMessage("Se ha perdido la conexión con el servidor. Clica abajo para intentar restablecer la conexión.");
             }, 2500);
         });
@@ -110,7 +136,7 @@ var MA = (() => {
         socket.on('reconnect', (attemtNumber) => {
             // Cambia de color al color normal y se notifica al usuario que se ha reestablecido la conexión de forma correcta
             $(".massistant").css("background", "linear-gradient(14deg, rgba(15, 184, 173, 0.6) 0%, rgba(31, 200, 219, 0.6) 50%, rgba(44, 181, 232, 0.6) 100%)");
-            if (localStorage.getItem("visibleMass"))
+            if (userConfig.activated)
                 Massistant.showMessage("Se ha reestablecido la conexión correctamente.");
         });
 
@@ -120,7 +146,7 @@ var MA = (() => {
          * @memberOf MA.Sockets
          */
         socket.on('aboutReceived', (text) => {
-            Massistant.showMessage(text, 20000);
+            Massistant.showMessage(text, 60000);
         });
 
         /**
@@ -291,7 +317,7 @@ var MA = (() => {
                 menuItems = $("#massistant_menu div.massistant_menu_option");
 
                 // Si el usuario tiene configurado que se muestre el asistente de sesiones anteriores
-                if (localStorage.getItem("visibleMass")) {
+                if (userConfig.activated) {
                     $('#massistant').css({ "opacity": "1", "visibility": "visible" });
                     $("#massistant_popup").css({ "display": "block" });
 
@@ -427,6 +453,9 @@ var MA = (() => {
                     break;
                 case "about":
                     socket.emit('aboutRequested');
+                    break;
+                case "config":
+                    getInMenu(menus.configMenu);
                     break;
                 default:
                     showMessage("Esta opción no está disponible en estos momentos.");
@@ -576,6 +605,49 @@ var MA = (() => {
         }
 
         /**
+        * Opciones disponibles que se ejecutan cuando el usuario intenta acceder a alguna opción
+        * del menú de manejo de configuración
+        * @memberOf MA.Massistant
+        * @method configGetInOption
+        */
+        function configGetInOption() {
+            switch (menuOnUse[pointerMenu].option) {
+                case "activation":
+                    // Use "toggle" input
+                    changeUserConfig("activation");
+                    if (userConfig.activated)
+                        showMessage(`Moodle Assistant estará habilitado a lo largo de toda esta sesión. </br><label class="switch">
+                                    <input type="checkbox" name="activation" checked disabled>
+                                    <span class="slider"></span>
+                                    </label>`);
+                    else
+                        showMessage(`Moodle Assistant estará deshabilitado a lo largo de toda esta sesión. </br><label class="switch">
+                                    <input type="checkbox" name="activation" disabled>
+                                    <span class="slider"></span>
+                                    </label>`);
+                    break;
+                case "pitch":
+                    changeUserConfig("pitch");
+                    // Use "range" input
+                    showMessage(`<input type="range" name="pitch" min="0" max="20" value=${userConfig.pitch} disabled>`);
+                    break;
+                case "volume":
+                    changeUserConfig("volume");
+                    // Use "range" input
+                    showMessage(`<input type="range" name="volume" min="0" max="10" value=${userConfig.volume} disabled>`);
+                    break;
+                case "speed":
+                    changeUserConfig("rate");
+                    // Use "range" input
+                    showMessage(`<input type="range" name="speed" min="0" max="15" value=${userConfig.rate} disabled>`);
+                    break;
+                default:
+                    showMessage("Esta opción no está disponible en estos momentos.");
+                    break;
+            }
+        }
+
+        /**
          * Controlador de opciones según el menú usado en cada momento
          * @memberOf MA.Massistant
          * @method getInTheItemOption
@@ -609,7 +681,28 @@ var MA = (() => {
                     else if (menuOnUse === menus.assignEditMenu || menuOnUse === menus.assingMainMenu) {
                         assignEditGetInOptions();
                     }
+                    // Si es el menú de configuración
+                    else if (menuOnUse === menus.configMenu) {
+                        configGetInOption();
+                    }
                 }
+            }
+        }
+
+        function changeUserConfig(whatToChange) {
+            switch (whatToChange) {
+                case "activation":
+                    userConfig.activated = !userConfig.activated;
+                    break;
+                case "pitch":
+                    userConfig.pitch = (userConfig.pitch + 1) % 20;
+                    break;
+                case "volume":
+                    userConfig.volume = (userConfig.volume + 1) % 15;
+                    break;
+                case "rate":
+                    userConfig.speed = (userConfig.speed + 1) % 10;
+                    break;
             }
         }
 
@@ -647,7 +740,7 @@ var MA = (() => {
                         break;
                     // Left
                     case 37:
-                        if (localStorage.getItem("visibleMass") && menuHistory.length !== 0) {
+                        if (userConfig.activated && menuHistory.length !== 0) {
                             // Recogemos la información del menú anterior
                             let previousMenuInfo = menuHistory.pop();
                             // Recogemos el menú
@@ -657,21 +750,20 @@ var MA = (() => {
                             // Mostramos el menú y destacamos la opción en la que ha entrado previamente
                             showMenu(menuOnUse);
                             highlightMenuItem(pointerMenu);
-
                             // Ocultar mensaje si está mostrandose alguno
                             hideMessage();
                         }
                         break;
                     // Up
                     case 38:
-                        if (localStorage.getItem("visibleMass")) {
+                        if (userConfig.activated) {
                             event.preventDefault();
                             goUpInTheMenu();
                         }
                         break;
                     // Right
                     case 39:
-                        if (localStorage.getItem("visibleMass")) {
+                        if (userConfig.activated) {
                             event.preventDefault();
                             // Ocultar mensaje si está mostrandose alguno
                             hideMessage();
@@ -680,10 +772,14 @@ var MA = (() => {
                         break;
                     // Down
                     case 40:
-                        if (localStorage.getItem("visibleMass")) {
+                        if (userConfig.activated) {
                             event.preventDefault();
                             goDownInTheMenu();
                         }
+                        break;
+                    // Barra espaciadora
+                    case 32:
+                        Utils.pauseNResumeTTS();
                         break;
                 }
             }
@@ -703,7 +799,7 @@ var MA = (() => {
                     case 39:
                     case 40:
                     case 77:
-                        if (localStorage.getItem("visibleMass"))
+                        if (userConfig.activated)
                             event.preventDefault();
                         break;
                 }
@@ -717,8 +813,8 @@ var MA = (() => {
          * @method doubleClickMA
          */
         function doubleClickMA() {
-            if (!localStorage.getItem("visibleMass")) {
-                localStorage.setItem("visibleMass", true);
+            if (!userConfig.activated) {
+                userConfig.activated = true;
                 $('#massistant').css({ "opacity": "1", "visibility": "visible" });
                 $('#massistant > div').css({ "visibility": "" });
                 $('#massistant_popup').css({ "display": "block" });
@@ -729,7 +825,7 @@ var MA = (() => {
                     responsiveVoice.cancel();
                 $('#massistant').css({ "opacity": "", "visibility": "" });
                 $('#massistant_popup').css({ "display": "none" });
-                localStorage.removeItem("visibleMass");
+                userConfig.activated = false;
             }
         }
 
@@ -785,6 +881,18 @@ var MA = (() => {
         }
 
         /**
+         * Realiza la función de pausar o reanudar el audio producido por la API
+         * @memberOf MA.Utils
+         * @method pauseNResumeTTS
+         */
+        function pauseNResumeTTS() {
+            if (responsiveVoice.isPlaying())
+                responsiveVoice.pause();
+            else
+                responsiveVoice.resume();
+        }
+
+        /**
          * Función que recoge el parámetro que le indiques de la URL
          * @typedef {(string|undefined)} qConsulta
          * @param {string} name Nombre del parámetro a recoger
@@ -816,7 +924,7 @@ var MA = (() => {
         }
 
         return {
-            textToSpeech, getQueryParam
+            textToSpeech, getQueryParam, pauseNResumeTTS
         }
     })();
 
@@ -833,7 +941,7 @@ var MA = (() => {
          * Navega al siguiente elemento, capaz de recorrerlo en forma de módulo
          * @memberOf MA.CourseNav
          * @method nextItem
-         */         
+         */
         function nextItem() {
             pointer = (pointer + 1) % subjectItems.length;
             if (pointer != 0)
@@ -880,7 +988,7 @@ var MA = (() => {
                 switch (event.keyCode) {
                     // Left
                     case 37:
-                        if (localStorage.getItem("visibleMass")) {
+                        if (userConfig.activated) {
                             $("body").off('keyup');
                             $("body").on('keyup', Massistant.keyUpEventFunction);
                             pointer = -1;
@@ -891,13 +999,13 @@ var MA = (() => {
                         break;
                     // Up
                     case 38:
-                        if (localStorage.getItem("visibleMass")) {
+                        if (userConfig.activated) {
                             previousItem();
                         }
                         break;
                     // Right
                     case 39:
-                        if (localStorage.getItem("visibleMass")) {
+                        if (userConfig.activated) {
                             let nw = window.open($(subjectItems[pointer]).children("a")[0].href);
                             if (!nw)
                                 window.location.replace($(subjectItems[pointer]).children("a")[0].href);
@@ -907,9 +1015,13 @@ var MA = (() => {
                         break;
                     // Down
                     case 40:
-                        if (localStorage.getItem("visibleMass")) {
+                        if (userConfig.activated) {
                             nextItem();
                         }
+                        break;
+                    // Barra espaciadora
+                    case 32:
+                        Utils.pauseNResumeTTS();
                         break;
                 }
             }
