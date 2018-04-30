@@ -695,6 +695,9 @@ var MA = (() => {
             switch (whatToChange) {
                 case "activation":
                     userConfig.activated = !userConfig.activated;
+                    setTimeout(() => {
+                        doubleClickMA();
+                    }, 5000);
                     break;
                 case "pitch":
                     userConfig.pitch = (userConfig.pitch + 1) % 20;
