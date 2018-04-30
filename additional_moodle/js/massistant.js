@@ -694,8 +694,9 @@ var MA = (() => {
         function changeUserConfig(whatToChange) {
             switch (whatToChange) {
                 case "activation":
+                    userConfig.activated = !userConfig.activated;
                     setTimeout(() => {
-                        doubleClickMA();
+                        doubleClickMA(true);
                     }, 5000);
                     break;
                 case "pitch":
@@ -817,22 +818,22 @@ var MA = (() => {
          * @memberOf MA.Massistant
          * @method doubleClickMA
          */
-        function doubleClickMA() {
+        function doubleClickMA(notRecurrent) {
             if (!userConfig.activated) {
-                userConfig.activated = true;
                 $('#massistant').css({ "opacity": "1", "visibility": "visible" });
                 $('#massistant > div').css({ "visibility": "" });
                 $('#massistant_popup').css({ "display": "block" });
                 showMenu(menuOnUse);
             }
             else {
-                userConfig.activated = false;
                 if (responsiveVoice.isPlaying())
                     responsiveVoice.cancel();
                 $('#massistant').css({ "opacity": "", "visibility": "" });
                 $('#massistant_popup').css({ "display": "none" });
                 changeUserConfig("activation");
             }
+            if (!notRecurrent)
+                changeUserConfig("activation");
         }
 
         /**
