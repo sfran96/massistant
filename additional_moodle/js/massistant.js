@@ -6,7 +6,7 @@
  */
 var MA = (() => {
     // Socket variable 
-    var socket = io('https://massistant.ddns.net:3000');
+    var socket = io('https://massistant.ddns.net:8080');
     // Diccionario de menús
     const courseMenu = [
         { name: "Inicio", option: "home" },
@@ -694,7 +694,12 @@ var MA = (() => {
         function changeUserConfig(whatToChange) {
             switch (whatToChange) {
                 case "activation":
-                    userConfig.activated = !userConfig.activated;
+                    setTimeout(() => {
+                        let lastSaved = JSON.parse(localStorage.getItem("userConfig"));
+                        userConfig.activated = !userConfig.activated;
+                        localStorage.setItem("userConfig", JSON.stringify(userConfig));
+                    },
+                        10000);
                     break;
                 case "pitch":
                     userConfig.pitch = (userConfig.pitch + 1) % 20;

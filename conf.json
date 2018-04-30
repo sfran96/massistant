@@ -1,7 +1,7 @@
 {
     "self": {
         "host": "https://massistant.ddns.net/moodle",
-        "port": "3000",
+        "port": "8080",
         "log_file_path": "./logs/",
         "cookie_session_key1": "mo0Dl3KeY",
         "cookie_session_key2": "k3Ym0odLe",
