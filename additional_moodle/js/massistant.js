@@ -694,7 +694,6 @@ var MA = (() => {
         function changeUserConfig(whatToChange) {
             switch (whatToChange) {
                 case "activation":
-                    userConfig.activated = !userConfig.activated;
                     setTimeout(() => {
                         doubleClickMA();
                     }, 5000);
@@ -820,13 +819,14 @@ var MA = (() => {
          */
         function doubleClickMA() {
             if (!userConfig.activated) {
-                changeUserConfig("activation");
+                userConfig.activated = true;
                 $('#massistant').css({ "opacity": "1", "visibility": "visible" });
                 $('#massistant > div').css({ "visibility": "" });
                 $('#massistant_popup').css({ "display": "block" });
                 showMenu(menuOnUse);
             }
             else {
+                userConfig.activated = false;
                 if (responsiveVoice.isPlaying())
                     responsiveVoice.cancel();
                 $('#massistant').css({ "opacity": "", "visibility": "" });
