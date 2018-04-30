@@ -830,7 +830,6 @@ var MA = (() => {
                 $('#massistant_popup').css({ "display": "none" });
                 changeUserConfig("activation");
             }
-            changeUserConfig("activation");
         }
 
         /**
