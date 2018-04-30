@@ -828,7 +828,6 @@ var MA = (() => {
                     responsiveVoice.cancel();
                 $('#massistant').css({ "opacity": "", "visibility": "" });
                 $('#massistant_popup').css({ "display": "none" });
-                changeUserConfig("activation");
             }
         }
 
