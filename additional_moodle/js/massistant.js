@@ -694,12 +694,7 @@ var MA = (() => {
         function changeUserConfig(whatToChange) {
             switch (whatToChange) {
                 case "activation":
-                    setTimeout(() => {
-                        let lastSaved = JSON.parse(localStorage.getItem("userConfig"));
-                        userConfig.activated = !userConfig.activated;
-                        localStorage.setItem("userConfig", JSON.stringify(userConfig));
-                    },
-                        10000);
+                    userConfig.activated = !userConfig.activated;
                     break;
                 case "pitch":
                     userConfig.pitch = (userConfig.pitch + 1) % 20;
