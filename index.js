@@ -4,7 +4,6 @@
  * @namespace Index
  */
 /** Archivo de configuración y menús **/
-var reload = require('require-reload')(require);
 const conf = require('./conf.json');
 /** Módulos externos utilizados **/
 const fs = require('fs');
