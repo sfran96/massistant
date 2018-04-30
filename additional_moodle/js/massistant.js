@@ -695,21 +695,7 @@ var MA = (() => {
             switch (whatToChange) {
                 case "activation":
                     userConfig.activated = !userConfig.activated;
-                    setTimeout(() => {
-                        if (userConfig.activated) {
-                            $('#massistant').css({ "opacity": "1", "visibility": "visible" });
-                            $('#massistant > div').css({ "visibility": "" });
-                            $('#massistant_popup').css({ "display": "block" });
-                            showMenu(menuOnUse);
-                        }
-                        else {
-                            if (responsiveVoice.isPlaying())
-                                responsiveVoice.cancel();
-                            $('#massistant').css({ "opacity": "", "visibility": "" });
-                            $('#massistant_popup').css({ "display": "none" });
-                            changeUserConfig("activation");
-                        }
-                    }, 5000);
+                    doubleClickMA();
                     break;
                 case "pitch":
                     userConfig.pitch = (userConfig.pitch + 1) % 20;
@@ -754,7 +740,7 @@ var MA = (() => {
                 switch (event.keyCode) {
                     // m
                     case 77:
-                        doubleClickMA();
+                        changeUserConfig("activation");
                         break;
                     // Left
                     case 37:
@@ -857,7 +843,7 @@ var MA = (() => {
             // ¿Es doble click?
             let newClick = Date.now();
             if (socket.connected && !socket.disconnected && lastClick != undefined && newClick - lastClick < 200) {
-                doubleClickMA();
+                changeUserConfig("activation");
             }
             // Forzar reconexión
             else if (socket.disconnected) {
@@ -1056,7 +1042,7 @@ var MA = (() => {
         // Asignar los eventos de click
         $('#massistant_icon').on('click', Massistant.onclickma);
         $('#massistant_message_close_btn').on('click', Massistant.hideMessage);
-        $('#massistant_menu_close_btn').on('click', Massistant.doubleClickMA);
+        $('#massistant_menu_close_btn').on('click', () => { changeUserConfig("activation") });
 
         $('input').focusin(() => {
             isOnInput = true;
