@@ -694,8 +694,8 @@ var MA = (() => {
         function changeUserConfig(whatToChange) {
             switch (whatToChange) {
                 case "activation":
-                    userConfig.activated = !userConfig.activated;
                     doubleClickMA();
+                    userConfig.activated = !userConfig.activated;
                     break;
                 case "pitch":
                     userConfig.pitch = (userConfig.pitch + 1) % 20;
