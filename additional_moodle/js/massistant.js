@@ -88,7 +88,8 @@ var MA = (() => {
                 pitch: 0,
                 volume: 1,
                 rate: 1,
-                activated: true
+                activated: true,
+                ttsactivated: true
             }
             localStorage.setItem('userConfig', JSON.stringify(retreivedConfig));
         }
@@ -636,12 +637,27 @@ var MA = (() => {
                 case "volume":
                     changeUserConfig("volume");
                     // Use "range" input
-                    showMessage(`<input type="range" name="volume" min="0" max="10" value=${userConfig.volume} disabled>`);
+                    showMessage(`<input type="range" name="volume" min="0" max="15" value=${userConfig.volume} disabled>`);
                     break;
                 case "speed":
                     changeUserConfig("rate");
                     // Use "range" input
-                    showMessage(`<input type="range" name="speed" min="0" max="15" value=${userConfig.rate} disabled>`);
+                    showMessage(`<input type="range" name="speed" min="0" max="10" value=${userConfig.rate} disabled>`);
+                    break;
+                case "ttsActivation":
+                    // Use "toggle" input
+                    changeUserConfig("ttsActivation");
+                    if (userConfig.ttsactivated)
+                        showMessage(`La opción de texto a voz estará habilitada a lo largo de toda esta sesión. </br><label class="switch">
+                                <input type="checkbox" name="ttsactivation" checked disabled>
+                                <span class="slider"></span>
+                                </label>`);
+                    else
+                        showMessage(`La opción de texto a voz estará deshabilitada a lo largo de toda esta sesión. </br><label class="switch">
+                                <input type="checkbox" name="ttsactivation" disabled>
+                                <span class="slider"></span>
+                                </label>`);
+                    break;
                     break;
                 default:
                     showMessage("Esta opción no está disponible en estos momentos.");
@@ -705,6 +721,9 @@ var MA = (() => {
                     break;
                 case "rate":
                     userConfig.speed = (userConfig.speed + 1) % 10;
+                    break;
+                case "ttsactivation":
+                    userConfig.ttsactivated = !userConfig.activated;
                     break;
             }
             localStorage.setItem("userConfig", JSON.stringify(userConfig));
@@ -875,11 +894,13 @@ var MA = (() => {
          * @method textToSpeech
          */
         function textToSpeech(text) {
-            if (responsiveVoice.isPlaying())
-                responsiveVoice.cancel();
-            var regex = /(<([^>]+)>)/ig;
-            textNoHTML = text.replace(regex, "");
-            responsiveVoice.speak(textNoHTML, "Spanish Female");
+            if (userConfig.ttsactivated) {
+                if (responsiveVoice.isPlaying())
+                    responsiveVoice.cancel();
+                var regex = /(<([^>]+)>)/ig;
+                textNoHTML = text.replace(regex, "");
+                responsiveVoice.speak(textNoHTML, "Spanish Female");
+            }
         }
 
         /**
@@ -888,10 +909,12 @@ var MA = (() => {
          * @method pauseNResumeTTS
          */
         function pauseNResumeTTS() {
-            if (responsiveVoice.isPlaying())
-                responsiveVoice.pause();
-            else
-                responsiveVoice.resume();
+            if (userConfig.ttsactivated) {
+                if (responsiveVoice.isPlaying())
+                    responsiveVoice.pause();
+                else
+                    responsiveVoice.resume();
+            }
         }
 
         /**

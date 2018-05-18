@@ -28,12 +28,12 @@ function checkUserStatus(socket, next) {
             moodleConn.isUserLoggedIn(cookieMoodle, callerIP, (userId) => {
                 socket.handshake.session.userId = userId;
                 socket.handshake.session.cookieMoodle = cookieMoodle;
-                _whenLoggedIn(socket);
+                whenLoggedIn(socket);
                 next();
             });
             // Si SÍ está definida, coger los datos de la sesión
         } else if (socket.handshake.session.cookieMoodle === cookieMoodle) {
-            _whenLoggedIn(socket);
+            whenLoggedIn(socket);
             next();
         }
     }
@@ -42,10 +42,10 @@ function checkUserStatus(socket, next) {
 /**
  * Función que se ejecuta cuando el usuario se encuentra con una sesión iniciada
  * @param {SocketIO.Socket} socket Socket del usuario que solicita el servicio
- * @method _whenLoggedIn
+ * @method whenLoggedIn
  * @memberOf SessionControl
  */
-function _whenLoggedIn(socket) {
+function whenLoggedIn(socket) {
     socket.join(socket.handshake.session.userId);
 }
 

@@ -42,7 +42,7 @@ const per = 60000; // Cada 60 segundos
  * @param {function} next Pasa al siguiente módulo del middleware (connection) si todo es correcto
  * @memberOf Index
  */
-function checkGoodUse(socket, next) {
+function checkSocketGoodUse(socket, next) {
     let current = Date.now();
     let timePassed;
     let user = connectionLastTime[socket.handshake.address];
@@ -84,7 +84,7 @@ function checkGoodUse(socket, next) {
 };
 
 app.use(session);
-io.use(checkGoodUse);
+io.use(checkSocketGoodUse);
 io.use(sharedsession(session));
 io.use(sessionControl.checkUserStatus);
 

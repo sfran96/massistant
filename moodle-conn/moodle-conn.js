@@ -19,6 +19,7 @@ var connection = mysql.createPool({
 /**
  * Función encargada de comprobar si el usuario que solicita la petición HTTP se encuentra con una sesión iniciada según Moodle
  * @param {string} moodCookValue Valor de la sesión
+ * @param {string} callerIP IP del solicitante
  * @param {function(string)} callback Función a llamar cuando se obtena el resultado de la consulta SQL
  * @method isUserLoggedIn
  * @memberOf MoodleConnection
