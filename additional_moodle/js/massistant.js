@@ -718,7 +718,7 @@ var MA = (() => {
                 case "rate":
                     userConfig.speed = (userConfig.speed + 1) % 10;
                     break;
-                case "ttsactivation":
+                case "ttsActivation":
                     userConfig.ttsactivated = !userConfig.ttsactivated;
                     break;
             }
