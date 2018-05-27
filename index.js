@@ -92,7 +92,6 @@ function checkSocketGoodUse(socket, next) {
  */
 function checkSocketGoodUseOnline(packet, next, socket) {
     if (socket.handshake !== undefined && socket.handshake.session !== undefined) {
-        console.log("IN!");
         let current = Date.now();
         let timePassed;
         let user = socket.handshake.session.bucketInfo;
@@ -132,7 +131,6 @@ function checkSocketGoodUseOnline(packet, next, socket) {
             user.allowance -= 1.0;
         }
     } else {
-        console.log("NOT IN!");
         next();
     }
 };
