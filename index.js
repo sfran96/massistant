@@ -122,7 +122,7 @@ function checkSocketGoodUseOnline(packet, next, socket) {
             socket.disconnect();
             // Si han pasado más de cinco minutos se escribe en el fichero
             if (user.lastEvent < current - 5 * 60 * 1000) {
-                utils.log(`El usuario con IP=${socket.handshake.address} e ID=${socket.handshake.userId} ha realizado más consultas de las contempladas por un uso correcto.`);
+                utils.log(`El usuario con IP=${socket.handshake.address} e ID=${socket.handshake.session.userId} ha realizado más consultas de las contempladas por un uso correcto.`);
                 user.lastEvent = current;
             }
         } else {
