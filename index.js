@@ -89,15 +89,9 @@ io.use(sharedsession(session));
 io.use(sessionControl.checkUserStatus);
 
 io.on('connection', function (socket) {
-
-    /** 
-     * Cuando el usuario se "desconecta del socket", cierra la pestaña del navegador, por ejemplo.
-     * @event disconnecting
-     * @memberOf Index
-     */
-    socket.on('disconnecting', (reason) => {
-    });
-
+    // Se usa para evitar el envío indiscriminado de mensajes
+    socket.use(checkSocketGoodUse);
+    
     /**  
      * Cuando el usuario solicita información acerca de Massistant
      * @event aboutRequested
@@ -125,16 +119,6 @@ io.on('connection', function (socket) {
             }
             socket.emit('coursesReceived', userSubjects);
         })
-    });
-
-    /**
-     * Cuando el usuario solicita visitar la página de calificaciones de una asignatura
-     * @event pathForGradesRequested
-     * @memberOf Index
-     */
-    socket.on('pathForGradesRequested', subjectId => {
-        let toReturn = `${conf.self.host}/grade/report/index.php?id=${subjectId}`;
-        socket.emit('pathForGradesReceived', toReturn);
     });
 
     /**
@@ -226,10 +210,6 @@ io.on('connection', function (socket) {
         let msgIdInt = parseInt(msgId);
         if (!isNaN(userIdInt) && !isNaN(msgIdInt))
             moodleConnection.readMessage(msgIdInt, userIdInt);
-    });
-
-    socket.on('updateSettings', (UserConfig) => {
-
     });
 });
 

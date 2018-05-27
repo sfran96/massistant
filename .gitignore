@@ -5,3 +5,4 @@ ecosystem.config.js
 package-lock.json
 */out/
 out/
+.vscode

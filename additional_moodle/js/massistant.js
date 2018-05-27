@@ -707,6 +707,10 @@ var MA = (() => {
             }
         }
 
+        /**
+         * Cambiar el valor de la configuración del sistema
+         * @param {string} whatToChange 
+         */
         function changeUserConfig(whatToChange) {
             switch (whatToChange) {
                 case "activation":
@@ -874,7 +878,7 @@ var MA = (() => {
         };
 
         return {
-            showMenu, showMessage, hideMessage, highlightMenuItem, keyUpEventFunction, keyDownEventFunction, onclickma, getInMenu, doubleClickMA
+            showMenu, showMessage, hideMessage, highlightMenuItem, keyUpEventFunction, keyDownEventFunction, onclickma, getInMenu, doubleClickMA, changeUserConfig
         }
     })();
 
@@ -899,7 +903,7 @@ var MA = (() => {
                     responsiveVoice.cancel();
                 var regex = /(<([^>]+)>)/ig;
                 textNoHTML = text.replace(regex, "");
-                responsiveVoice.speak(textNoHTML, "Spanish Female");
+                responsiveVoice.speak(textNoHTML, "Spanish Female", {pitch: userConfig.pitch, rate: userConfig.rate, volume: userConfig.volume});
             }
         }
 
@@ -1063,7 +1067,7 @@ var MA = (() => {
         // Asignar los eventos de click
         $('#massistant_icon').on('click', Massistant.onclickma);
         $('#massistant_message_close_btn').on('click', Massistant.hideMessage);
-        $('#massistant_menu_close_btn').on('click', () => { changeUserConfig("activation") });
+        $('#massistant_menu_close_btn').on('click', () => { Massistant.changeUserConfig("activation") });
 
         $('input').focusin(() => {
             isOnInput = true;
