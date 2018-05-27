@@ -91,43 +91,47 @@ function checkSocketGoodUse(socket, next) {
  * @memberOf Index
  */
 function checkSocketGoodUseOnline(socket, next) {
-    let current = Date.now();
-    let timePassed;
-    let user = socket.handshake.session.bucketInfo;
+    if (socket.handshake && socket.handshake.session) {
+        let current = Date.now();
+        let timePassed;
+        let user = socket.handshake.session.bucketInfo;
 
-    // Si no existe una entrada para el usuario, se crea
-    if (user === undefined) {
-        socket.handshake.session.bucketInfo = {
-            lastTime: current + 10000,
-            lastEvent: 0,
-            allowance: rate
+        // Si no existe una entrada para el usuario, se crea
+        if (user === undefined) {
+            socket.handshake.session.bucketInfo = {
+                lastTime: current + 10000,
+                lastEvent: 0,
+                allowance: rate
+            }
+            user = socket.handshake.session.bucketInfo;
         }
-        user = socket.handshake.session.bucketInfo;
-    }
 
-    // Se calcula cuanto ha pasado desde la última vez
-    timePassed = current - user.lastTime;
-    // Guardamos cuando se solicitó por última vez
-    user.lastTime = current;
+        // Se calcula cuanto ha pasado desde la última vez
+        timePassed = current - user.lastTime;
+        // Guardamos cuando se solicitó por última vez
+        user.lastTime = current;
 
-    // Calculamos la permitibilidad del usuario
-    user.allowance += timePassed * (rate / per);
-    if (user.allowance > rate) {
-        user.allowance = rate;
-    }
-    // Comparamos
-    if (user.allowance < 1.0) {
-        // Desconectamos al usuario
-        socket.disconnect();
-        // Si han pasado más de cinco minutos se escribe en el fichero
-        if (user.lastEvent < current - 5 * 60 * 1000) {
-            utils.log(`El usuario con IP=${socket.handshake.address} e ID=${socket.handshake.userId} ha realizado más consultas de las contempladas por un uso correcto.`);
-            user.lastEvent = current;
+        // Calculamos la permitibilidad del usuario
+        user.allowance += timePassed * (rate / per);
+        if (user.allowance > rate) {
+            user.allowance = rate;
+        }
+        // Comparamos
+        if (user.allowance < 1.0) {
+            // Desconectamos al usuario
+            socket.disconnect();
+            // Si han pasado más de cinco minutos se escribe en el fichero
+            if (user.lastEvent < current - 5 * 60 * 1000) {
+                utils.log(`El usuario con IP=${socket.handshake.address} e ID=${socket.handshake.userId} ha realizado más consultas de las contempladas por un uso correcto.`);
+                user.lastEvent = current;
+            }
+        } else {
+            // Lo pasamos al siguiente middleware
+            next();
+            user.allowance -= 1.0;
         }
     } else {
-        // Lo pasamos al siguiente middleware
         next();
-        user.allowance -= 1.0;
     }
 };
 
