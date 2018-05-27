@@ -91,9 +91,8 @@ function checkSocketGoodUse(socket, next) {
  * @memberOf Index
  */
 function checkSocketGoodUseOnline(socket, next) {
-    console.log(socket.handshake !== undefined);
-    console.log(socket.handshake.session !== undefined);
-    if (socket.handshake && socket.handshake.session) {
+    if (socket.handshake !== undefined && socket.handshake.session !== undefined) {
+        console.log("IN!");
         let current = Date.now();
         let timePassed;
         let user = socket.handshake.session.bucketInfo;
@@ -133,6 +132,7 @@ function checkSocketGoodUseOnline(socket, next) {
             user.allowance -= 1.0;
         }
     } else {
+        console.log("NOT IN!");
         next();
     }
 };
