@@ -90,7 +90,7 @@ function checkSocketGoodUse(socket, next) {
  * @param {function} next Pasa al siguiente módulo del middleware (connection) si todo es correcto
  * @memberOf Index
  */
-function checkSocketGoodUseOnline(socket, next) {
+function checkSocketGoodUseOnline(packet, next, socket) {
     if (socket.handshake !== undefined && socket.handshake.session !== undefined) {
         console.log("IN!");
         let current = Date.now();
@@ -144,7 +144,9 @@ io.use(sessionControl.checkUserStatus);
 
 io.on('connection', function (socket) {
     // Se usa para evitar el envío indiscriminado de mensajes
-    socket.use(checkSocketGoodUseOnline);
+    socket.use((packet, next) => {
+        checkSocketGoodUseOnline(packet, next, socket);
+    });
 
     /**  
      * Cuando el usuario solicita información acerca de Massistant
