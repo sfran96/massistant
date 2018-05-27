@@ -719,7 +719,7 @@ var MA = (() => {
                     userConfig.speed = (userConfig.speed + 1) % 10;
                     break;
                 case "ttsactivation":
-                    userConfig.ttsactivated = !userConfig.activated;
+                    userConfig.ttsactivated = !userConfig.ttsactivated;
                     break;
             }
             localStorage.setItem("userConfig", JSON.stringify(userConfig));
