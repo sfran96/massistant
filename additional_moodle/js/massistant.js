@@ -45,8 +45,8 @@ var MA = (() => {
     const configMenu = [
         { name: "Activar/Desactivar", option: "activation" },
         { name: "Cambiar pitch", option: "pitch" },
-        { name: "Cambiar volumen", option: "volume" },
-        { name: "Cambair velocidad", option: "speed" }
+        { name: "Cambiar velocidad", option: "speed" },
+        {name: "Activar/Desactivar Voz", option:"ttsActivation"}
     ]
     // Menú devuelto en petición
     const menus = {
@@ -634,11 +634,6 @@ var MA = (() => {
                     // Use "range" input
                     showMessage(`<input type="range" name="pitch" min="0" max="20" value=${userConfig.pitch} disabled>`);
                     break;
-                case "volume":
-                    changeUserConfig("volume");
-                    // Use "range" input
-                    showMessage(`<input type="range" name="volume" min="0" max="15" value=${userConfig.volume} disabled>`);
-                    break;
                 case "speed":
                     changeUserConfig("rate");
                     // Use "range" input
@@ -719,9 +714,6 @@ var MA = (() => {
                     break;
                 case "pitch":
                     userConfig.pitch = (userConfig.pitch + 1) % 20;
-                    break;
-                case "volume":
-                    userConfig.volume = (userConfig.volume + 1) % 15;
                     break;
                 case "rate":
                     userConfig.speed = (userConfig.speed + 1) % 10;
