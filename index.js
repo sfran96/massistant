@@ -91,6 +91,8 @@ function checkSocketGoodUse(socket, next) {
  * @memberOf Index
  */
 function checkSocketGoodUseOnline(socket, next) {
+    console.log(socket.handshake !== undefined);
+    console.log(socket.handshake.session !== undefined);
     if (socket.handshake && socket.handshake.session) {
         let current = Date.now();
         let timePassed;
