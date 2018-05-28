@@ -890,7 +890,7 @@ var MA = (() => {
          * @method textToSpeech
          */
         function textToSpeech(text) {
-            if (userConfig.ttsactivated) {
+            if (socket.connected && Config.ttsactivated) {
                 if (responsiveVoice.isPlaying())
                     responsiveVoice.cancel();
                 var regex = /(<([^>]+)>)/ig;

@@ -81,7 +81,6 @@ function checkSocketGoodUse(socket, next) {
         next();
         user.allowance -= 1.0;
     }
-    console.log(`Usuarios con IP=${socket.handshake.address} tienen una tolerancia=${user.allowance}.`);
 };
 
 /**
@@ -131,7 +130,6 @@ function checkSocketGoodUseOnline(packet, next, socket) {
             next();
             user.allowance -= 1.0;
         }
-        console.log(`Usuario con ID=${socket.handshake.session.userId} tiene una tolerancia=${user.allowance}.`);
     } else {
         next();
     }
