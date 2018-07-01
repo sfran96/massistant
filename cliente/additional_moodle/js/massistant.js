@@ -415,7 +415,7 @@ var MA = (() => {
                 if (pointerMenu === index)
                     Utils.textToSpeech("Opción:" + menuOnUse[index].name);
             }, 300);
-            $(menuItems[index]).css("color", "#21b8d1").css({ "font-size": "30px", "font-weight": "bold" });
+            $(menuItems[index]).css("color", "#037487").css({ "font-size": "30px", "font-weight": "bold" });
         }
 
         /**
