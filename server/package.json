@@ -1,6 +1,6 @@
 {
   "name": "massistant",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Asistente para facilitar el uso de Moodle a las personas discapacitadas.",
   "main": "index.js",
   "scripts": {

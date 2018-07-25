@@ -3,8 +3,7 @@
         "host": "https://massistant.ddns.net/moodle",
         "port": "8080",
         "log_file_path": "./logs/",
-        "cookie_session_key1": "mo0Dl3KeY",
-        "cookie_session_key2": "k3Ym0odLe",
+        "cookie_session_key": "mo0Dl3KeY",
         "passphrase": "TfG2018$"
     },
     "sql": {
@@ -12,7 +11,6 @@
         "port": "3306",
         "user": "tfg",
         "password": "TfG2018$",
-        "sql_moodle_db": "moodle",
-        "sql_mass_db": "massistant"
+        "sql_moodle_db": "moodle"
     }
 }

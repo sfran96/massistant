@@ -9,16 +9,24 @@ const conf = require('./conf.json');
 const fs = require('fs');
 const https = require('https');
 const app = require('express')();
-const server = https.createServer({
-    key: fs.readFileSync('./ssl_config_files/key.pem'),
-    cert: fs.readFileSync('./ssl_config_files/cert.crt'),
-    passphrase: conf.self.passphrase
-}, app);
+if (conf.self.passphrase !== "") {
+    const server = https.createServer({
+        key: fs.readFileSync('./ssl_config_files/key.pem'),
+        cert: fs.readFileSync('./ssl_config_files/cert.crt'),
+        passphrase: conf.self.passphrase
+    }, app);
+}
+else {
+    const server = https.createServer({
+        key: fs.readFileSync('./ssl_config_files/key.pem'),
+        cert: fs.readFileSync('./ssl_config_files/cert.crt')
+    }, app);
+}
 const io = require('socket.io')(server, {
     pingTimeout: 5000
 });
 const session = require("express-session")({
-    secret: conf.self.cookie_session_key1,
+    secret: conf.self.cookie_session_key,
     resave: true,
     saveUninitialized: true
 });
